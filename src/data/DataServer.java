@@ -6,16 +6,20 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.Connection;
 
 import model.Car;
 
 public class DataServer extends UnicastRemoteObject implements IDataServer
 {
    private static final long serialVersionUID = 1L;
+   private static Connection connection;
 
    public DataServer() throws RemoteException 
    {
       super();
+      
+      DataServer.connection = PersistenceConfig.establishConnection(connection);
    }
 
    public void begin()
@@ -25,8 +29,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer
          
          Naming.rebind("dataServer", this);
          
-         System.out.println("Data server is running");
-      } catch( Exception e ) {
+         System.out.println("Data server is running... ");
+      } catch (Exception e) {
          e.printStackTrace();
       }
    }
