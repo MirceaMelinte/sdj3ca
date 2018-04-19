@@ -1,4 +1,4 @@
-package Model;
+package model;
 
 import java.io.Serializable;
 
@@ -14,7 +14,7 @@ public class Part implements Serializable {
 	
 	private Car car;
 	private Pallet pallet;
-	private Package package_field; // package is keyword
+	private Package packageField; // package is keyword
 	
 	
 	
@@ -55,10 +55,10 @@ public class Part implements Serializable {
 		this.pallet = pallet;
 	}
 	public Package getPackage() {
-		return package_field;
+		return packageField;
 	}
 	public void setPackage(Package package_field) {
-		this.package_field = package_field;
+		this.packageField = package_field;
 	}
 	
 	
