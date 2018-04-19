@@ -52,7 +52,7 @@ Mkfile.old
 dkms.conf
 
 # binary
-#bin/
-#.settings/
-#*.classpath
-#.classpath
+bin/
+.settings/
+*.classpath
+.classpath
