@@ -62,7 +62,7 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer
    {
       try
       {
-         if(dataServer.executeRegisterCar(car))
+         if(dataServer.executeRegisterCar(car) != null)
          {
             return "The car was registered";
          }

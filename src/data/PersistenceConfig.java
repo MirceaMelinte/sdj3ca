@@ -3,13 +3,14 @@ package data;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
 import oracle.jdbc.OracleDriver;
 
 public class PersistenceConfig {
 	
 	final static String connectString = "jdbc:oracle:thin:@localhost:1521:orcl";
-	final static String userName = "mskn";
-	final static String password = "admin";
+	final static String userName = "mircea";
+	final static String password = "carlcarl";
 	
 	public static Connection establishConnection(Connection connection) {
 		try {

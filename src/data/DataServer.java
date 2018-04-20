@@ -43,9 +43,294 @@ public class DataServer extends UnicastRemoteObject implements IDataServer
    }
 
    @Override
-   public boolean executeRegisterCar(Car car)
-   {
-      return !car.equals(null);
+   public Car executeRegisterCar(Car car) throws SQLException, RemoteException {
+	   try {
+			PreparedStatement insertStatement = DataServer.connection.prepareStatement(
+					"INSERT INTO car (manufacturer, model, year, weight, chassisNumber, isReady, isFinished) "
+					+ "VALUES (?, ?, ?, ?, ?, ?, 0)");
+			
+			insertStatement.setString(1, car.getManufacturer());
+			insertStatement.setString(2, car.getModel());
+			insertStatement.setInt(3, car.getYear());
+			insertStatement.setDouble(4, car.getWeight());
+			insertStatement.setString(5, car.getChassisNumber());
+			insertStatement.setBoolean(6, car.isReady());
+			insertStatement.execute();
+			insertStatement.close();
+
+			System.out.println("[SUCCESS] Successful execution of new car registration. Chassis number: " 
+			      + car.getChassisNumber());
+			
+			PreparedStatement returnStatement = DataServer.connection.prepareStatement(
+					"SELECT id FROM car WHERE chassisNumber = ?");
+			
+			returnStatement.setString(1, car.getChassisNumber());
+			ResultSet resultSet = returnStatement.executeQuery();
+			
+			while (resultSet.next()) {
+				car.setCarId(resultSet.getInt("id"));
+			}
+
+			returnStatement.close();
+			DataServer.connection.commit();
+			
+			return car;
+		}
+		catch (Exception e) {
+			DataServer.connection.rollback();
+			System.out.println("[FAIL] Failed execution of new car registration. Chassis number: " 
+					+ car.getChassisNumber());
+			e.printStackTrace();
+		}
+	   
+		return null;
+   }
+   
+   @Override
+   public Pallet executeRegisterPallet(Pallet pallet) throws RemoteException, SQLException {
+	   try {
+			PreparedStatement insertStatement = DataServer.connection.prepareStatement(
+					"INSERT INTO pallet (partType, maxWeight, isFinished) "
+					+ "VALUES (?, ?, 0)");
+			
+			insertStatement.setString(1, pallet.getPartType());
+			insertStatement.setDouble(2, pallet.getMaxWeight());
+			insertStatement.execute();
+			insertStatement.close();
+
+			PreparedStatement returnStatement = DataServer.connection.prepareStatement(
+					"SELECT * FROM (SELECT id FROM pallet ORDER BY id DESC) WHERE ROWNUM = 1");
+			
+			ResultSet resultSet = returnStatement.executeQuery();
+			
+			while (resultSet.next()) {
+				pallet.setPalletId(resultSet.getInt("id"));
+			}
+
+			System.out.println("[SUCCESS] Successful execution of new pallet registration. Pallet number: " 
+			      + pallet.getPalletId());
+			
+			returnStatement.close();
+			DataServer.connection.commit();
+			
+			return pallet;
+		}
+		catch (Exception e) {
+			DataServer.connection.rollback();
+			System.out.println("[FAIL] Failed execution of new pallet registration. Pallet number: " 
+					+ pallet.getPalletId());
+			e.printStackTrace();
+		}
+	   
+		return null;
+   }
+   
+   @Override
+   public Product executeRegisterProduct(Product product) throws RemoteException, SQLException {
+	   try {
+			PreparedStatement insertStatement = DataServer.connection.prepareStatement(
+					"INSERT INTO product (type, name) VALUES (?, ?)");
+			
+			insertStatement.setString(1, product.getType());
+			insertStatement.setString(2, product.getName());
+			insertStatement.execute();
+			insertStatement.close();
+
+			PreparedStatement returnStatement = DataServer.connection.prepareStatement(
+					"SELECT * FROM (SELECT id FROM product ORDER BY id DESC) WHERE ROWNUM = 1");
+			
+			ResultSet resultSet = returnStatement.executeQuery();
+			
+			while (resultSet.next()) {
+				product.setProductId(resultSet.getInt("id"));
+			}
+
+			System.out.println("[SUCCESS] Successful execution of new product registration. Product number: " 
+			      + product.getProductId());
+			
+			returnStatement.close();
+			DataServer.connection.commit();
+			
+			return product;
+		}
+		catch (Exception e) {
+			DataServer.connection.rollback();
+			System.out.println("[FAIL] Failed execution of new product registration. Product number: " 
+					+ product.getProductId());
+			e.printStackTrace();
+		}
+	   
+		return null;
+   }
+   
+   @Override
+   public Part executeRegisterNewPart(Part part) throws RemoteException, SQLException {
+	   try {
+		   	DataServer.addNonExistentEntities();
+		   
+			PreparedStatement insertStatement = DataServer.connection.prepareStatement(
+					"INSERT INTO part (name, type, weight, carId, palletId, productId) VALUES (?, ?)");
+			
+			insertStatement.setString(1, part.getName());
+			insertStatement.setString(2, part.getType());
+			insertStatement.setDouble(3, part.getWeight());
+			insertStatement.setInt(4, part.getCar().getCarId());
+			insertStatement.setInt(5, part.getPallet().getPalletId());
+			insertStatement.setInt(6, part.getProduct().getProductId());
+			insertStatement.execute();
+			insertStatement.close();
+
+			PreparedStatement returnStatement = DataServer.connection.prepareStatement(
+					"SELECT * FROM (SELECT id FROM part ORDER BY id DESC) WHERE ROWNUM = 1");
+			
+			ResultSet resultSet = returnStatement.executeQuery();
+			
+			while (resultSet.next()) {
+				part.setPartId(resultSet.getInt("id"));
+			}
+
+			System.out.println("[SUCCESS] Successful execution of new part registration. Part number: " 
+			      + part.getPartId());
+			
+			returnStatement.close();
+			DataServer.connection.commit();
+			
+			return part;
+		}
+		catch (Exception e) {
+			DataServer.connection.rollback();
+			System.out.println("[FAIL] Failed execution of new part registration. Part number: " 
+					+ part.getPartId());
+			e.printStackTrace();
+		}
+	   
+		return null;
+   }
+   
+   @Override
+   public Part executeUpdatePartPallet(Part part, Pallet pallet) throws RemoteException, SQLException {
+	   try {
+		   	DataServer.addNonExistentEntities();
+		   
+			PreparedStatement updateStatement = DataServer.connection.prepareStatement(
+					"UPDATE part SET palletId = ? WHERE id = ?");
+			
+			updateStatement.setInt(1, pallet.getPalletId());
+			updateStatement.setInt(2, part.getPartId());
+			updateStatement.executeUpdate();
+			updateStatement.close();
+
+			System.out.println("[SUCCESS] Successful execution of part pallet setting. Part number: " 
+			      + part.getPartId());
+			
+			updateStatement.close();
+			DataServer.connection.commit();
+			
+			part.setPallet(pallet);
+			
+			return part;
+		}
+		catch (Exception e) {
+			DataServer.connection.rollback();
+			System.out.println("[FAIL] Failed execution of part pallet setting. Part number: " 
+					+ part.getPartId());
+			e.printStackTrace();
+		}
+	   
+	   	return null;
+   }
+   
+   @Override
+   public Part executeUpdatePartProduct(Part part, Product product) throws RemoteException, SQLException {
+	   try {
+		   	DataServer.addNonExistentEntities();
+		   
+			PreparedStatement updateStatement = DataServer.connection.prepareStatement(
+					"UPDATE part SET productId = ? WHERE id = ?");
+			
+			updateStatement.setInt(1, product.getProductId());
+			updateStatement.setInt(2, part.getPartId());
+			updateStatement.executeUpdate();
+			updateStatement.close();
+
+			System.out.println("[SUCCESS] Successful execution of part product setting. Part number: " 
+			      + part.getPartId());
+			
+			updateStatement.close();
+			DataServer.connection.commit();
+			
+			part.setProduct(product);
+			
+			return part;
+		}
+		catch (Exception e) {
+			DataServer.connection.rollback();
+			System.out.println("[FAIL] Failed execution of part product setting. Part number: " 
+					+ part.getPartId());
+			e.printStackTrace();
+		}
+	   
+	   	return null;
+   }
+   
+   @Override
+   public Pallet executeFinishPallet(Pallet pallet) throws RemoteException, SQLException {
+	   try {
+			PreparedStatement updateStatement = DataServer.connection.prepareStatement(
+					"UPDATE pallet SET isFinished = 1 WHERE id = ?");
+			
+			updateStatement.setInt(1, pallet.getPalletId());
+			updateStatement.executeUpdate();
+			updateStatement.close();
+
+			System.out.println("[SUCCESS] Successful execution of pallet finished setting. Pallet number: " 
+			      + pallet.getPalletId());
+			
+			updateStatement.close();
+			DataServer.connection.commit();
+			
+			pallet.setFinished(true);
+			
+			return pallet;
+		}
+		catch (Exception e) {
+			DataServer.connection.rollback();
+			System.out.println("[FAIL] Failed execution of pallet finished setting. Pallet number: " 
+					+ pallet.getPalletId());
+			e.printStackTrace();
+		}
+	   
+	   	return null;
+   }
+   
+   @Override
+   public Car executeFinishCar(Car car) throws RemoteException, SQLException {
+	   try {
+			PreparedStatement updateStatement = DataServer.connection.prepareStatement(
+					"UPDATE car SET isFinished = 1 WHERE id = ?");
+			
+			updateStatement.setInt(1, car.getCarId());
+			updateStatement.executeUpdate();
+			updateStatement.close();
+
+			System.out.println("[SUCCESS] Successful execution of car finished setting. Car number: " 
+			      + car.getCarId());
+			
+			updateStatement.close();
+			DataServer.connection.commit();
+			
+			car.setFinished(true);
+			
+			return car;
+		}
+		catch (Exception e) {
+			DataServer.connection.rollback();
+			System.out.println("[FAIL] Failed execution of pallet car setting. Car number: " 
+					+ car.getCarId());
+			e.printStackTrace();
+		}
+	   
+	   	return null;
    }
 
    @Override
@@ -86,12 +371,42 @@ public class DataServer extends UnicastRemoteObject implements IDataServer
          
          return partList;
       }
-      catch (SQLException e) {
+      catch (Exception e) {
          DataServer.connection.rollback();
          System.out.println("[FAIL] Part List Retrieval Failed");
          e.printStackTrace();
       }
       return null;
+   }
+   
+   private static void addNonExistentEntities() throws SQLException {
+	   try {
+			PreparedStatement insertPalletStatement = DataServer.connection.prepareStatement(
+					"INSERT INTO Pallet (id, partType, maxWeight, isFinished) "
+					+ "SELECT -1, 'no pallet', 0, 0 "
+					+ "FROM dual "
+					+ "WHERE NOT EXISTS(SELECT id, partType, maxWeight, isFinished FROM pallet WHERE id = -1)");
+			
+			insertPalletStatement.execute();
+			insertPalletStatement.close();
+			
+			PreparedStatement insertProductStatement = DataServer.connection.prepareStatement(
+					"INSERT INTO Product (id, type, name) "
+					+ "SELECT -1, 'no product', 'no product' "
+					+ "FROM dual "
+					+ "WHERE NOT EXISTS(SELECT id, type, name FROM product WHERE id = -1)");
+			
+			insertProductStatement.execute();
+			insertProductStatement.close();
+			
+			DataServer.connection.commit();
+		}
+		catch (Exception e) {
+			DataServer.connection.rollback();
+			System.out.println("[FAIL] Failed execution of adding non existent entities. Exception: " 
+					+ e.getMessage());
+			e.printStackTrace();
+		}
    }
    
    public static void main(String[] args) throws RemoteException
