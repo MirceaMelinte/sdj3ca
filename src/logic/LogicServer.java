@@ -6,8 +6,10 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.SQLException;
 
 import model.Car;
+import model.PartList;
 import interfaces.IDataServer;
 
 public class LogicServer extends UnicastRemoteObject implements ILogicServer
@@ -47,10 +49,24 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer
    @Override
    public String validateRegisterCar(Car car) throws RemoteException
    {
-      if(dataServer.executeRegisterCar(car))
+      try
       {
-         return "The car was registered";
+         if(dataServer.executeRegisterCar(car))
+         {
+            return "The car was registered";
+         }
+      }
+      catch (SQLException e)
+      {
+         e.printStackTrace();
       }
       return "The car registration has failed";
+   }
+
+   @Override
+   public PartList validateGetStolenParts(Car car) throws RemoteException
+   {
+      // TODO Auto-generated method stub
+      return null;
    }
 }

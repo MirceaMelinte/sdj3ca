@@ -43,7 +43,7 @@ public class CarClient
       
       Car car = new Car();
       
-      car.setId(1);
+      car.setCarId(1);
       car.setManufacturer("BMW");
       car.setModel("M3");
       
