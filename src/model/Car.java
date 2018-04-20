@@ -2,68 +2,106 @@ package model;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+@XmlRootElement
 public class Car implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private int id;
-	private String manufacturer;
-	private String model;
-	private int year;
+	private int carId, year;
+	private String chassisNumber, model, manufacturer;
 	private double weight;
-	private String chassisNumber;
+	
+	@XmlTransient
 	private boolean isReady, isFinished;
 	
+	public int getCarId() 
+	{
+		return carId;
+	}
 	
-	public int getId() {
-		return id;
+	public void setCarId(int carId) 
+	{
+		this.carId = carId;
 	}
-	public void setId(int id) {
-		this.id = id;
-	}
-	public String getManufacturer() {
+	
+	@XmlTransient
+	public String getManufacturer() 
+	{
 		return manufacturer;
 	}
-	public void setManufacturer(String manufacturer) {
+	
+	public void setManufacturer(String manufacturer) 
+	{
 		this.manufacturer = manufacturer;
 	}
-	public String getModel() {
+	
+	@XmlTransient
+	public String getModel() 
+	{
 		return model;
 	}
-	public void setModel(String model) {
+	
+	public void setModel(String model) 
+	{
 		this.model = model;
 	}
-	public int getYear() {
+	
+	@XmlTransient
+	public int getYear() 
+	{
 		return year;
 	}
-	public void setYear(int year) {
+	
+	public void setYear(int year) 
+	{
 		this.year = year;
 	}
-	public double getWeight() {
+	
+	@XmlTransient
+	public double getWeight() 
+	{
 		return weight;
 	}
-	public void setWeight(double weight) {
+	
+	public void setWeight(double weight) 
+	{
 		this.weight = weight;
 	}
-	public String getChassisNumber() {
+	
+	@XmlElement
+	public String getChassisNumber() 
+	{
 		return chassisNumber;
 	}
-	public void setChassisNumber(String chassisNumber) {
+	
+	public void setChassisNumber(String chassisNumber) 
+	{
 		this.chassisNumber = chassisNumber;
 	}
-	public boolean isReady() {
+	
+	@XmlTransient
+	public boolean isReady() 
+	{
 		return isReady;
 	}
-	public void setReady(boolean isReady) {
+	
+	public void setReady(boolean isReady) 
+	{
 		this.isReady = isReady;
 	}
-	public boolean isFinished() {
+	
+	@XmlTransient
+	public boolean isFinished() 
+	{
 		return isFinished;
 	}
-	public void setFinished(boolean isFinished) {
+	
+	public void setFinished(boolean isFinished) 
+	{
 		this.isFinished = isFinished;
 	}
-	
-	
-
 }

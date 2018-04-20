@@ -2,66 +2,88 @@ package model;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Part implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private int id;
-	private String name;
-	private String type;
+	private int partId;
+	private String name, type;
 	private double weight;
-	
 	
 	private Car car;
 	private Pallet pallet;
-	private Package packageField; // package is keyword
+	private Product product;
 	
-	
-	
-	public int getId() {
-		return id;
+	public int getPartId() 
+	{
+		return partId;
 	}
-	public void setId(int id) {
-		this.id = id;
+	
+	public void setPartId(int partId) 
+	{
+		this.partId = partId;
 	}
-	public String getName() {
+	
+	public String getName() 
+	{
 		return name;
 	}
-	public void setName(String name) {
+	
+	public void setName(String name) 
+	{
 		this.name = name;
 	}
-	public String getType() {
+	
+	public String getType() 
+	{
 		return type;
 	}
-	public void setType(String type) {
+	
+	public void setType(String type) 
+	{
 		this.type = type;
 	}
-	public double getWeight() {
+	
+	public double getWeight() 
+	{
 		return weight;
 	}
-	public void setWeight(double weight) {
+	
+	public void setWeight(double weight) 
+	{
 		this.weight = weight;
 	}
-	public Car getCar() {
+	
+	public Car getCar() 
+	{
 		return car;
 	}
-	public void setCar(Car car) {
+	
+	public void setCar(Car car) 
+	{
 		this.car = car;
 	}
-	public Pallet getPallet() {
+	
+	public Pallet getPallet() 
+	{
 		return pallet;
 	}
-	public void setPallet(Pallet pallet) {
+	
+	public void setPallet(Pallet pallet) 
+	{
 		this.pallet = pallet;
 	}
-	public Package getPackage() {
-		return packageField;
+	
+	public Product getProduct() 
+	{
+		return product;
 	}
-	public void setPackage(Package package_field) {
-		this.packageField = package_field;
+	
+	public void setProduct(Product product) 
+	{
+		this.product = product;
 	}
-	
-	
-	
-	
 }
