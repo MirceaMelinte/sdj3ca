@@ -1,7 +1,7 @@
 DROP TABLE Part PURGE;
 DROP TABLE Car PURGE;
 DROP TABLE Pallet PURGE;
-DROP TABLE Package PURGE;
+DROP TABLE Product PURGE;
 
 -- 
 
@@ -51,7 +51,7 @@ CREATE TABLE Part(
     palletId NUMBER(6, 0) NOT NULL
         REFERENCES Pallet (id),
     productId NUMBER(6, 0) NOT NULL
-        REFERENCES Package (id)
+        REFERENCES Product (id)
 );
 
 -- ##################################
