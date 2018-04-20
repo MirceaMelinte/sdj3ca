@@ -56,7 +56,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer
       {
          PreparedStatement statement = 
                DataServer.connection.prepareStatement("SELECT * FROM Part "
-                                             + "WHERE  = carId = ?");
+                                             + "WHERE carId = ?");
          
          statement.setDouble(1, car.getCarId());
          ResultSet rs = statement.executeQuery();
@@ -75,6 +75,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer
             Pallet pallet = new Pallet();
             pallet.setPalletId(rs.getInt("palletId"));
             partList.addPart(part);
+            
+            System.out.println(part.getPartId());
          }
 
          statement.close();

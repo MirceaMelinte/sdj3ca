@@ -60,6 +60,11 @@ public class PartList implements Serializable
       return parts;
    }
    
+   public int count()
+   {
+      return parts.size();
+   }
+   
    public String toString()
    {
       StringBuilder s = new StringBuilder();
