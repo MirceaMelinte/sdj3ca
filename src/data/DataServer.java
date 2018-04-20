@@ -41,6 +41,88 @@ public class DataServer extends UnicastRemoteObject implements IDataServer
          e.printStackTrace();
       }
    }
+   
+   @Override
+   public PartList executeGetParts() throws RemoteException, SQLException {
+	   try {
+		   PreparedStatement selectStatement = DataServer.connection.prepareStatement(
+				   "SELECT id, name, type, weight, carId, palletId, productId FROM part");
+		   
+		   ResultSet resultSet = selectStatement.executeQuery();
+		   PartList parts = new PartList();
+		   
+		   while (resultSet.next()) {
+			   Part part = new Part();
+			   part.setPartId(resultSet.getInt("id"));
+			   part.setName(resultSet.getString("name"));
+			   part.setType(resultSet.getString("type"));
+			   part.setWeight(resultSet.getDouble("weight"));
+			   
+			   PreparedStatement carSelectStatement = DataServer.connection.prepareStatement(
+					   "SELECT model, manufacturer, year, weight, chassisNumber, isReady, isFinished "
+					   + "FROM car WHERE id = ?");
+			   carSelectStatement.setInt(1, resultSet.getInt("carId"));
+			   ResultSet carResultSet = carSelectStatement.executeQuery();
+			   while (carResultSet.next()) {
+				   Car car = new Car();
+				   car.setCarId(resultSet.getInt("carId"));
+				   car.setModel(carResultSet.getString("model"));
+				   car.setManufacturer(carResultSet.getString("manufacturer"));
+				   car.setYear(carResultSet.getInt("year"));
+				   car.setWeight(carResultSet.getDouble("weight"));
+				   car.setChassisNumber(carResultSet.getString("chassisNumber"));
+				   car.setReady(carResultSet.getBoolean("isReady"));
+				   car.setFinished(carResultSet.getBoolean("isFinished"));
+				   part.setCar(car);
+			   }
+			   carSelectStatement.close();
+			   carResultSet.close();
+			   
+			   PreparedStatement palletSelectStatement = DataServer.connection.prepareStatement(
+					   "SELECT partType, maxWeight, isFinished FROM pallet WHERE id = ?");
+			   palletSelectStatement.setInt(1, resultSet.getInt("palletId"));
+			   ResultSet palletResultSet = palletSelectStatement.executeQuery();
+			   while (palletResultSet.next()) {
+				   Pallet pallet = new Pallet();
+				   pallet.setPalletId(resultSet.getInt("palletId"));
+				   pallet.setPartType(palletResultSet.getString("partType"));
+				   pallet.setMaxWeight(palletResultSet.getDouble("maxWeight"));
+				   pallet.setFinished(palletResultSet.getBoolean("isFinished"));
+				   part.setPallet(pallet);
+			   }
+			   palletSelectStatement.close();
+			   palletResultSet.close();
+			   
+			   PreparedStatement productSelectStatement = DataServer.connection.prepareStatement(
+					   "SELECT type, name FROM product WHERE id = ?");
+			   productSelectStatement.setInt(1, resultSet.getInt("productId"));
+			   ResultSet productResultSet = productSelectStatement.executeQuery();
+			   while (productResultSet.next()) {
+				   Product product = new Product();
+				   product.setProductId(resultSet.getInt("productId"));
+				   product.setType(productResultSet.getString("type"));
+				   product.setName(productResultSet.getString("name"));
+				   part.setProduct(product);
+			   }
+			   productSelectStatement.close();
+			   productResultSet.close();
+			   
+			   parts.addPart(part);
+		   }
+		   
+		   selectStatement.close();
+		   resultSet.close();
+		   System.out.println("[SUCCESS] Successful retrieval of all the parts in the database. ");
+		   
+		   return parts;
+	   }
+	   catch (Exception e) {
+		   System.out.println("[FAIL] Failed execution of parts retrieval. ");
+		   e.printStackTrace();
+	   }
+	   
+	   return null;
+   }
 
    @Override
    public Car executeRegisterCar(Car car) throws SQLException, RemoteException {

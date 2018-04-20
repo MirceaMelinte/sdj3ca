@@ -17,6 +17,8 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer
    private static final long serialVersionUID = 1L;
    private IDataServer dataServer;
    
+   private PartList cache;
+   
    public LogicServer() throws RemoteException
    {
       super();
@@ -34,7 +36,14 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer
          
          dataServer = (IDataServer) Naming.lookup( URL );
          
-         System.out.println("Logic server is running");
+         System.out.println("Logic server is running... ");
+         
+         this.cache = this.dataServer.executeGetParts();
+         
+         System.out.println((this.cache != null)
+        		 				? "Parts cache is now up-to-date. "
+	 							: "A problem has occured when updating the parts cache. ");
+         
       } catch( Exception e ) {
          e.printStackTrace();
       }

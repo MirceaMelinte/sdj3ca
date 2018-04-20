@@ -1,4 +1,4 @@
-SELECT * FROM Pallet;
+SELECT * FROM Part;
 
 DELETE FROM Part;
 
@@ -28,5 +28,5 @@ INSERT INTO Pallet (partType, maxWeight, isFinished)
     VALUES ('Tires', 500, 0);
     
     
-    
+    commit;
     
