@@ -53,17 +53,6 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer
    {
       LogicServer l = new LogicServer();
       l.begin();
-      
-//      Car c = new Car();
-//      
-//      c.setCarId(1);
-//      
-//      PartList list = l.validateGetStolenParts(c);
-//      
-//      for (int i = 0; i < list.count(); i++)
-//      {
-//         System.out.println(list.getPart(i).getName());
-//      }
    }
 
    @Override
@@ -93,7 +82,6 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer
       }
       catch (SQLException e)
       {
-         // TODO Auto-generated catch block
          e.printStackTrace();
       }
       return null;

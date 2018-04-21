@@ -454,7 +454,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer
          return partList;
       }
       catch (Exception e) {
-         DataServer.connection.rollback();
          System.out.println("[FAIL] Part List Retrieval Failed");
          e.printStackTrace();
       }
