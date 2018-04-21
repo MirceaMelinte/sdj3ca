@@ -442,8 +442,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer
             Pallet pallet = new Pallet();
             pallet.setPalletId(rs.getInt("palletId"));
             partList.addPart(part);
-            
-            System.out.println(part.getPartId());
          }
 
          statement.close();
