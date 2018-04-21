@@ -5,11 +5,8 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import common.Serialization;
 
 @XmlRootElement
 public class PartList implements Serializable
@@ -112,65 +109,4 @@ public class PartList implements Serializable
       
       return s.toString();
    }
-   
-//   // Small test
-//   public static void main(String[] args) throws JAXBException
-//   {
-//      Part p = new Part();
-//      Part p2 = new Part();
-//      
-//      p.setPartId(123);
-//      p.setName("Steering wheel");
-//      p.setType("Unit");
-//      p.setWeight(3.4);
-//      
-//      p2.setPartId(456);
-//      p2.setName("Engine");
-//      p2.setType("Unit");
-//      p2.setWeight(113.4);
-//      
-//      Product pr = new Product();
-//      Pallet pl = new Pallet();
-//      Car c = new Car();
-//      
-//     
-//     
-//      pr.setProductId(23232);
-//      pl.setPalletId(22222);
-//      c.setCarId(564646);
-//      c.setChassisNumber("AX2323JA");
-//      
-////      pr.setName("Steering system");
-////      pr.setType("bundle");
-//      
-//      p.setProduct(pr);
-//      p.setPallet(pl);
-//      p.setCar(c);
-//      
-//      p2.setProduct(pr);
-//      p2.setPallet(pl);
-//      p2.setCar(c);
-//      
-//      PartList l = new PartList();
-//      
-//      l.addPart(p);
-//      l.addPart(p2);
-//      
-//      //System.out.println(l.toString());
-//      
-//      //Serialization<PartList> sr = new Serialization<>();
-//      
-//      //System.out.println(sr.createXMLString(l, PartList.class));
-//      //System.out.println();
-//      
-//      Serialization<Car> sr2 = new Serialization<>();
-//      
-//      System.out.println(sr2.createXMLString(c, Car.class));
-//      
-//      Car c2 = sr2.createObjectFromXMLString(sr2.createXMLString(c, Car.class));
-//      
-//      System.out.println();
-//      
-//      System.out.println(c2.getCarId() + ", " + c2.getChassisNumber());
-//   }
 }

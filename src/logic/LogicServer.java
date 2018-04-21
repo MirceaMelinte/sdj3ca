@@ -88,7 +88,6 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer
    {
       try
       {
-         System.out.println("here");
          return dataServer.executeGetStolenParts(car);
          
       }
