@@ -1,13 +1,8 @@
 package client;
 
-import interfaces.ILogicServer;
-
-import java.rmi.Naming;
 import java.rmi.RemoteException;
-
 import client.controller.CarClientController;
 import client.view.CarClientView;
-import model.Car;
 
 public class CarClient
 {

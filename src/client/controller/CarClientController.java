@@ -52,6 +52,6 @@ public class CarClientController {
 
 	// Network Methods
 	public void registerCar(Car car) throws RemoteException {
-		view.show(logicServer.validateRegisterCar(car));
+		view.show("[Server Response] " + logicServer.validateRegisterCar(car));
 	}
 }
