@@ -383,7 +383,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer
 
          statement.close();
          rs.close();
-         System.out.println("AAA");
          
          System.out.println("[SUCCESS] Part List Retrieved");
          
