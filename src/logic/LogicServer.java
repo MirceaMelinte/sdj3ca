@@ -10,16 +10,22 @@ import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
 
 import model.Car;
+import model.CarList;
 import model.Pallet;
+import model.PalletList;
 import model.Part;
 import model.PartList;
 import model.Product;
+import model.ProductList;
 
 public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	private static final long serialVersionUID = 1L;
 	private IDataServer dataServer;
 
-	private PartList cache;
+	private CarList carListCache;
+	private PartList partListCache;
+	private PalletList palletListCache;
+	private ProductList productListCache;
 
 	public LogicServer() throws RemoteException {
 		super();
@@ -38,10 +44,10 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 
 			System.out.println("Logic server is running... ");
 
-			this.cache = this.dataServer.executeGetParts();
+			this.partListCache = this.dataServer.executeGetParts();
 
-			System.out.println((this.cache != null) ? "Parts cache is now up-to-date. "
-					: "A problem has occured when updating the parts cache. ");
+			System.out.println((this.partListCache != null) ? "partListCache is now up-to-date. "
+					: "A problem has occured when updating the partListCache. ");
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -115,17 +121,6 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	}
 
 	@Override
-	public String validateFinishPallet(Pallet pallet) throws RemoteException {
-		try {
-			if (dataServer.executeFinishPallet(pallet) != null)
-				return "Pallet was set as finished";
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return "Setting pallet as finished has failed";
-	}
-
-	@Override
 	public PartList getParts() throws RemoteException {
 		try {
 			return dataServer.executeGetParts();
@@ -134,5 +129,16 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 		}
 		return null;
 	}
+
+	@Override
+   public String validateFinishPallet(Pallet pallet) throws RemoteException {
+      try {
+         if (dataServer.executeFinishPallet(pallet) != null)
+            return "Pallet was set as finished";
+      } catch (SQLException e) {
+         e.printStackTrace();
+      }
+      return "Setting pallet as finished has failed";
+   }
 
 }
