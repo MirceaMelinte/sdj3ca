@@ -43,6 +43,7 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 
 			System.out.println("Logic server is running... ");
 
+			cacheMemory = new Cache();
 			cacheMemory.setPartCache(this.dataServer.executeGetParts());
 
 			System.out.println((cacheMemory.getCarCache() != null) ? "partListCache is now up-to-date. "
