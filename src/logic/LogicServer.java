@@ -30,10 +30,10 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	public LogicServer() throws RemoteException {
 		super();
 	}
-
+	
 	public void begin() throws RemoteException {
 		try {
-			LocateRegistry.getRegistry(1099); // Registry is created on dataServer, here we just get it
+			LocateRegistry.getRegistry(1099);
 
 			Naming.rebind("logicServer", this);
 
@@ -41,14 +41,9 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 			String URL = "rmi://" + ip + "/" + "dataServer";
 
 			dataServer = (IDataServer) Naming.lookup(URL);
-
 			System.out.println("Logic server is running... ");
-
-			this.partListCache = this.dataServer.executeGetParts();
-
-			System.out.println((this.partListCache != null) ? "partListCache is now up-to-date. "
-					: "A problem has occured when updating the partListCache. ");
-
+			
+			this.synchronizeServerCaches();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -86,7 +81,8 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 		try {
 			Part registeredPart = dataServer.executeRegisterNewPart(part);
 			if (registeredPart != null)
-				return "The part was registered. id: " + registeredPart.getPartId();
+				return "The part was registered. id: "
+						+ registeredPart.getPartId();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -98,7 +94,8 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 		try {
 			Pallet registeredPallet = dataServer.executeRegisterPallet(pallet);
 			if (registeredPallet != null)
-				return "The pallet was registered. id: " + registeredPallet.getPalletId();
+				return "The pallet was registered. id: "
+						+ registeredPallet.getPalletId();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -106,14 +103,17 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	}
 
 	@Override
-	public String validateRegisterProduct(Product product, PartList partList) throws RemoteException {
+	public String validateRegisterProduct(Product product, PartList partList)
+			throws RemoteException {
 		try {
 			for (Part part : partList.getList()) {
 				dataServer.executeUpdatePartProduct(part, product);
 			}
-			Product registeredProduct = dataServer.executeRegisterProduct(product);
+			Product registeredProduct = dataServer
+					.executeRegisterProduct(product);
 			if (registeredProduct != null)
-				return "The product was registered. id: " + registeredProduct.getProductId();
+				return "The product was registered. id: "
+						+ registeredProduct.getProductId();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -122,23 +122,45 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 
 	@Override
 	public PartList getParts() throws RemoteException {
-		try {
-			return dataServer.executeGetParts();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return null;
+		return (this.partListCache != null)
+				? this.partListCache
+				: null;
 	}
 
 	@Override
-   public String validateFinishPallet(Pallet pallet) throws RemoteException {
-      try {
-         if (dataServer.executeFinishPallet(pallet) != null)
-            return "Pallet was set as finished";
-      } catch (SQLException e) {
-         e.printStackTrace();
-      }
-      return "Setting pallet as finished has failed";
-   }
+	public String validateFinishPallet(Pallet pallet) throws RemoteException {
+		try {
+			if (dataServer.executeFinishPallet(pallet) != null)
+				return "Pallet was set as finished";
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return "Setting pallet as finished has failed";
+	}
+	
+	private void synchronizeServerCaches() {
+		try {
+			this.partListCache = this.dataServer.executeGetParts();
+			System.out.println((this.partListCache != null) 
+					? "PARTS cache is now up-to-date. "
+					: "A problem has occured when updating the PARTS cache. ");
 
+			this.carListCache = this.dataServer.executeGetCars();
+			System.out.println((this.carListCache != null) 
+					? "CARS cache is now up-to-date. "
+					: "A problem has occured when updating the CARS cache. ");
+
+			this.palletListCache = this.dataServer.executeGetPallets();
+			System.out.println((this.palletListCache != null) 
+					? "PALLETS cache is now up-to-date. "
+					: "A problem has occured when updating the PALLETS cache. ");
+
+			this.productListCache = this.dataServer.executeGetProducts();
+			System.out.println((this.productListCache != null) 
+					? "PRODUCTS cache is now up-to-date. "
+					: "A problem has occured when updating the PRODUCTS cache. ");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

@@ -12,10 +12,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import model.Car;
+import model.CarList;
 import model.Pallet;
+import model.PalletList;
 import model.Part;
 import model.PartList;
 import model.Product;
+import model.ProductList;
 
 public class DataServer extends UnicastRemoteObject implements IDataServer {
 	private static final long serialVersionUID = 1L;
@@ -55,10 +58,11 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 				part.setWeight(resultSet.getDouble("weight"));
 
 				PreparedStatement carSelectStatement = DataServer.connection
-						.prepareStatement("SELECT model, manufacturer, year, weight, chassisNumber "
+						.prepareStatement("SELECT model, manufacturer, year, weight, chassisNumber, state "
 								+ "FROM car WHERE id = ?");
 				carSelectStatement.setInt(1, resultSet.getInt("carId"));
 				ResultSet carResultSet = carSelectStatement.executeQuery();
+				
 				while (carResultSet.next()) {
 					Car car = new Car();
 					car.setChassisNumber(carResultSet.getString("chassisNumber"));
@@ -66,40 +70,15 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 					car.setManufacturer(carResultSet.getString("manufacturer"));
 					car.setYear(carResultSet.getInt("year"));
 					car.setWeight(carResultSet.getDouble("weight"));
+					car.setState(carResultSet.getString("state"));
 					part.setCar(car);
 				}
+				
 				carSelectStatement.close();
 				carResultSet.close();
 
-				PreparedStatement palletSelectStatement = DataServer.connection
-						.prepareStatement("SELECT partType, maxWeight FROM pallet WHERE id = ?");
-				palletSelectStatement.setInt(1, resultSet.getInt("palletId"));
-				ResultSet palletResultSet = palletSelectStatement.executeQuery();
-				while (palletResultSet.next()) {
-					Pallet pallet = new Pallet();
-					int palletId = resultSet.getInt("palletId");
-					pallet.setPalletId(palletId);
-					pallet.setPartType(palletResultSet.getString("partType"));
-					pallet.setMaxWeight(palletResultSet.getDouble("maxWeight"));
-					part.setPalletId(palletId);
-				}
-				palletSelectStatement.close();
-				palletResultSet.close();
-
-				PreparedStatement productSelectStatement = DataServer.connection
-						.prepareStatement("SELECT type, name FROM product WHERE id = ?");
-				productSelectStatement.setInt(1, resultSet.getInt("productId"));
-				ResultSet productResultSet = productSelectStatement.executeQuery();
-				while (productResultSet.next()) {
-					Product product = new Product();
-					int productId = resultSet.getInt("productId");
-					product.setProductId(productId);
-					product.setType(productResultSet.getString("type"));
-					product.setName(productResultSet.getString("name"));
-					part.setProductId(productId);
-				}
-				productSelectStatement.close();
-				productResultSet.close();
+				part.setPalletId(resultSet.getInt("palletId"));
+				part.setProductId(resultSet.getInt("productId"));				
 
 				parts.addPart(part);
 			}
@@ -114,6 +93,25 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			e.printStackTrace();
 		}
 
+		return null;
+	}
+	
+	@Override
+	public CarList executeGetCars() throws RemoteException, SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PalletList executeGetPallets() throws RemoteException, SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ProductList executeGetProducts() throws RemoteException,
+			SQLException {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -133,18 +131,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			insertStatement.execute();
 			insertStatement.close();
 
-			System.out
-					.println("[SUCCESS] Successful execution of new car registration. Chassis number: "
+			System.out.println("[SUCCESS] Successful execution of new car registration. Chassis number: "
 							+ car.getChassisNumber());
-
-			PreparedStatement returnStatement = DataServer.connection
-					.prepareStatement("SELECT id FROM car WHERE chassisNumber = ?");
-
-			returnStatement.setString(1, car.getChassisNumber());
-			ResultSet resultSet = returnStatement.executeQuery();
-
-			returnStatement.close();
-			resultSet.close();
 			DataServer.connection.commit();
 
 			return car;
@@ -172,6 +160,21 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			insertStatement.setString(4, pallet.getState());
 			insertStatement.execute();
 			insertStatement.close();
+			
+			if (pallet.getPartList().count() > 0) {
+				pallet.getPartList().getList().forEach(part -> {
+					try {
+						PreparedStatement updateStatement = DataServer.connection
+								.prepareStatement("UPDATE part SET palletId = ? WHERE id = ?");
+						updateStatement.setInt(1, pallet.getPalletId());
+						updateStatement.setInt(2, part.getPartId());
+						updateStatement.executeUpdate();
+						updateStatement.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				});
+			}
 
 			PreparedStatement returnStatement = DataServer.connection
 					.prepareStatement("SELECT * FROM (SELECT id FROM pallet ORDER BY id DESC) WHERE ROWNUM = 1");
@@ -182,8 +185,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 				pallet.setPalletId(resultSet.getInt("id"));
 			}
 
-			System.out
-					.println("[SUCCESS] Successful execution of new pallet registration. Pallet number: "
+			System.out.println("[SUCCESS] Successful execution of new pallet registration. Pallet number: "
 							+ pallet.getPalletId());
 
 			returnStatement.close();
@@ -192,8 +194,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			return pallet;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
-			System.out
-					.println("[FAIL] Failed execution of new pallet registration. Pallet number: "
+			System.out.println("[FAIL] Failed execution of new pallet registration. Pallet number: "
 							+ pallet.getPalletId());
 			e.printStackTrace();
 		}
@@ -211,7 +212,22 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			insertStatement.setString(2, product.getName());
 			insertStatement.execute();
 			insertStatement.close();
-
+			
+			if (product.getPartList().count() > 0) {
+				product.getPartList().getList().forEach(part -> {
+					try {
+						PreparedStatement updateStatement = DataServer.connection
+								.prepareStatement("UPDATE part SET productId = ? WHERE id = ?");
+						updateStatement.setInt(1, product.getProductId());
+						updateStatement.setInt(2, part.getPartId());
+						updateStatement.executeUpdate();
+						updateStatement.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				});
+			}
+			
 			PreparedStatement returnStatement = DataServer.connection
 					.prepareStatement("SELECT * FROM (SELECT id FROM product ORDER BY id DESC) WHERE ROWNUM = 1");
 
@@ -221,8 +237,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 				product.setProductId(resultSet.getInt("id"));
 			}
 
-			System.out
-					.println("[SUCCESS] Successful execution of new product registration. Product number: "
+			System.out.println("[SUCCESS] Successful execution of new product registration. Product number: "
 							+ product.getProductId());
 
 			returnStatement.close();
@@ -231,8 +246,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			return product;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
-			System.out
-					.println("[FAIL] Failed execution of new product registration. Product number: "
+			System.out.println("[FAIL] Failed execution of new product registration. Product number: "
 							+ product.getProductId());
 			e.printStackTrace();
 		}
@@ -243,20 +257,32 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	@Override
 	public Part executeRegisterNewPart(Part part) throws RemoteException, SQLException {
 		try {
-			// DataServer.addNonExistentEntities();
+			DataServer.addNonExistentEntities();
+			
+			PreparedStatement carStatement = DataServer.connection
+					.prepareStatement("SELECT * FROM (SELECT id FROM car WHERE chassisNumber = ?) "
+									+ "WHERE ROWNUM = 1");
+			
+			carStatement.setString(1, part.getCar().getChassisNumber());
+			ResultSet carResultSet = carStatement.executeQuery();
+			
+			int carId = -1;
+			while (carResultSet.next()) {
+				carId = carResultSet.getInt("id");
+			}
+			
+			carResultSet.close();
+			carStatement.close();
 
 			PreparedStatement insertStatement = DataServer.connection
-					.prepareStatement("INSERT INTO part (type, weight, carId, palletId, productId) VALUES (?, ?, "
-							+ " (SELECT id FROM car WHERE chassisNumber = ?), ?, ?)");
+					.prepareStatement("INSERT INTO part (type, weight, carId, palletId, productId) VALUES "
+							+ "(?, ?, ?, ?, ?)");
 
 			insertStatement.setString(1, part.getType());
 			insertStatement.setDouble(2, part.getWeight());
-			insertStatement.setString(3, part.getCar().getChassisNumber());
+			insertStatement.setInt(3, carId);
 			insertStatement.setInt(4, part.getPalletId());
-			int productId = part.getProductId();
-			insertStatement.setInt(5, productId);//
-			System.out.println(productId);
-			System.out.println(productId);
+			insertStatement.setInt(5, part.getProductId());
 			insertStatement.execute();
 			insertStatement.close();
 
@@ -269,18 +295,17 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 				part.setPartId(resultSet.getInt("id"));
 			}
 
-			System.out
-					.println("[SUCCESS] Successful execution of new part registration. Part number: "
+			System.out.println("[SUCCESS] Successful execution of new part registration. Part number: "
 							+ part.getPartId());
-
+			
+			resultSet.close();
 			returnStatement.close();
 			DataServer.connection.commit();
 
 			return part;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
-			System.out
-					.println("[FAIL] Failed execution of new part registration. Part number: "
+			System.out.println("[FAIL] Failed execution of new part registration. Part number: "
 							+ part.getPartId());
 			e.printStackTrace();
 		}
@@ -301,8 +326,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			updateStatement.executeUpdate();
 			updateStatement.close();
 
-			System.out
-					.println("[SUCCESS] Successful execution of part pallet setting. Part number: "
+			System.out.println("[SUCCESS] Successful execution of part pallet setting. Part number: "
 							+ part.getPartId());
 
 			updateStatement.close();
@@ -313,8 +337,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			return part;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
-			System.out
-					.println("[FAIL] Failed execution of part pallet setting. Part number: "
+			System.out.println("[FAIL] Failed execution of part pallet setting. Part number: "
 							+ part.getPartId());
 			e.printStackTrace();
 		}
@@ -335,8 +358,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			updateStatement.executeUpdate();
 			updateStatement.close();
 
-			System.out
-					.println("[SUCCESS] Successful execution of part product setting. Part number: "
+			System.out.println("[SUCCESS] Successful execution of part product setting. Part number: "
 							+ part.getPartId());
 
 			updateStatement.close();
@@ -366,8 +388,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			updateStatement.executeUpdate();
 			updateStatement.close();
 
-			System.out
-					.println("[SUCCESS] Successful execution of pallet finished setting. Pallet number: "
+			System.out.println("[SUCCESS] Successful execution of pallet finished setting. Pallet number: "
 							+ pallet.getPalletId());
 
 			updateStatement.close();
@@ -378,8 +399,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			return pallet;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
-			System.out
-					.println("[FAIL] Failed execution of pallet finished setting. Pallet number: "
+			System.out.println("[FAIL] Failed execution of pallet finished setting. Pallet number: "
 							+ pallet.getPalletId());
 			e.printStackTrace();
 		}
@@ -397,8 +417,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			updateStatement.executeUpdate();
 			updateStatement.close();
 
-			System.out
-					.println("[SUCCESS] Successful execution of car finished setting. Car chassis: "
+			System.out.println("[SUCCESS] Successful execution of car finished setting. Car chassis: "
 							+ car.getChassisNumber());
 
 			updateStatement.close();
@@ -409,8 +428,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			return car;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
-			System.out
-					.println("[FAIL] Failed execution of pallet car setting. Car chassis: "
+			System.out.println("[FAIL] Failed execution of pallet car setting. Car chassis: "
 							+ car.getChassisNumber());
 			e.printStackTrace();
 		}
@@ -457,10 +475,11 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	private static void addNonExistentEntities() throws SQLException {
 		try {
 			PreparedStatement insertPalletStatement = DataServer.connection
-					.prepareStatement("INSERT INTO Pallet (id, partType, maxWeight) "
-							+ "SELECT -1, 'no pallet', 0, 0 "
+					.prepareStatement("INSERT INTO Pallet (id, partType, weight, maxWeight, state) "
+							+ "SELECT -1, 'no pallet', 0, 0, 'Finished' "
 							+ "FROM dual "
-							+ "WHERE NOT EXISTS(SELECT id, partType, maxWeight FROM pallet WHERE id = -1)");
+							+ "WHERE NOT EXISTS "
+							+ "(SELECT id, partType, weight, maxWeight, state FROM pallet WHERE id = -1)");
 
 			insertPalletStatement.execute();
 			insertPalletStatement.close();
@@ -469,7 +488,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 					.prepareStatement("INSERT INTO Product (id, type, name) "
 							+ "SELECT -1, 'no product', 'no product' "
 							+ "FROM dual "
-							+ "WHERE NOT EXISTS(SELECT id, type, name FROM product WHERE id = -1)");
+							+ "WHERE NOT EXISTS "
+							+ " (SELECT id, type, name FROM product WHERE id = -1)");
 
 			insertProductStatement.execute();
 			insertProductStatement.close();
