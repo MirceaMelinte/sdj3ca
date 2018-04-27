@@ -8,6 +8,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
+import java.util.Calendar;
 
 import model.Car;
 import model.CarList;
@@ -32,7 +33,7 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 
 	public void begin() throws RemoteException {
 		try {
-			LocateRegistry.getRegistry(1099); // Registry is created on dataServer, here we just get it
+			LocateRegistry.getRegistry(1099);
 
 			Naming.rebind("logicServer", this);
 
@@ -59,56 +60,70 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	@Override
 	public String validateFinishDismantling(Car car) throws RemoteException {
 		try {
-			if (dataServer.executeFinishCar(car) != null) {
-				Car currentCar = this.cacheMemory.getCarCache().getCache().get(car.getChassisNumber());
-				this.cacheMemory.getCarCache().getCache().replace(currentCar.getChassisNumber(), currentCar);
-				
-				this.availableCars.removeCar(car.getChassisNumber());
-				
-				return "The car dismantling was registered";
-			}
+			if (car.getChassisNumber().length() <= 17) {
+				if (car.getState().equals("Finished") || car.getState().equals("In progress")) {
+					if (car.getYear() <= Calendar.getInstance().get(Calendar.YEAR)) {
+						if (dataServer.executeFinishCar(car) != null) {
+							Car currentCar = this.cacheMemory.getCarCache().getCache().get(car.getChassisNumber());
+							this.cacheMemory.getCarCache().getCache().replace(currentCar.getChassisNumber(), currentCar);
+							
+							this.availableCars.removeCar(car.getChassisNumber());
+							
+							return "[SUCCESS] The car dismantling was registered. ";
+						}
+					} return "[VALIDATION ERROR] Invalid car registration year. ";
+				} return "[VALIDATION ERROR] Invalid car state. ";
+			} return "[VALIDATION ERROR] Invalid car chassis number. ";
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		return "The car dismantling registration has failed";
+		return "[APPLICATION FAILURE] The car dismantling registration has failed. ";
 	}
 	
 	@Override
 	public String validateFinishPallet(Pallet pallet) throws RemoteException {
 		try {
-			if (dataServer.executeFinishPallet(pallet) != null) {
-				Pallet currentPallet = this.cacheMemory.getPalletCache().getCache().get(pallet.getPalletId());
-				this.cacheMemory.getPalletCache().getCache().replace(currentPallet.getPalletId(), currentPallet);
-				
-				this.availablePallets.removePallet(pallet.getPalletId());
-				
-				return "The pallet finishing was registered";
-			}
+			if (pallet.getState().equals("Finished") || pallet.getState().equals("In progress")) {
+				if (dataServer.executeFinishPallet(pallet) != null) {
+					Pallet currentPallet = this.cacheMemory.getPalletCache().getCache().get(pallet.getPalletId());
+					this.cacheMemory.getPalletCache().getCache().replace(currentPallet.getPalletId(), currentPallet);
+					
+					this.availablePallets.removePallet(pallet.getPalletId());
+					
+					return "[SUCCESS] The pallet finishing was registered. ";
+				}
+			} return "[VALIDATION ERROR] Invalid pallet state. ";
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		return "The pallet finishing registration has failed";
+		return "[APPLICATION FAILURE] The pallet finishing registration has failed. ";
 	}
 
 	@Override
 	public String validateRegisterCar(Car car) throws RemoteException {
 		try {
-			if (dataServer.executeRegisterCar(car) != null) {
-				this.cacheMemory.getCarCache().addCar(car);
-				
-				if (car.getState().equals("In progress")) {
-					this.availableCars.addCar(car);
-				}
-				
-				return "The car was registered";
-			}
+			if (car.getChassisNumber().length() <= 17) {
+				if (car.getState().equals("Finished") || car.getState().equals("In progress")) {
+					if (car.getYear() <= Calendar.getInstance().get(Calendar.YEAR)) {
+						if (dataServer.executeRegisterCar(car) != null) {
+							this.cacheMemory.getCarCache().addCar(car);
+							
+							if (car.getState().equals("In progress")) {
+								this.availableCars.addCar(car);
+							}
+							
+							return "[SUCCESS] The car was registered. ";
+						}
+					} return "[VALIDATION ERROR] Invalid car registration year. ";
+				} return "[VALIDATION ERROR] Invalid car state. ";
+			} return "[VALIDATION ERROR] Invalid car chassis number. ";
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		return "The car registration has failed";
+		return "[APPLICATION FAILURE] The car registration has failed. ";
 	}
 
 	@Override
@@ -132,44 +147,59 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	@Override
 	public String validateRegisterPart(Part part) throws RemoteException {
 		try {
-			Part registeredPart = dataServer.executeRegisterNewPart(part);
-			if (registeredPart != null) {
-				this.cacheMemory.getPartCache().addPart(registeredPart);
-				
-				return "The part was registered. id: " + registeredPart.getPartId();
-			}
+			if (part.getCar() != null) {
+				if (part.getCar().getChassisNumber().length() <= 17) {
+					if (part.getCar().getState().equals("Finished") || part.getCar().getState().equals("In progress")) {
+						if (part.getCar().getYear() <= Calendar.getInstance().get(Calendar.YEAR)) {
+							Part registeredPart = dataServer.executeRegisterNewPart(part);
+							if (registeredPart != null) {
+								this.cacheMemory.getPartCache().addPart(registeredPart);
+								
+								return "[SUCCESS] The part was registered. ID: " + registeredPart.getPartId();
+							}
+						} return "[VALIDATION ERROR] Invalid car registration year. ";
+					} return "[VALIDATION ERROR] Invalid car state. ";
+				} return "[VALIDATION ERROR] Invalid car chassis number. ";
+			} return "[VALIDATION ERROR] There was no car set for this part. ";
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		return "The part registration has failed";
+		return "[APPLICATION FAILURE] The part registration has failed. ";
 	}
 
 	@Override
 	public String validateRegisterPallet(Pallet pallet) throws RemoteException {
 		try {
-			Pallet registeredPallet = dataServer.executeRegisterPallet(pallet);
-			if (registeredPallet != null) {
-				this.cacheMemory.getPalletCache().addPallet(registeredPallet);
-				
-				if (registeredPallet.getState().equals("Finished")) {
-					this.availablePallets.addPallet(registeredPallet);
+			if (pallet.getState().equals("Finished") || pallet.getState().equals("In progress")) {
+				Pallet registeredPallet = dataServer.executeRegisterPallet(pallet);
+				if (registeredPallet != null) {
+					this.cacheMemory.getPalletCache().addPallet(registeredPallet);
+					
+					if (registeredPallet.getState().equals("Finished")) {
+						this.availablePallets.addPallet(registeredPallet);
+					}
+					
+					return "[SUCCESS] The pallet was registered. ID: " + registeredPallet.getPalletId();
 				}
-				
-				return "The pallet was registered. id: " + registeredPallet.getPalletId();
-			}
+			} return "[VALIDATION ERROR] Invalid pallet state. ";
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return "The pallet registration has failed";
+		return "[APPLICATION FAILURE] The pallet registration has failed. ";
 	}
 
 	@Override
 	public String validateRegisterProduct(Product product, PartList partList) throws RemoteException {
 		try {
-			for (Part part : partList.getList()) {
-				dataServer.executeUpdatePartProduct(part, product);
-			}
+			partList.getList().forEach(x -> {
+				try {
+					dataServer.executeUpdatePartProduct(x, product);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
 			
 			Product registeredProduct = dataServer.executeRegisterProduct(product);
 			if (registeredProduct != null) {
@@ -180,12 +210,12 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 					this.cacheMemory.getPartCache().getCache().replace(x.getPartId(), currentPart);
 				});
 				
-				return "The product was registered. id: " + registeredProduct.getProductId();
+				return "[SUCCESS] The product was registered. ID: " + registeredProduct.getProductId();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return "The product registration has failed";
+		return "[APPLICATION FAILURE] The product registration has failed. ";
 	}
 
 	@Override
