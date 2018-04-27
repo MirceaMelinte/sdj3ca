@@ -20,7 +20,7 @@ CREATE TABLE Car
                           (state IN ('In progress', 'Finished'))
     );    
     
-    -- 
+-- 
     
 CREATE TABLE Product
     (
@@ -30,7 +30,7 @@ CREATE TABLE Product
         name 			VARCHAR(100) NOT NULL
     );    
     
-    --
+--
     
 CREATE TABLE Pallet
     (
@@ -44,7 +44,7 @@ CREATE TABLE Pallet
                           (state IN ('In progress', 'Finished'))
     );    
     
-    --
+--
     
 CREATE TABLE Part
     (

@@ -39,16 +39,13 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 			String ip = "localhost";
 			String URL = "rmi://" + ip + "/" + "dataServer";
 
-			dataServer = (IDataServer) Naming.lookup(URL);
+			this.dataServer = (IDataServer) Naming.lookup(URL);
 
 			System.out.println("Logic server is running... ");
 
-			cacheMemory = new Cache();
-			cacheMemory.setPartCache(this.dataServer.executeGetParts());
-
-			System.out.println((cacheMemory.getCarCache() != null) ? "partListCache is now up-to-date. "
-					: "A problem has occured when updating the partListCache. ");
-
+			this.cacheMemory = new Cache();
+			this.synchronizeServerCaches();
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -122,12 +119,52 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 
 	@Override
 	public PartCache getParts() throws RemoteException {
+		return (this.cacheMemory.getPartCache() != null)
+				? this.cacheMemory.getPartCache()
+				: null;
+	}
+	
+	private void synchronizeServerCaches() {
 		try {
-			return dataServer.executeGetParts();
-		} catch (SQLException e) {
+			this.cacheMemory.setPartCache(this.dataServer.executeGetPartCache());
+			System.out.println((this.cacheMemory.getPartCache() != null) 
+								? "PARTS cache is now up-to-date. "
+								: "A problem has occured when updating the PARTS cache. ");
+			
+			this.cacheMemory.setCarCache(this.dataServer.executeGetCarCache());
+			System.out.println((this.cacheMemory.getCarCache() != null) 
+								? "CARS cache is now up-to-date. "
+								: "A problem has occured when updating the CARS cache. ");
+
+			this.cacheMemory.setPalletCache(this.dataServer.executeGetPalletCache());
+			System.out.println((this.cacheMemory.getPalletCache() != null) 
+								? "PALLETS cache is now up-to-date. "
+								: "A problem has occured when updating the PALLETS cache. ");
+
+			this.cacheMemory.setProductCache(this.dataServer.executeGetProductCache());
+			System.out.println((this.cacheMemory.getProductCache() != null) 
+								? "PRODUCTS cache is now up-to-date. "
+								: "A problem has occured when updating the PRODUCTS cache. ");
+			
+			if (this.cacheMemory.getCarCache() != null) {
+				this.availableCars = new CarList();
+				this.cacheMemory.getCarCache().getCache().forEach((x, y) -> { 
+					if (y.getState() == "In progress") {
+						this.availableCars.addCar(y);
+					}
+				});
+			}
+			
+			if (this.cacheMemory.getPalletCache() != null) {
+				this.availablePallets = new PalletList();
+				this.cacheMemory.getPalletCache().getCache().forEach((x, y) -> { 
+					if (y.getState() == "Finished") {
+						this.availablePallets.addPallet(y);
+					}
+				});
+			}
+		} catch (RemoteException | SQLException e) {
 			e.printStackTrace();
 		}
-		return null;
 	}
-
 }

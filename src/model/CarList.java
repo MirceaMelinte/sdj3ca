@@ -19,12 +19,12 @@ public class CarList implements Serializable
    
    public CarList() {}
    
-   public void addcar(Car p)
+   public void addCar(Car p)
    {
       cars.add(p);
    }
    
-   public Car removecar(String chassisNumber)
+   public Car removeCar(String chassisNumber)
    {
       for (int i = 0; i < cars.size(); i++)
       {
