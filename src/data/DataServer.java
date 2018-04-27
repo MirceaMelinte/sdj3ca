@@ -19,15 +19,14 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 	public DataServer() throws RemoteException {
 		super();
-
-		DataServer.connection = PersistenceConfig.establishConnection(connection);
 	}
 
 	public void begin() {
 		try {
 			LocateRegistry.createRegistry(1099);
-
 			Naming.rebind("dataServer", this);
+
+			DataServer.connection = PersistenceConfig.establishConnection(connection);
 
 			System.out.println("Data server is running... ");
 		} catch (Exception e) {
