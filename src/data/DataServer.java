@@ -319,6 +319,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 				});
 			}
 
+			DataServer.connection.commit();
+			
 			PreparedStatement returnStatement = DataServer.connection
 					.prepareStatement("SELECT * FROM (SELECT id FROM pallet ORDER BY id DESC) WHERE ROWNUM = 1");
 
@@ -332,7 +334,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 							+ pallet.getPalletId());
 
 			returnStatement.close();
-			DataServer.connection.commit();
 
 			return pallet;
 		} catch (Exception e) {
@@ -370,6 +371,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 					}
 				});
 			}
+
+			DataServer.connection.commit();
 			
 			PreparedStatement returnStatement = DataServer.connection
 					.prepareStatement("SELECT * FROM (SELECT id FROM product ORDER BY id DESC) WHERE ROWNUM = 1");
@@ -384,7 +387,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 							+ product.getProductId());
 
 			returnStatement.close();
-			DataServer.connection.commit();
 
 			return product;
 		} catch (Exception e) {
@@ -429,6 +431,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			insertStatement.execute();
 			insertStatement.close();
 
+			DataServer.connection.commit();
+			
 			PreparedStatement returnStatement = DataServer.connection
 					.prepareStatement("SELECT * FROM (SELECT id FROM part ORDER BY id DESC) WHERE ROWNUM = 1");
 
@@ -443,7 +447,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			
 			resultSet.close();
 			returnStatement.close();
-			DataServer.connection.commit();
 
 			return part;
 		} catch (Exception e) {
@@ -576,42 +579,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			e.printStackTrace();
 		}
 
-		return null;
-	}
-
-	@Override
-	public PartList executeGetStolenParts(Car car) throws RemoteException, SQLException {
-		try {
-			PreparedStatement statement = DataServer.connection
-					.prepareStatement("SELECT * FROM Part " + "WHERE id = 1");
-
-			// statement.setString(1, car.getChassisNumber());
-			ResultSet rs = statement.executeQuery();
-			PartList partList = new PartList();
-
-			while (rs.next()) {
-				Part part = new Part();
-				part.setPartId(rs.getInt("id"));
-				part.setType(rs.getString("type"));
-				part.setWeight(rs.getDouble("weight"));
-				part.setCar(car);
-				Product product = new Product();
-				product.setProductId(rs.getInt("productId"));
-				Pallet pallet = new Pallet();
-				pallet.setPalletId(rs.getInt("palletId"));
-				partList.addPart(part);
-			}
-
-			statement.close();
-			rs.close();
-
-			System.out.println("[SUCCESS] Part List Retrieved");
-
-			return partList;
-		} catch (Exception e) {
-			System.out.println("[FAIL] Part List Retrieval Failed");
-			e.printStackTrace();
-		}
 		return null;
 	}
 

@@ -30,6 +30,4 @@ public interface IDataServer extends Remote {
 	Pallet executeFinishPallet(Pallet pallet) throws RemoteException, SQLException;
 
 	Car executeFinishCar(Car car) throws RemoteException, SQLException;
-
-	PartList executeGetStolenParts(Car car) throws RemoteException, SQLException;
 }

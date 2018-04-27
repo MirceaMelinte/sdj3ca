@@ -55,26 +55,77 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 		LogicServer l = new LogicServer();
 		l.begin();
 	}
+	
+	@Override
+	public String validateFinishDismantling(Car car) throws RemoteException {
+		try {
+			if (dataServer.executeFinishCar(car) != null) {
+				Car currentCar = this.cacheMemory.getCarCache().getCache().get(car.getChassisNumber());
+				this.cacheMemory.getCarCache().getCache().replace(currentCar.getChassisNumber(), currentCar);
+				
+				this.availableCars.removeCar(car.getChassisNumber());
+				
+				return "The car dismantling was registered";
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return "The car dismantling registration has failed";
+	}
+	
+	@Override
+	public String validateFinishPallet(Pallet pallet) throws RemoteException {
+		try {
+			if (dataServer.executeFinishPallet(pallet) != null) {
+				Pallet currentPallet = this.cacheMemory.getPalletCache().getCache().get(pallet.getPalletId());
+				this.cacheMemory.getPalletCache().getCache().replace(currentPallet.getPalletId(), currentPallet);
+				
+				this.availablePallets.removePallet(pallet.getPalletId());
+				
+				return "The pallet finishing was registered";
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return "The pallet finishing registration has failed";
+	}
 
 	@Override
 	public String validateRegisterCar(Car car) throws RemoteException {
 		try {
 			if (dataServer.executeRegisterCar(car) != null) {
+				this.cacheMemory.getCarCache().addCar(car);
+				
+				if (car.getState().equals("In progress")) {
+					this.availableCars.addCar(car);
+				}
+				
 				return "The car was registered";
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
 		return "The car registration has failed";
 	}
 
 	@Override
 	public PartList validateGetStolenParts(Car car) throws RemoteException {
 		try {
-			return dataServer.executeGetStolenParts(car);
-		} catch (SQLException e) {
+			PartList stolenParts = new PartList();
+			this.cacheMemory.getPartCache().getCache().forEach((x, y) -> {
+				if (y.getCar().getChassisNumber().equals(car.getChassisNumber())) {
+					stolenParts.addPart(y);
+				}
+			});
+			
+			return stolenParts;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 		return null;
 	}
 
@@ -82,11 +133,15 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	public String validateRegisterPart(Part part) throws RemoteException {
 		try {
 			Part registeredPart = dataServer.executeRegisterNewPart(part);
-			if (registeredPart != null)
+			if (registeredPart != null) {
+				this.cacheMemory.getPartCache().addPart(registeredPart);
+				
 				return "The part was registered. id: " + registeredPart.getPartId();
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
 		return "The part registration has failed";
 	}
 
@@ -94,8 +149,15 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	public String validateRegisterPallet(Pallet pallet) throws RemoteException {
 		try {
 			Pallet registeredPallet = dataServer.executeRegisterPallet(pallet);
-			if (registeredPallet != null)
+			if (registeredPallet != null) {
+				this.cacheMemory.getPalletCache().addPallet(registeredPallet);
+				
+				if (registeredPallet.getState().equals("Finished")) {
+					this.availablePallets.addPallet(registeredPallet);
+				}
+				
 				return "The pallet was registered. id: " + registeredPallet.getPalletId();
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -108,9 +170,18 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 			for (Part part : partList.getList()) {
 				dataServer.executeUpdatePartProduct(part, product);
 			}
+			
 			Product registeredProduct = dataServer.executeRegisterProduct(product);
-			if (registeredProduct != null)
+			if (registeredProduct != null) {
+				this.cacheMemory.getProductCache().addProduct(registeredProduct);
+				
+				partList.getList().forEach(x -> {					
+					Part currentPart = this.cacheMemory.getPartCache().getCache().get(x.getPartId());				
+					this.cacheMemory.getPartCache().getCache().replace(x.getPartId(), currentPart);
+				});
+				
 				return "The product was registered. id: " + registeredProduct.getProductId();
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

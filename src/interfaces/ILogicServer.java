@@ -15,6 +15,8 @@ public interface ILogicServer extends Remote {
 	// client 1
 	String validateRegisterCar(Car car) throws RemoteException;
 	// client 2
+	String validateFinishDismantling(Car car) throws RemoteException; // TODO Client
+	String validateFinishPallet(Pallet pallet) throws RemoteException; // TODO Client
 	String validateRegisterPart(Part part) throws RemoteException;
 	String validateRegisterPallet(Pallet pallet) throws RemoteException;
 
