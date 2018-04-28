@@ -8,6 +8,7 @@ import model.Pallet;
 import model.Part;
 import model.PartList;
 import model.Product;
+import model.ProductList;
 import model.cache.PartCache;
 
 public interface ILogicServer extends Remote {
@@ -26,4 +27,6 @@ public interface ILogicServer extends Remote {
 
 	// client 4
 	PartList validateGetStolenParts(Car car) throws RemoteException;
+	ProductList validateGetStolenProducts(Car car) throws RemoteException;
+	Car validateGetStolenCar(String chassisNumber) throws RemoteException;
 }

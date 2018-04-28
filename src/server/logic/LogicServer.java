@@ -16,6 +16,7 @@ import model.PalletList;
 import model.Part;
 import model.PartList;
 import model.Product;
+import model.ProductList;
 import model.cache.Cache;
 import model.cache.PartCache;
 
@@ -143,6 +144,40 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 		
 		return null;
 	}
+	
+   @Override
+   public ProductList validateGetStolenProducts(Car car) throws RemoteException
+   {
+      try {
+         ProductList stolenProducts = new ProductList();
+         this.cacheMemory.getProductCache().getCache().forEach((x, y) -> {    
+            y.getPartList().getList().forEach((z) -> {
+               if(z.getCar().getChassisNumber().equals(car.getChassisNumber())){
+                  stolenProducts.addProduct(y);
+               }
+            });
+         });
+         return stolenProducts;
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      
+      return null;
+   }
+
+   @Override
+   public Car validateGetStolenCar(String chassisNumber) throws RemoteException
+   {
+      try {
+         
+         return cacheMemory.getCarCache().getCache().get(chassisNumber);
+         
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      
+      return null;
+   }
 
 	@Override
 	public String validateRegisterPart(Part part) throws RemoteException {
