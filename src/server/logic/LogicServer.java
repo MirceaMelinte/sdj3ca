@@ -1,7 +1,4 @@
-package logic;
-
-import interfaces.IDataServer;
-import interfaces.ILogicServer;
+package server.logic;
 
 import java.rmi.Naming;
 import java.rmi.RemoteException;
@@ -10,14 +7,17 @@ import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
 import java.util.Calendar;
 
+import remote.interfaces.IDataServer;
+import remote.interfaces.ILogicServer;
 import model.Car;
 import model.CarList;
 import model.Pallet;
 import model.PalletList;
 import model.Part;
-import model.PartCache;
 import model.PartList;
 import model.Product;
+import model.cache.Cache;
+import model.cache.PartCache;
 
 public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	private static final long serialVersionUID = 1L;

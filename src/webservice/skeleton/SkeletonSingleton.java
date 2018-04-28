@@ -1,17 +1,15 @@
 package webservice.skeleton;
 
-import interfaces.ILogicServer;
-
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 
 import javax.xml.bind.JAXBException;
 
+import remote.interfaces.ILogicServer;
 import model.Car;
 import model.PartList;
 import webservice.TraceCar;
 import webservice.TraceCarResponse;
-
 import common.XmlMarshaller;
 
 public class SkeletonSingleton implements ICarServiceSkeletonInterface

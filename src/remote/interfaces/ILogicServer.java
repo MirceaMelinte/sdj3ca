@@ -1,4 +1,4 @@
-package interfaces;
+package remote.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -6,9 +6,9 @@ import java.rmi.RemoteException;
 import model.Car;
 import model.Pallet;
 import model.Part;
-import model.PartCache;
 import model.PartList;
 import model.Product;
+import model.cache.PartCache;
 
 public interface ILogicServer extends Remote {
 

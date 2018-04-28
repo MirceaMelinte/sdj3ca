@@ -3,8 +3,8 @@ package client.controller;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 
+import remote.interfaces.ILogicServer;
 import client.view.CarClientView;
-import interfaces.ILogicServer;
 import model.Car;
 
 public class CarClientController {

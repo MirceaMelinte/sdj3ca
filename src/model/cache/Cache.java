@@ -1,11 +1,6 @@
-package logic;
+package model.cache;
 
 import java.io.Serializable;
-
-import model.CarCache;
-import model.PalletCache;
-import model.PartCache;
-import model.ProductCache;
 
 public class Cache implements Serializable {
 	private static final long serialVersionUID = 1L;

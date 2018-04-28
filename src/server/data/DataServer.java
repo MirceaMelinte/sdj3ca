@@ -1,6 +1,4 @@
-package data;
-
-import interfaces.IDataServer;
+package server.data;
 
 import java.rmi.Naming;
 import java.rmi.RemoteException;
@@ -11,7 +9,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import remote.interfaces.IDataServer;
 import model.*;
+import model.cache.CarCache;
+import model.cache.PalletCache;
+import model.cache.PartCache;
+import model.cache.ProductCache;
 
 public class DataServer extends UnicastRemoteObject implements IDataServer {
 	private static final long serialVersionUID = 1L;

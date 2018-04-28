@@ -1,10 +1,14 @@
-package interfaces;
+package remote.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
 
 import model.*;
+import model.cache.CarCache;
+import model.cache.PalletCache;
+import model.cache.PartCache;
+import model.cache.ProductCache;
 
 public interface IDataServer extends Remote {
 	PartCache executeGetPartCache() throws RemoteException, SQLException;

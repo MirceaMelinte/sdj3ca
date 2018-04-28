@@ -3,9 +3,9 @@ package client.controller;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 
+import remote.interfaces.ILogicServer;
 import client.view.PartClientView;
 import client.view.ProductClientView;
-import interfaces.ILogicServer;
 import model.Car;
 import model.Pallet;
 import model.Part;
