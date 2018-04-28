@@ -20,6 +20,7 @@ public interface ILogicServer extends Remote {
 	String validateFinishPallet(Pallet pallet) throws RemoteException; // TODO Client
 	String validateRegisterPart(Part part) throws RemoteException;
 	String validateRegisterPallet(Pallet pallet) throws RemoteException;
+	String validateSetPalletWeight(Pallet pallet, double newWeight) throws RemoteException; // TODO Client
 
 	// client 3
 	String validateRegisterProduct(Product product, PartList partList) throws RemoteException;

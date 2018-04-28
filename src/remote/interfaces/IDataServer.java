@@ -30,6 +30,8 @@ public interface IDataServer extends Remote {
 	Part executeUpdatePartPallet(Part part, Pallet pallet) throws RemoteException, SQLException;
 
 	Part executeUpdatePartProduct(Part part, Product product) throws RemoteException, SQLException;
+	
+	Pallet executeUpdatePalletWeight(Pallet pallet) throws RemoteException, SQLException;
 
 	Pallet executeSetPalletState(Pallet pallet, String state) throws RemoteException, SQLException;
 

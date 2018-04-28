@@ -224,6 +224,32 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 		}
 		return "[APPLICATION FAILURE] The pallet registration has failed. ";
 	}
+	
+	@Override
+	public String validateSetPalletWeight(Pallet pallet, double newWeight) throws RemoteException {
+		try {
+			if (pallet.getState().equals("Available")) {
+				if (newWeight <= pallet.getMaxWeight()) {
+					pallet.setWeight(newWeight);
+					Pallet updatedPallet = dataServer.executeUpdatePalletWeight(pallet);
+					if (updatedPallet != null) {
+						this.cacheMemory.getPalletCache().getCache().replace(pallet.getPalletId(), updatedPallet);
+						
+						if (updatedPallet.getState() != "Finished") {
+							this.availablePallets.removePallet(pallet.getPalletId());
+							this.availablePallets.addPallet(updatedPallet);
+						}
+						
+						return "[SUCCESS] The pallet was updated. ID: " + updatedPallet.getPalletId();
+					}
+				} return "[VALIDATION ERROR] Cannot put more items on this pallet. ";
+			} return "[VALIDATION ERROR] Invalid pallet state. ";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return "[APPLICATION FAILURE] The pallet weight setting has failed. ";
+	}
 
 	@Override
 	public String validateRegisterProduct(Product product, PartList partList) throws RemoteException {

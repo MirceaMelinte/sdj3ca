@@ -525,6 +525,34 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 		return null;
 	}
+	
+	@Override
+	public Pallet executeUpdatePalletWeight(Pallet pallet) throws RemoteException, SQLException {
+		try {
+			PreparedStatement updateStatement = DataServer.connection
+					.prepareStatement("UPDATE pallet SET weight = ? WHERE id = ?");
+
+			updateStatement.setDouble(1, pallet.getWeight());
+			updateStatement.setInt(2, pallet.getPalletId());
+			updateStatement.executeUpdate();
+			updateStatement.close();
+
+			System.out.println("[SUCCESS] Successful execution of pallet weight setting. Pallet number: "
+							+ pallet.getPalletId());
+
+			updateStatement.close();
+			DataServer.connection.commit();
+
+			return pallet;
+		} catch (Exception e) {
+			DataServer.connection.rollback();
+			System.out.println("[FAIL] Failed execution of pallet weight setting. Pallet number: "
+							+ pallet.getPalletId());
+			e.printStackTrace();
+		}
+
+		return null;
+	}
 
 	@Override
 	public Pallet executeSetPalletState(Pallet pallet, String state) throws RemoteException, SQLException {
