@@ -17,7 +17,7 @@ CREATE TABLE Car
         weight 			DOUBLE PRECISION NOT NULL,   
 		state 			VARCHAR(30) NOT NULL
                         CONSTRAINT carStateCheck CHECK 
-                          (state IN ('In progress', 'Finished'))
+                          (state IN ('Available', 'In progress', 'Finished'))
     );    
     
 -- 
@@ -41,7 +41,7 @@ CREATE TABLE Pallet
         maxWeight 		DOUBLE PRECISION NOT NULL,
 		state 			VARCHAR(30) NOT NULL
                         CONSTRAINT palletStateCheck CHECK 
-                          (state IN ('In progress', 'Finished'))
+                          (state IN ('Available', 'Finished'))
     );    
     
 --
