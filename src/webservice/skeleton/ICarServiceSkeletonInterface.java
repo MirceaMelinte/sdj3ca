@@ -13,7 +13,24 @@ public interface ICarServiceSkeletonInterface {
     /**
      * Auto generated method signature
      *
-     * @param traceCar
+     * @param traceStolenProducts
      */
-    public webservice.TraceCarResponse traceCar(webservice.TraceCar traceCar);
+    public webservice.TraceStolenProductsResponse traceStolenProducts(
+        webservice.TraceStolenProducts traceStolenProducts);
+
+    /**
+     * Auto generated method signature
+     *
+     * @param traceStolenParts
+     */
+    public webservice.TraceStolenPartsResponse traceStolenParts(
+        webservice.TraceStolenParts traceStolenParts);
+
+    /**
+     * Auto generated method signature
+     *
+     * @param traceStolenCar
+     */
+    public webservice.TraceStolenCarResponse traceStolenCar(
+        webservice.TraceStolenCar traceStolenCar);
 }

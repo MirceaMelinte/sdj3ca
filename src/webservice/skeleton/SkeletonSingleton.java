@@ -5,11 +5,17 @@ import java.rmi.RemoteException;
 
 import javax.xml.bind.JAXBException;
 
-import remote.interfaces.ILogicServer;
 import model.Car;
 import model.PartList;
-import webservice.TraceCar;
-import webservice.TraceCarResponse;
+import model.ProductList;
+import remote.interfaces.ILogicServer;
+import webservice.TraceStolenCar;
+import webservice.TraceStolenCarResponse;
+import webservice.TraceStolenParts;
+import webservice.TraceStolenPartsResponse;
+import webservice.TraceStolenProducts;
+import webservice.TraceStolenProductsResponse;
+
 import common.XmlMarshaller;
 
 public class SkeletonSingleton implements ICarServiceSkeletonInterface
@@ -20,32 +26,6 @@ public class SkeletonSingleton implements ICarServiceSkeletonInterface
    private SkeletonSingleton()
    {
       begin();
-   }
-
-   @Override
-   public TraceCarResponse traceCar(TraceCar traceCar)
-   {  
-      TraceCarResponse res = new TraceCarResponse(); // Create web service response object
-      
-      String xmlCar = traceCar.getArgs0(); // Create XML String representation of the Car object
-      
-      XmlMarshaller<Car> serCar = new XmlMarshaller<>(); // Create XmlMarshaller object of type Car
-      XmlMarshaller<PartList> serPartList = new XmlMarshaller<>(); // Create XmlMarshaller object of type PartList
-      
-      try
-      {
-         Car car = serCar.createObjectFromXMLString(xmlCar, Car.class); // Create car object from XML string      
-         PartList partList = logicServer.validateGetStolenParts(car); // Call RMI method and return PartList object
-         String xmlPartList = serPartList.createXMLString(partList, PartList.class); // Xreate XML string representation of PartList object
-         res.set_return(xmlPartList); // Set return value to the web service response object created in step 1
-      }
-      catch (JAXBException | RemoteException e)
-      {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      }
-      
-      return res; // Return the xml version of the PartList
    }
 
    public static SkeletonSingleton getInstance()
@@ -65,9 +45,87 @@ public class SkeletonSingleton implements ICarServiceSkeletonInterface
          
          logicServer = (ILogicServer) Naming.lookup( URL );
          
-         System.out.println("Car Client connection established");
+         System.out.println("Stolen car tracking web service connection established");
       } catch( Exception ex ) {
          ex.printStackTrace();
       }
+   }
+
+   @Override
+   public TraceStolenPartsResponse traceStolenParts(
+         TraceStolenParts traceStolenParts)
+   {
+      TraceStolenPartsResponse res = new TraceStolenPartsResponse();
+      
+      String xmlCar = traceStolenParts.getArgs0(); // Create XML String representation of the Car object
+      
+      XmlMarshaller<Car> serCar = new XmlMarshaller<>(); // Create XmlMarshaller object of type Car
+      XmlMarshaller<PartList> serPartList = new XmlMarshaller<>(); // Create XmlMarshaller object of type PartList
+      
+      try
+      {
+         Car car = serCar.createObjectFromXMLString(xmlCar, Car.class); // Create car object from XML string      
+         PartList partList = logicServer.validateGetStolenParts(car); // Call RMI method and return PartList object
+         String xmlPartList = serPartList.createXMLString(partList, PartList.class); // Xreate XML string representation of PartList object
+         res.set_return(xmlPartList); // Set return value to the web service response object created in step 1
+         System.out.println("Trace stolen parts service is called, chassisNumber: " + car.getChassisNumber());
+      }
+      catch (JAXBException | RemoteException e)
+      {
+         e.printStackTrace();
+      }
+      
+      return res; // Return the xml version of the PartList
+   }
+   
+   @Override
+   public TraceStolenProductsResponse traceStolenProducts(
+         TraceStolenProducts traceStolenProducts)
+   {
+      TraceStolenProductsResponse res = new TraceStolenProductsResponse();
+      
+      String xmlCar = traceStolenProducts.getArgs0(); 
+      
+      XmlMarshaller<Car> serCar = new XmlMarshaller<>(); 
+      XmlMarshaller<ProductList> serProductList = new XmlMarshaller<>(); 
+      
+      try
+      {
+         Car car = serCar.createObjectFromXMLString(xmlCar, Car.class);     
+         ProductList productList = logicServer.validateGetStolenProducts(car); 
+         String xmlProductList = serProductList.createXMLString(productList, ProductList.class); 
+         res.set_return(xmlProductList); 
+         System.out.println("Trace stolen products service is called, chassisNumber: " + car.getChassisNumber());
+      }
+      catch (JAXBException | RemoteException e)
+      {
+         e.printStackTrace();
+      }
+      
+      return res; 
+   }
+
+   @Override
+   public TraceStolenCarResponse traceStolenCar(TraceStolenCar traceStolenCar)
+   {
+      TraceStolenCarResponse res = new TraceStolenCarResponse();
+      
+      String chassisNumber = traceStolenCar.getArgs0(); 
+      
+      XmlMarshaller<Car> serCar = new XmlMarshaller<>(); 
+      
+      try
+      {     
+         Car car = logicServer.validateGetStolenCar(chassisNumber); 
+         String xmlCar = serCar.createXMLString(car, Car.class); 
+         res.set_return(xmlCar); 
+         System.out.println("Trace stolen car service is called, chassisNumber: " + car.getChassisNumber());
+      }
+      catch (JAXBException | RemoteException e)
+      {
+         e.printStackTrace();
+      }
+      
+      return res; 
    }
 }

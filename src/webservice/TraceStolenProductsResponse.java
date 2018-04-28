@@ -1,5 +1,5 @@
 /**
- * TraceCarResponse.java
+ * TraceStolenProductsResponse.java
  *
  * This file was auto-generated from WSDL
  * by the Apache Axis2 version: 1.7.7  Built on : Nov 20, 2017 (11:41:50 GMT)
@@ -8,14 +8,14 @@ package webservice;
 
 
 /**
- *  TraceCarResponse bean class
+ *  TraceStolenProductsResponse bean class
  */
 @SuppressWarnings({"unchecked",
     "unused"
 })
-public class TraceCarResponse implements org.apache.axis2.databinding.ADBBean {
+public class TraceStolenProductsResponse implements org.apache.axis2.databinding.ADBBean {
     public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
-            "traceCarResponse", "ns1");
+            "traceStolenProductsResponse", "ns1");
 
     /**
      * field for _return
@@ -91,11 +91,11 @@ public class TraceCarResponse implements org.apache.axis2.databinding.ADBBean {
                     (namespacePrefix.trim().length() > 0)) {
                 writeAttribute("xsi",
                     "http://www.w3.org/2001/XMLSchema-instance", "type",
-                    namespacePrefix + ":traceCarResponse", xmlWriter);
+                    namespacePrefix + ":traceStolenProductsResponse", xmlWriter);
             } else {
                 writeAttribute("xsi",
                     "http://www.w3.org/2001/XMLSchema-instance", "type",
-                    "traceCarResponse", xmlWriter);
+                    "traceStolenProductsResponse", xmlWriter);
             }
         }
 
@@ -333,9 +333,9 @@ public class TraceCarResponse implements org.apache.axis2.databinding.ADBBean {
          * Postcondition: If this object is an element, the reader is positioned at its end element
          *                If this object is a complex type, the reader is positioned at the end element of its outer element
          */
-        public static TraceCarResponse parse(
+        public static TraceStolenProductsResponse parse(
             javax.xml.stream.XMLStreamReader reader) throws java.lang.Exception {
-            TraceCarResponse object = new TraceCarResponse();
+            TraceStolenProductsResponse object = new TraceStolenProductsResponse();
 
             int event;
             javax.xml.namespace.QName currentQName = null;
@@ -367,12 +367,12 @@ public class TraceCarResponse implements org.apache.axis2.databinding.ADBBean {
                         java.lang.String type = fullTypeName.substring(fullTypeName.indexOf(
                                     ":") + 1);
 
-                        if (!"traceCarResponse".equals(type)) {
+                        if (!"traceStolenProductsResponse".equals(type)) {
                             //find namespace for the prefix
                             java.lang.String nsUri = reader.getNamespaceContext()
                                                            .getNamespaceURI(nsPrefix);
 
-                            return (TraceCarResponse) webservice.ExtensionMapper.getTypeObject(nsUri,
+                            return (TraceStolenProductsResponse) webservice.ExtensionMapper.getTypeObject(nsUri,
                                 type, reader);
                         }
                     }

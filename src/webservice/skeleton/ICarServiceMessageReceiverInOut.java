@@ -38,19 +38,49 @@ public class ICarServiceMessageReceiverInOut extends org.apache.axis2.receivers.
             if ((op.getName() != null) &&
                     ((methodName = org.apache.axis2.util.JavaUtils.xmlNameToJavaIdentifier(
                             op.getName().getLocalPart())) != null)) {
-                if ("traceCar".equals(methodName)) {
-                    webservice.TraceCarResponse traceCarResponse7 = null;
-                    webservice.TraceCar wrappedParam = (webservice.TraceCar) fromOM(msgContext.getEnvelope()
-                                                                                              .getBody()
-                                                                                              .getFirstElement(),
-                            webservice.TraceCar.class);
+                if ("traceStolenProducts".equals(methodName)) {
+                    webservice.TraceStolenProductsResponse traceStolenProductsResponse19 =
+                        null;
+                    webservice.TraceStolenProducts wrappedParam = (webservice.TraceStolenProducts) fromOM(msgContext.getEnvelope()
+                                                                                                                    .getBody()
+                                                                                                                    .getFirstElement(),
+                            webservice.TraceStolenProducts.class);
 
-                    traceCarResponse7 = skel.traceCar(wrappedParam);
+                    traceStolenProductsResponse19 = skel.traceStolenProducts(wrappedParam);
 
                     envelope = toEnvelope(getSOAPFactory(msgContext),
-                            traceCarResponse7, false,
+                            traceStolenProductsResponse19, false,
                             new javax.xml.namespace.QName("http://webservice",
-                                "traceCarResponse"));
+                                "traceStolenProductsResponse"));
+                } else
+                 if ("traceStolenParts".equals(methodName)) {
+                    webservice.TraceStolenPartsResponse traceStolenPartsResponse21 =
+                        null;
+                    webservice.TraceStolenParts wrappedParam = (webservice.TraceStolenParts) fromOM(msgContext.getEnvelope()
+                                                                                                              .getBody()
+                                                                                                              .getFirstElement(),
+                            webservice.TraceStolenParts.class);
+
+                    traceStolenPartsResponse21 = skel.traceStolenParts(wrappedParam);
+
+                    envelope = toEnvelope(getSOAPFactory(msgContext),
+                            traceStolenPartsResponse21, false,
+                            new javax.xml.namespace.QName("http://webservice",
+                                "traceStolenPartsResponse"));
+                } else
+                 if ("traceStolenCar".equals(methodName)) {
+                    webservice.TraceStolenCarResponse traceStolenCarResponse23 = null;
+                    webservice.TraceStolenCar wrappedParam = (webservice.TraceStolenCar) fromOM(msgContext.getEnvelope()
+                                                                                                          .getBody()
+                                                                                                          .getFirstElement(),
+                            webservice.TraceStolenCar.class);
+
+                    traceStolenCarResponse23 = skel.traceStolenCar(wrappedParam);
+
+                    envelope = toEnvelope(getSOAPFactory(msgContext),
+                            traceStolenCarResponse23, false,
+                            new javax.xml.namespace.QName("http://webservice",
+                                "traceStolenCarResponse"));
                 } else {
                     throw new java.lang.RuntimeException("method not found");
                 }
@@ -63,10 +93,11 @@ public class ICarServiceMessageReceiverInOut extends org.apache.axis2.receivers.
     }
 
     //
-    private org.apache.axiom.om.OMElement toOM(webservice.TraceCar param,
-        boolean optimizeContent) throws org.apache.axis2.AxisFault {
+    private org.apache.axiom.om.OMElement toOM(
+        webservice.TraceStolenProducts param, boolean optimizeContent)
+        throws org.apache.axis2.AxisFault {
         try {
-            return param.getOMElement(webservice.TraceCar.MY_QNAME,
+            return param.getOMElement(webservice.TraceStolenProducts.MY_QNAME,
                 org.apache.axiom.om.OMAbstractFactory.getOMFactory());
         } catch (org.apache.axis2.databinding.ADBException e) {
             throw org.apache.axis2.AxisFault.makeFault(e);
@@ -74,10 +105,54 @@ public class ICarServiceMessageReceiverInOut extends org.apache.axis2.receivers.
     }
 
     private org.apache.axiom.om.OMElement toOM(
-        webservice.TraceCarResponse param, boolean optimizeContent)
+        webservice.TraceStolenProductsResponse param, boolean optimizeContent)
         throws org.apache.axis2.AxisFault {
         try {
-            return param.getOMElement(webservice.TraceCarResponse.MY_QNAME,
+            return param.getOMElement(webservice.TraceStolenProductsResponse.MY_QNAME,
+                org.apache.axiom.om.OMAbstractFactory.getOMFactory());
+        } catch (org.apache.axis2.databinding.ADBException e) {
+            throw org.apache.axis2.AxisFault.makeFault(e);
+        }
+    }
+
+    private org.apache.axiom.om.OMElement toOM(
+        webservice.TraceStolenParts param, boolean optimizeContent)
+        throws org.apache.axis2.AxisFault {
+        try {
+            return param.getOMElement(webservice.TraceStolenParts.MY_QNAME,
+                org.apache.axiom.om.OMAbstractFactory.getOMFactory());
+        } catch (org.apache.axis2.databinding.ADBException e) {
+            throw org.apache.axis2.AxisFault.makeFault(e);
+        }
+    }
+
+    private org.apache.axiom.om.OMElement toOM(
+        webservice.TraceStolenPartsResponse param, boolean optimizeContent)
+        throws org.apache.axis2.AxisFault {
+        try {
+            return param.getOMElement(webservice.TraceStolenPartsResponse.MY_QNAME,
+                org.apache.axiom.om.OMAbstractFactory.getOMFactory());
+        } catch (org.apache.axis2.databinding.ADBException e) {
+            throw org.apache.axis2.AxisFault.makeFault(e);
+        }
+    }
+
+    private org.apache.axiom.om.OMElement toOM(
+        webservice.TraceStolenCar param, boolean optimizeContent)
+        throws org.apache.axis2.AxisFault {
+        try {
+            return param.getOMElement(webservice.TraceStolenCar.MY_QNAME,
+                org.apache.axiom.om.OMAbstractFactory.getOMFactory());
+        } catch (org.apache.axis2.databinding.ADBException e) {
+            throw org.apache.axis2.AxisFault.makeFault(e);
+        }
+    }
+
+    private org.apache.axiom.om.OMElement toOM(
+        webservice.TraceStolenCarResponse param, boolean optimizeContent)
+        throws org.apache.axis2.AxisFault {
+        try {
+            return param.getOMElement(webservice.TraceStolenCarResponse.MY_QNAME,
                 org.apache.axiom.om.OMAbstractFactory.getOMFactory());
         } catch (org.apache.axis2.databinding.ADBException e) {
             throw org.apache.axis2.AxisFault.makeFault(e);
@@ -86,7 +161,7 @@ public class ICarServiceMessageReceiverInOut extends org.apache.axis2.receivers.
 
     private org.apache.axiom.soap.SOAPEnvelope toEnvelope(
         org.apache.axiom.soap.SOAPFactory factory,
-        webservice.TraceCarResponse param, boolean optimizeContent,
+        webservice.TraceStolenProductsResponse param, boolean optimizeContent,
         javax.xml.namespace.QName elementQName)
         throws org.apache.axis2.AxisFault {
         try {
@@ -94,7 +169,7 @@ public class ICarServiceMessageReceiverInOut extends org.apache.axis2.receivers.
 
             emptyEnvelope.getBody()
                          .addChild(param.getOMElement(
-                    webservice.TraceCarResponse.MY_QNAME, factory));
+                    webservice.TraceStolenProductsResponse.MY_QNAME, factory));
 
             return emptyEnvelope;
         } catch (org.apache.axis2.databinding.ADBException e) {
@@ -102,8 +177,56 @@ public class ICarServiceMessageReceiverInOut extends org.apache.axis2.receivers.
         }
     }
 
-    private webservice.TraceCarResponse wraptraceCar() {
-        webservice.TraceCarResponse wrappedElement = new webservice.TraceCarResponse();
+    private webservice.TraceStolenProductsResponse wraptraceStolenProducts() {
+        webservice.TraceStolenProductsResponse wrappedElement = new webservice.TraceStolenProductsResponse();
+
+        return wrappedElement;
+    }
+
+    private org.apache.axiom.soap.SOAPEnvelope toEnvelope(
+        org.apache.axiom.soap.SOAPFactory factory,
+        webservice.TraceStolenPartsResponse param, boolean optimizeContent,
+        javax.xml.namespace.QName elementQName)
+        throws org.apache.axis2.AxisFault {
+        try {
+            org.apache.axiom.soap.SOAPEnvelope emptyEnvelope = factory.getDefaultEnvelope();
+
+            emptyEnvelope.getBody()
+                         .addChild(param.getOMElement(
+                    webservice.TraceStolenPartsResponse.MY_QNAME, factory));
+
+            return emptyEnvelope;
+        } catch (org.apache.axis2.databinding.ADBException e) {
+            throw org.apache.axis2.AxisFault.makeFault(e);
+        }
+    }
+
+    private webservice.TraceStolenPartsResponse wraptraceStolenParts() {
+        webservice.TraceStolenPartsResponse wrappedElement = new webservice.TraceStolenPartsResponse();
+
+        return wrappedElement;
+    }
+
+    private org.apache.axiom.soap.SOAPEnvelope toEnvelope(
+        org.apache.axiom.soap.SOAPFactory factory,
+        webservice.TraceStolenCarResponse param, boolean optimizeContent,
+        javax.xml.namespace.QName elementQName)
+        throws org.apache.axis2.AxisFault {
+        try {
+            org.apache.axiom.soap.SOAPEnvelope emptyEnvelope = factory.getDefaultEnvelope();
+
+            emptyEnvelope.getBody()
+                         .addChild(param.getOMElement(
+                    webservice.TraceStolenCarResponse.MY_QNAME, factory));
+
+            return emptyEnvelope;
+        } catch (org.apache.axis2.databinding.ADBException e) {
+            throw org.apache.axis2.AxisFault.makeFault(e);
+        }
+    }
+
+    private webservice.TraceStolenCarResponse wraptraceStolenCar() {
+        webservice.TraceStolenCarResponse wrappedElement = new webservice.TraceStolenCarResponse();
 
         return wrappedElement;
     }
@@ -119,12 +242,28 @@ public class ICarServiceMessageReceiverInOut extends org.apache.axis2.receivers.
     private java.lang.Object fromOM(org.apache.axiom.om.OMElement param,
         java.lang.Class type) throws org.apache.axis2.AxisFault {
         try {
-            if (webservice.TraceCar.class.equals(type)) {
-                return webservice.TraceCar.Factory.parse(param.getXMLStreamReaderWithoutCaching());
+            if (webservice.TraceStolenCar.class.equals(type)) {
+                return webservice.TraceStolenCar.Factory.parse(param.getXMLStreamReaderWithoutCaching());
             }
 
-            if (webservice.TraceCarResponse.class.equals(type)) {
-                return webservice.TraceCarResponse.Factory.parse(param.getXMLStreamReaderWithoutCaching());
+            if (webservice.TraceStolenCarResponse.class.equals(type)) {
+                return webservice.TraceStolenCarResponse.Factory.parse(param.getXMLStreamReaderWithoutCaching());
+            }
+
+            if (webservice.TraceStolenParts.class.equals(type)) {
+                return webservice.TraceStolenParts.Factory.parse(param.getXMLStreamReaderWithoutCaching());
+            }
+
+            if (webservice.TraceStolenPartsResponse.class.equals(type)) {
+                return webservice.TraceStolenPartsResponse.Factory.parse(param.getXMLStreamReaderWithoutCaching());
+            }
+
+            if (webservice.TraceStolenProducts.class.equals(type)) {
+                return webservice.TraceStolenProducts.Factory.parse(param.getXMLStreamReaderWithoutCaching());
+            }
+
+            if (webservice.TraceStolenProductsResponse.class.equals(type)) {
+                return webservice.TraceStolenProductsResponse.Factory.parse(param.getXMLStreamReaderWithoutCaching());
             }
         } catch (java.lang.Exception e) {
             throw org.apache.axis2.AxisFault.makeFault(e);

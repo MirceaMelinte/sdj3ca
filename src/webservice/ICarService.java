@@ -2,5 +2,7 @@ package webservice;
 
 public interface ICarService
 {
-   String traceCar(String xml);
+   String traceStolenParts(String carXml);
+   String traceStolenProducts(String carXml);
+   String traceStolenCar(String chassisNumber);
 }
