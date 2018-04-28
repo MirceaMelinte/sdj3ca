@@ -527,27 +527,28 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 
 	@Override
-	public Pallet executeFinishPallet(Pallet pallet) throws RemoteException, SQLException {
+	public Pallet executeSetPalletState(Pallet pallet, String state) throws RemoteException, SQLException {
 		try {
 			PreparedStatement updateStatement = DataServer.connection
-					.prepareStatement("UPDATE pallet SET state = 'Finished' WHERE id = ?");
+					.prepareStatement("UPDATE pallet SET state = ? WHERE id = ?");
 
-			updateStatement.setInt(1, pallet.getPalletId());
+			updateStatement.setString(1, state);
+			updateStatement.setInt(2, pallet.getPalletId());
 			updateStatement.executeUpdate();
 			updateStatement.close();
 
-			System.out.println("[SUCCESS] Successful execution of pallet finished setting. Pallet number: "
+			System.out.println("[SUCCESS] Successful execution of pallet state setting. Pallet number: "
 							+ pallet.getPalletId());
 
 			updateStatement.close();
 			DataServer.connection.commit();
 
-			pallet.setState("Finished");
+			pallet.setState(state);
 
 			return pallet;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
-			System.out.println("[FAIL] Failed execution of pallet finished setting. Pallet number: "
+			System.out.println("[FAIL] Failed execution of pallet state setting. Pallet number: "
 							+ pallet.getPalletId());
 			e.printStackTrace();
 		}
@@ -556,27 +557,28 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 
 	@Override
-	public Car executeFinishCar(Car car) throws RemoteException, SQLException {
+	public Car executeSetCarState(Car car, String state) throws RemoteException, SQLException {
 		try {
 			PreparedStatement updateStatement = DataServer.connection
-					.prepareStatement("UPDATE car SET state = 'Finished' WHERE chassisNumber = ?");
+					.prepareStatement("UPDATE car SET state = ? WHERE chassisNumber = ?");
 
-			updateStatement.setString(1, car.getChassisNumber());
+			updateStatement.setString(1, state);
+			updateStatement.setString(2, car.getChassisNumber());
 			updateStatement.executeUpdate();
 			updateStatement.close();
 
-			System.out.println("[SUCCESS] Successful execution of car finished setting. Car chassis: "
+			System.out.println("[SUCCESS] Successful execution of car state setting. Car chassis: "
 							+ car.getChassisNumber());
 
 			updateStatement.close();
 			DataServer.connection.commit();
 
-			car.setState("Finished");
+			car.setState(state);
 
 			return car;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
-			System.out.println("[FAIL] Failed execution of pallet car setting. Car chassis: "
+			System.out.println("[FAIL] Failed execution of car state setting. Car chassis: "
 							+ car.getChassisNumber());
 			e.printStackTrace();
 		}

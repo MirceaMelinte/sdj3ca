@@ -62,9 +62,9 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	public String validateFinishDismantling(Car car) throws RemoteException {
 		try {
 			if (car.getChassisNumber().length() <= 17) {
-				if (car.getState().equals("Finished") || car.getState().equals("In progress")) {
+				if (car.getState().equals("In progress")) {
 					if (car.getYear() <= Calendar.getInstance().get(Calendar.YEAR)) {
-						if (dataServer.executeFinishCar(car) != null) {
+						if (dataServer.executeSetCarState(car, "Finished") != null) {
 							Car currentCar = this.cacheMemory.getCarCache().getCache().get(car.getChassisNumber());
 							this.cacheMemory.getCarCache().getCache().replace(currentCar.getChassisNumber(), currentCar);
 							
@@ -85,8 +85,8 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	@Override
 	public String validateFinishPallet(Pallet pallet) throws RemoteException {
 		try {
-			if (pallet.getState().equals("Finished") || pallet.getState().equals("In progress")) {
-				if (dataServer.executeFinishPallet(pallet) != null) {
+			if (pallet.getState().equals("Available")) {
+				if (dataServer.executeSetPalletState(pallet, "Finished") != null) {
 					Pallet currentPallet = this.cacheMemory.getPalletCache().getCache().get(pallet.getPalletId());
 					this.cacheMemory.getPalletCache().getCache().replace(currentPallet.getPalletId(), currentPallet);
 					
@@ -111,7 +111,7 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 						if (dataServer.executeRegisterCar(car) != null) {
 							this.cacheMemory.getCarCache().addCar(car);
 							
-							if (car.getState().equals("In progress")) {
+							if (car.getState().equals("Available")) {
 								this.availableCars.addCar(car);
 							}
 							
@@ -184,7 +184,7 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 		try {
 			if (part.getCar() != null) {
 				if (part.getCar().getChassisNumber().length() <= 17) {
-					if (part.getCar().getState().equals("Finished") || part.getCar().getState().equals("In progress")) {
+					if (part.getCar().getState().equals("In progress")) {
 						if (part.getCar().getYear() <= Calendar.getInstance().get(Calendar.YEAR)) {
 							Part registeredPart = dataServer.executeRegisterNewPart(part);
 							if (registeredPart != null) {
@@ -207,7 +207,7 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	@Override
 	public String validateRegisterPallet(Pallet pallet) throws RemoteException {
 		try {
-			if (pallet.getState().equals("Finished") || pallet.getState().equals("In progress")) {
+			if (pallet.getState().equals("Finished") || pallet.getState().equals("Available")) {
 				Pallet registeredPallet = dataServer.executeRegisterPallet(pallet);
 				if (registeredPallet != null) {
 					this.cacheMemory.getPalletCache().addPallet(registeredPallet);
