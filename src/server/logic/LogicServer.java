@@ -7,18 +7,10 @@ import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
 import java.util.Calendar;
 
-import remote.interfaces.IDataServer;
-import remote.interfaces.ILogicServer;
-import model.Car;
-import model.CarList;
-import model.Pallet;
-import model.PalletList;
-import model.Part;
-import model.PartList;
-import model.Product;
-import model.ProductList;
-import model.cache.Cache;
-import model.cache.PartCache;
+import common.Validation;
+import remote.interfaces.*;
+import model.*;
+import model.cache.*;
 
 public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 	private static final long serialVersionUID = 1L;
@@ -47,7 +39,7 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 
 			this.cacheMemory = new Cache();
 			this.synchronizeServerCaches();
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -57,199 +49,259 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 		LogicServer l = new LogicServer();
 		l.begin();
 	}
-	
-	@Override
-	public String validateFinishDismantling(Car car) throws RemoteException {
-		try {
-			if (car.getChassisNumber().length() <= 17) {
-				if (car.getState().equals("In progress")) {
-					if (car.getYear() <= Calendar.getInstance().get(Calendar.YEAR)) {
-						if (dataServer.executeSetCarState(car, "Finished") != null) {
-							Car currentCar = this.cacheMemory.getCarCache().getCache().get(car.getChassisNumber());
-							this.cacheMemory.getCarCache().getCache().replace(currentCar.getChassisNumber(), currentCar);
-							
-							this.availableCars.removeCar(car.getChassisNumber());
-							
-							return "[SUCCESS] The car dismantling was registered. ";
-						}
-					} return "[VALIDATION ERROR] Invalid car registration year. ";
-				} return "[VALIDATION ERROR] Invalid car state. ";
-			} return "[VALIDATION ERROR] Invalid car chassis number. ";
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return "[APPLICATION FAILURE] The car dismantling registration has failed. ";
-	}
-	
-	@Override
-	public String validateFinishPallet(Pallet pallet) throws RemoteException {
-		try {
-			if (pallet.getState().equals("Available")) {
-				if (dataServer.executeSetPalletState(pallet, "Finished") != null) {
-					Pallet currentPallet = this.cacheMemory.getPalletCache().getCache().get(pallet.getPalletId());
-					this.cacheMemory.getPalletCache().getCache().replace(currentPallet.getPalletId(), currentPallet);
-					
-					this.availablePallets.removePallet(pallet.getPalletId());
-					
-					return "[SUCCESS] The pallet finishing was registered. ";
-				}
-			} return "[VALIDATION ERROR] Invalid pallet state. ";
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return "[APPLICATION FAILURE] The pallet finishing registration has failed. ";
-	}
+
+	// FIRST CLIENT
 
 	@Override
 	public String validateRegisterCar(Car car) throws RemoteException {
+
+		// Validation
+
+		if (!Validation.validate(car.getChassisNumber(), Validation.CHASSIS_NUMBER))
+			return "[VALIDATION ERROR] Invalid car chassis number. ";
+
+		if (!Validation.validate(car.getYear(), Validation.YEAR))
+			return "[VALIDATION ERROR] Invalid car registration year. ";
+
+		if (!car.getState().equals(Car.AVAILABLE))
+			return "[VALIDATION ERROR] Invalid car state. ";
+
+		// Update Database
+
 		try {
-			if (car.getChassisNumber().length() <= 17) {
-				if (car.getState().equals("Finished") || car.getState().equals("In progress")) {
-					if (car.getYear() <= Calendar.getInstance().get(Calendar.YEAR)) {
-						if (dataServer.executeRegisterCar(car) != null) {
-							this.cacheMemory.getCarCache().addCar(car);
-							
-							if (car.getState().equals("Available")) {
-								this.availableCars.addCar(car);
-							}
-							
-							return "[SUCCESS] The car was registered. ";
-						}
-					} return "[VALIDATION ERROR] Invalid car registration year. ";
-				} return "[VALIDATION ERROR] Invalid car state. ";
-			} return "[VALIDATION ERROR] Invalid car chassis number. ";
+			car = dataServer.executeRegisterCar(car);
+
+			if (car == null)
+				return "[APPLICATION FAILURE] The car registration has failed. ";
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-		return "[APPLICATION FAILURE] The car registration has failed. ";
+
+		// Update Cache
+
+		this.cacheMemory.getCarCache().addCar(car);
+		return "[SUCCESS] The car was registered.";
+
 	}
 
+	// SECOND CLIENT
+
+	/*
+	 * Also returns in progress cars...
+	 */
 	@Override
-	public PartList validateGetStolenParts(Car car) throws RemoteException {
-		try {
-			PartList stolenParts = new PartList();
-			this.cacheMemory.getPartCache().getCache().forEach((x, y) -> {
-				if (y.getCar().getChassisNumber().equals(car.getChassisNumber())) {
-					stolenParts.addPart(y);
-				}
-			});
-			
-			return stolenParts;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return null;
+	public CarList getAvailableCars() throws RemoteException {
+
+		CarList carList = new CarList();
+
+		for (Car car : this.cacheMemory.getCarCache().getCache().values())
+			if (!car.getState().equals(Car.FINISHED))
+				carList.addCar(car);
+
+		return carList;
+
 	}
-	
-   @Override
-   public ProductList validateGetStolenProducts(Car car) throws RemoteException
-   {
-      try {
-         ProductList stolenProducts = new ProductList();
-         this.cacheMemory.getProductCache().getCache().forEach((x, y) -> {    
-            y.getPartList().getList().forEach((z) -> {
-               if(z.getCar().getChassisNumber().equals(car.getChassisNumber())){
-                  stolenProducts.addProduct(y);
-               }
-            });
-         });
-         return stolenProducts;
-      } catch (Exception e) {
-         e.printStackTrace();
-      }
-      
-      return null;
-   }
 
-   @Override
-   public Car validateGetStolenCar(String chassisNumber) throws RemoteException
-   {
-      try {
-         
-         return cacheMemory.getCarCache().getCache().get(chassisNumber);
-         
-      } catch (Exception e) {
-         e.printStackTrace();
-      }
-      
-      return null;
-   }
-
+	/*
+	 * Car object inside a part only has only chassis number set ... is that a
+	 * problem?
+	 */
 	@Override
 	public String validateRegisterPart(Part part) throws RemoteException {
+
+		// Validate
+
+		if (part.getType() == null || part.getType().isEmpty())
+			return "[VALIDATION ERROR] Invalid part type.";
+
+		if (part.getWeight() <= 0)
+			return "[VALIDATION ERROR] Invalid part weight.";
+
+		if (part.getCar() == null)
+			return "[VALIDATION ERROR] There was no car set for this part.";
+
+		if (!Validation.validate(part.getCar().getChassisNumber(), Validation.CHASSIS_NUMBER))
+			return "[VALIDATION ERROR] Invalid car chassis number.";
+
+		if (!this.cacheMemory.getCarCache().contains(part.getCar().getChassisNumber()))
+			return "[VALIDATION ERROR] This car does not exist.";
+
+		if (this.cacheMemory.getCarCache().getCar(part.getCar().getChassisNumber()).getState().equals(Car.FINISHED))
+			return "[VALIDATION ERROR] This car is already finished.";
+
+		// Update Database
+
 		try {
-			if (part.getCar() != null) {
-				if (part.getCar().getChassisNumber().length() <= 17) {
-					if (part.getCar().getState().equals("In progress")) {
-						if (part.getCar().getYear() <= Calendar.getInstance().get(Calendar.YEAR)) {
-							Part registeredPart = dataServer.executeRegisterNewPart(part);
-							if (registeredPart != null) {
-								this.cacheMemory.getPartCache().addPart(registeredPart);
-								
-								return "[SUCCESS] The part was registered. ID: " + registeredPart.getPartId();
-							}
-						} return "[VALIDATION ERROR] Invalid car registration year. ";
-					} return "[VALIDATION ERROR] Invalid car state. ";
-				} return "[VALIDATION ERROR] Invalid car chassis number. ";
-			} return "[VALIDATION ERROR] There was no car set for this part. ";
-			
+			part = dataServer.executeRegisterNewPart(part);
+
+			if (part == null)
+				return "[FAIL]";
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-		return "[APPLICATION FAILURE] The part registration has failed. ";
+
+		// Update Cache
+
+		Car car = this.cacheMemory.getCarCache().getCar(part.getCar().getChassisNumber());
+		car.setState(Car.IN_PROGRESS); // Update car cache
+
+		this.cacheMemory.getCarCache().getCache().replace(car.getChassisNumber(), car); // Do I need this line?
+
+		part.setCar(car);
+
+		this.cacheMemory.getPartCache().addPart(part); // Update Part Cache
+
+		return "[SUCCESS] The part was registered. ID: " + part.getPartId();
+
 	}
 
 	@Override
-	public String validateRegisterPallet(Pallet pallet) throws RemoteException {
+	public String validatePutPart(int partId, int palletId) throws RemoteException {
+
+		// Validation
+
+		if (!Validation.validate(partId, Validation.PART_ID))
+			return "[VALIDATION ERROR] Invalid part id.";
+
+		if (!Validation.validate(palletId, Validation.PALLET_ID))
+			return "[VALIDATION ERROR] Invalid palled id.";
+
+		if (!this.cacheMemory.getPartCache().contains(partId))
+			return "[VALIDATION ERROR] Part does not exist";
+
+		if (!this.cacheMemory.getPalletCache().contains(palletId))
+			return "[VALIDATION ERROR] Pallet does not exist";
+
+		Part part = this.cacheMemory.getPartCache().getPart(partId);
+		Pallet pallet = this.cacheMemory.getPalletCache().getPallet(palletId);
+
+		double availableWeightCapacity = pallet.getMaxWeight() - pallet.getWeight();
+
+		if (availableWeightCapacity < part.getWeight()) // if doesn't fits on pallet
+			return "[FAIL] Not enough space on the pallet";
+
+		if (!pallet.getState().equals(Pallet.AVAILABLE))
+			return "[FAIL] Pallet is not available";
+
+		if (!pallet.getPartType().equals("-1"))
+			if (!pallet.getPartType().equals(part.getType()))
+				return "[FAIL] Type missmatch";
+
+		// Update Database
+
 		try {
-			if (pallet.getState().equals("Finished") || pallet.getState().equals("Available")) {
-				Pallet registeredPallet = dataServer.executeRegisterPallet(pallet);
-				if (registeredPallet != null) {
-					this.cacheMemory.getPalletCache().addPallet(registeredPallet);
-					
-					if (registeredPallet.getState().equals("Finished")) {
-						this.availablePallets.addPallet(registeredPallet);
-					}
-					
-					return "[SUCCESS] The pallet was registered. ID: " + registeredPallet.getPalletId();
-				}
-			} return "[VALIDATION ERROR] Invalid pallet state. ";
+			part = dataServer.executeUpdatePartPallet(part, palletId);
+
+			if (part == null)
+				return "[FAIL] 1";
+
+			pallet = dataServer.executeUpdatePalletWeight(pallet, part.getWeight()); // TODO not implemented yet
+
+			if (pallet == null)
+				return "[FAIL] 2s"; // TODO what if we fail here? above method was executed in database already
+
+			pallet.getPartList().addPart(part); // TODO seems useless, we newer really need (fast) access to all parts
+												// of a pallet
+
+			if (pallet.getPartType().equals("-1"))
+				pallet.setPartType(part.getType());
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return "[APPLICATION FAILURE] The pallet registration has failed. ";
+
+		// Update Cache
+
+		this.cacheMemory.getPalletCache().getCache().replace(pallet.getPalletId(), pallet);
+		this.cacheMemory.getPartCache().getCache().replace(part.getPartId(), part);
+
+		return "[SUCCESS] Part was put on pallet";
+
 	}
-	
+
 	@Override
-	public String validateSetPalletWeight(Pallet pallet, double newWeight) throws RemoteException {
+	public String validateFinishPallet(int palletId) throws RemoteException {
+
+		// Validation
+
+		if (!Validation.validate(palletId, Validation.PALLET_ID))
+			return "[VALIDATION ERROR] Invalid palled id.";
+
+		if (!this.cacheMemory.getPalletCache().contains(palletId))
+			return "[VALIDATION ERROR] Pallet does not exist";
+
+		Pallet pallet = this.cacheMemory.getPalletCache().getPallet(palletId);
+
+		if (pallet.getState().equals(Pallet.FINISHED))
+			return "[FAIL] Pallet was set as finised.";
+
+		// Update Database
+
 		try {
-			if (pallet.getState().equals("Available")) {
-				if (newWeight <= pallet.getMaxWeight()) {
-					pallet.setWeight(newWeight);
-					Pallet updatedPallet = dataServer.executeUpdatePalletWeight(pallet);
-					if (updatedPallet != null) {
-						this.cacheMemory.getPalletCache().getCache().replace(pallet.getPalletId(), updatedPallet);
-						
-						if (updatedPallet.getState() != "Finished") {
-							this.availablePallets.removePallet(pallet.getPalletId());
-							this.availablePallets.addPallet(updatedPallet);
-						}
-						
-						return "[SUCCESS] The pallet was updated. ID: " + updatedPallet.getPalletId();
-					}
-				} return "[VALIDATION ERROR] Cannot put more items on this pallet. ";
-			} return "[VALIDATION ERROR] Invalid pallet state. ";
-		} catch (Exception e) {
+			pallet = dataServer.executeSetPalletState(pallet, Pallet.FINISHED);
+
+			if (pallet == null)
+				return "[FAIL]";
+
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-		return "[APPLICATION FAILURE] The pallet weight setting has failed. ";
+
+		// Update Cache
+
+		this.cacheMemory.getPalletCache().getCache().replace(pallet.getPalletId(), pallet);
+
+		return "[SUCCESS] The pallet finishing was registered. ";
+
 	}
+
+	@Override
+	public String validateFinishDismantling(String chassisNumber) throws RemoteException {
+
+		// Validation
+
+		if (!Validation.validate(chassisNumber, Validation.CHASSIS_NUMBER))
+			return "[VALIDATION ERROR] Invalid car chassis number. ";
+
+		if (!this.cacheMemory.getCarCache().contains(chassisNumber)) {
+			System.out.println(cacheMemory.getCarCache().toString());
+			return "[VALIDATION ERROR] Car does not exist";
+		}
+
+		Car car = this.cacheMemory.getCarCache().getCar(chassisNumber);
+
+		if (car.getState().equals(Car.FINISHED))
+			return "[FAIL] Car is already finished";
+
+		// Update Database
+
+		try {
+			car = dataServer.executeSetCarState(car, Car.FINISHED);
+
+			if (car == null)
+				return "[FAIL]";
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		// Update Cache
+
+		this.cacheMemory.getCarCache().getCache().replace(car.getChassisNumber(), car);
+
+		// TODO problem - car is also many times referenced in parts cache,
+		// those should be updated as well ... unless we dont use Car as field in Part
+		// ...
+
+		return "[SUCCESS] The car was set as finished.";
+
+	}
+
+	// THIRD CLIENT
+
+	// TODO those are not yet refactored
 
 	@Override
 	public String validateRegisterProduct(Product product, PartList partList) throws RemoteException {
@@ -261,16 +313,16 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 					e.printStackTrace();
 				}
 			});
-			
+
 			Product registeredProduct = dataServer.executeRegisterProduct(product);
 			if (registeredProduct != null) {
 				this.cacheMemory.getProductCache().addProduct(registeredProduct);
-				
-				partList.getList().forEach(x -> {					
-					Part currentPart = this.cacheMemory.getPartCache().getCache().get(x.getPartId());				
+
+				partList.getList().forEach(x -> {
+					Part currentPart = this.cacheMemory.getPartCache().getCache().get(x.getPartId());
 					this.cacheMemory.getPartCache().getCache().replace(x.getPartId(), currentPart);
 				});
-				
+
 				return "[SUCCESS] The product was registered. ID: " + registeredProduct.getProductId();
 			}
 		} catch (SQLException e) {
@@ -281,45 +333,93 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 
 	@Override
 	public PartCache getParts() throws RemoteException {
-		return (this.cacheMemory.getPartCache() != null)
-				? this.cacheMemory.getPartCache()
-				: null;
+		return (this.cacheMemory.getPartCache() != null) ? this.cacheMemory.getPartCache() : null;
 	}
-	
+
+	// FOURTH CLIENT
+
+	@Override
+	public PartList validateGetStolenParts(Car car) throws RemoteException {
+		try {
+			PartList stolenParts = new PartList();
+			this.cacheMemory.getPartCache().getCache().forEach((x, y) -> {
+				if (y.getCar().getChassisNumber().equals(car.getChassisNumber())) {
+					stolenParts.addPart(y);
+				}
+			});
+
+			return stolenParts;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	@Override
+	public ProductList validateGetStolenProducts(Car car) throws RemoteException {
+		try {
+			ProductList stolenProducts = new ProductList();
+			this.cacheMemory.getProductCache().getCache().forEach((x, y) -> {
+				y.getPartList().getList().forEach((z) -> {
+					if (z.getCar().getChassisNumber().equals(car.getChassisNumber())) {
+						stolenProducts.addProduct(y);
+					}
+				});
+			});
+			return stolenProducts;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	@Override
+	public Car validateGetStolenCar(String chassisNumber) throws RemoteException {
+		try {
+
+			return cacheMemory.getCarCache().getCache().get(chassisNumber);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	// PRIVATE METHODS
+
 	private void synchronizeServerCaches() {
 		try {
 			this.cacheMemory.setPartCache(this.dataServer.executeGetPartCache());
-			System.out.println((this.cacheMemory.getPartCache() != null) 
-								? "PARTS cache is now up-to-date. "
-								: "A problem has occured when updating the PARTS cache. ");
-			
+			System.out.println((this.cacheMemory.getPartCache() != null) ? "PARTS cache is now up-to-date. "
+					: "A problem has occured when updating the PARTS cache. ");
+
 			this.cacheMemory.setCarCache(this.dataServer.executeGetCarCache());
-			System.out.println((this.cacheMemory.getCarCache() != null) 
-								? "CARS cache is now up-to-date. "
-								: "A problem has occured when updating the CARS cache. ");
+			System.out.println((this.cacheMemory.getCarCache() != null) ? "CARS cache is now up-to-date. "
+					: "A problem has occured when updating the CARS cache. ");
 
 			this.cacheMemory.setPalletCache(this.dataServer.executeGetPalletCache());
-			System.out.println((this.cacheMemory.getPalletCache() != null) 
-								? "PALLETS cache is now up-to-date. "
-								: "A problem has occured when updating the PALLETS cache. ");
+			System.out.println((this.cacheMemory.getPalletCache() != null) ? "PALLETS cache is now up-to-date. "
+					: "A problem has occured when updating the PALLETS cache. ");
 
 			this.cacheMemory.setProductCache(this.dataServer.executeGetProductCache());
-			System.out.println((this.cacheMemory.getProductCache() != null) 
-								? "PRODUCTS cache is now up-to-date. "
-								: "A problem has occured when updating the PRODUCTS cache. ");
-			
+			System.out.println((this.cacheMemory.getProductCache() != null) ? "PRODUCTS cache is now up-to-date. "
+					: "A problem has occured when updating the PRODUCTS cache. ");
+
 			if (this.cacheMemory.getCarCache() != null) {
 				this.availableCars = new CarList();
-				this.cacheMemory.getCarCache().getCache().forEach((x, y) -> { 
+				this.cacheMemory.getCarCache().getCache().forEach((x, y) -> {
 					if (y.getState() == "In progress") {
 						this.availableCars.addCar(y);
 					}
 				});
 			}
-			
+
 			if (this.cacheMemory.getPalletCache() != null) {
 				this.availablePallets = new PalletList();
-				this.cacheMemory.getPalletCache().getCache().forEach((x, y) -> { 
+				this.cacheMemory.getPalletCache().getCache().forEach((x, y) -> {
 					if (y.getState() == "Finished") {
 						this.availablePallets.addPallet(y);
 					}
@@ -329,4 +429,5 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 			e.printStackTrace();
 		}
 	}
+
 }
