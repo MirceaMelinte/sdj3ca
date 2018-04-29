@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controller.CarClientController">
+   <children>
+      <Label layoutX="40.0" layoutY="40.0" text="Chassis Number" />
+      <TextField fx:id="tfChassisNumber" layoutX="40.0" layoutY="60.0" />
+      <Label layoutX="40.0" layoutY="100.0" text="Manufacturer" />
+      <TextField fx:id="tfManufacturer" layoutX="40.0" layoutY="120.0" />
+      <Label layoutX="40.0" layoutY="160.0" text="Model" />
+      <TextField fx:id="tfModel" layoutX="40.0" layoutY="180.0" />
+      <Label layoutX="40.0" layoutY="220.0" text="Year" />
+      <TextField fx:id="tfYear" layoutX="40.0" layoutY="240.0" />
+      <Label layoutX="40.0" layoutY="280.0" text="Weight" />
+      <TextField fx:id="tfWeight" layoutX="40.0" layoutY="300.0" />
+      <Button fx:id="btnRegister" layoutX="40.0" layoutY="340.0" mnemonicParsing="false" onAction="#onRegisterClick" text="Register" />
+      <Text layoutX="40.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Register Car" />
+   </children>
+</Pane>

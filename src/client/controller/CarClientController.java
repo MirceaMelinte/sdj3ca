@@ -1,58 +1,65 @@
 package client.controller;
 
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
-import remote.interfaces.ILogicServer;
-import client.view.CarClientView;
 import model.Car;
+import remote.interfaces.ILogicServer;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 
 public class CarClientController {
 
-	private CarClientView view;
 	private ILogicServer logicServer;
 
-	public CarClientController(CarClientView view) throws RemoteException {
-		this.view = view;
-
+	public CarClientController() throws RemoteException, MalformedURLException, NotBoundException {
+		 logicServer = (ILogicServer) Naming.lookup("rmi://localhost/logicServer");
 	}
 
-	public void execute(String what) throws RemoteException {
-		switch (what) {
-		case "Add Car":
-			Car car = new Car();
-			car.setManufacturer(view.get("Manufacturer"));
-			car.setModel(view.get("Model"));
-			car.setYear(Integer.parseInt(view.get("Year")));
-			car.setWeight(Double.parseDouble(view.get("Weight")));
-			car.setChassisNumber(view.get("Chassis Number"));
-			car.setState(view.get("State"));
-			registerCar(car);
-			break;
-		case "Quit":
-			System.exit(0);
-			break;
-		default:
-			break;
-		}
-	}
+	@FXML
+	private TextField tfYear, tfChassisNumber, tfModel, tfManufacturer, tfWeight;
 
-	// Network Connection
-	public void begin() {
+	@FXML
+	private Button btnRegister;
+
+	@FXML
+	void onRegisterClick(ActionEvent event) throws RemoteException {
+		Car car;
+
 		try {
-			String ip = "localhost";
-			String URL = "rmi://" + ip + "/" + "logicServer";
+			String chassisNumber = tfChassisNumber.getText();
+			String manufacturer = tfManufacturer.getText();
+			String model = tfModel.getText();
+			int year = Integer.parseInt(tfYear.getText());
+			double weight = Double.parseDouble(tfWeight.getText());
+			String state = "In progress";
+			
+			car = new Car(chassisNumber, manufacturer, model, year, weight, state);
 
-			logicServer = (ILogicServer) Naming.lookup(URL);
+			String serverResponse = logicServer.validateRegisterCar(car);
 
-			view.show("Car Client connection established");
-		} catch (Exception ex) {
-			ex.printStackTrace();
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Server Response");
+			alert.setHeaderText(null);
+			alert.setContentText(serverResponse);
+			alert.showAndWait();
+			
+		} catch (NumberFormatException e) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText(null);
+			alert.setContentText("Invalid Input");
+			alert.showAndWait();
 		}
+			
+
+
 	}
 
-	// Network Methods
-	public void registerCar(Car car) throws RemoteException {
-		view.show("[Server Response] " + logicServer.validateRegisterCar(car));
-	}
 }

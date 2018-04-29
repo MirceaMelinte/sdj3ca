@@ -1,76 +1,186 @@
 package client.controller;
 
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
-import remote.interfaces.ILogicServer;
-import client.view.PartClientView;
 import model.Car;
+import model.CarList;
 import model.Pallet;
 import model.Part;
+import remote.interfaces.ILogicServer;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 
 public class PartClientController {
-
-	private PartClientView view;
 	private ILogicServer logicServer;
+	private CarList cl;
+	private Car selected;
 
-	public PartClientController(PartClientView view) throws RemoteException {
-		this.view = view;
+	public PartClientController() throws RemoteException, MalformedURLException, NotBoundException {
+		logicServer = (ILogicServer) Naming.lookup("rmi://localhost/logicServer");
 	}
 
-	public void execute(String what) throws RemoteException {
-		switch (what) {
-		case "Add Part":
-		   int partId = 1; // Dummy value for test only
-		   String type = view.get("Type");
-		   double weight = Double.parseDouble(view.get("Weight"));
-		   int palletId = Integer.parseInt(view.get("Pallet ID"));
-		   String chassisNumber = view.get("Chassis Number");
-		   Car car = new Car();
-		   car.setChassisNumber(chassisNumber);
-		   
-			Part part = new Part(partId, type, weight, car);
-			part.setPalletId(palletId);
+	@FXML
+	private ListView<String> lvAvailableCars = new ListView<String>();
 
-			registerPart(part);
-			break;
-		case "Add Pallet":
-			Pallet pallet1 = new Pallet();
-			pallet1.setPartType(view.get("Part Type"));
-			pallet1.setWeight(Double.parseDouble(view.get("Weight")));
-			pallet1.setMaxWeight(Double.parseDouble(view.get("Max Weight")));
-			pallet1.setState(view.get("State"));
+	@FXML
+	private TextField tfRegisterPart_type;
 
-			registerPallet(pallet1);
-			break;
-		case "Quit":
-			System.exit(0);
-			break;
-		default:
-			break;
+	@FXML
+	private TextField tfPutPart_partId;
+
+	@FXML
+	private Button btnPutPart;
+
+	@FXML
+	private Button btnFinishCar;
+
+	@FXML
+	private Button btnSelectCar;
+
+	@FXML
+	private Button btnFinishPallet;
+
+	@FXML
+	private TextField tfRegisterPart_weight;
+
+	@FXML
+	private TextField tfFinishPallet_palletId;
+
+	@FXML
+	private TextField tfFinishCar_chassisNumber;
+
+	@FXML
+	private Button btnRegisterPart;
+
+	@FXML
+	private TextField tfRegisterPart_chassisNumber = new TextField();
+
+	@FXML
+	private TextField tfPutPart_palletId;
+
+	@FXML
+	private Button btnRefreshAvailableCars;
+
+	@FXML
+	void onRefreshAvailableCarsClick(ActionEvent event) throws RemoteException {
+
+		cl = logicServer.getAvailableCars();
+
+		ObservableList<String> items = FXCollections.observableArrayList();
+		for (Car car : cl.getList()) {
+			items.add(car.toString());
 		}
+
+		lvAvailableCars.setItems(items);
 	}
 
-	// Network Connection
-	public void begin() {
+	@FXML
+	void onSelectCar(ActionEvent event) throws RemoteException {
+		selected = cl.getList().get(lvAvailableCars.getSelectionModel().getSelectedIndex());
+		String selectedChassisNumber = selected.getChassisNumber();
+
+		tfRegisterPart_chassisNumber.textProperty().set(selectedChassisNumber);
+		tfFinishCar_chassisNumber.textProperty().set(selectedChassisNumber);
+
+	}
+
+	@FXML
+	void onRegisterPart(ActionEvent event) throws RemoteException {
 		try {
-			String ip = "localhost";
-			String URL = "rmi://" + ip + "/" + "logicServer";
+			String chassisNumber = tfRegisterPart_chassisNumber.getText();
+			String type = tfRegisterPart_type.getText();
+			double weight = Double.parseDouble(tfRegisterPart_weight.getText());
 
-			logicServer = (ILogicServer) Naming.lookup(URL);
+			// TODO ?? too many -1
+			// maybe car constructor only chassis number
+			Part part = new Part(-1, type, weight, new Car(chassisNumber, "-1", "-1", -1, -1, "-1"));
 
-			view.show("Part Client connection established");
-		} catch (Exception ex) {
-			ex.printStackTrace();
+			String serverResponse = logicServer.validateRegisterPart(part);
+
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Server Response");
+			alert.setHeaderText(null);
+			alert.setContentText(serverResponse);
+			alert.showAndWait();
+
+		} catch (NumberFormatException e) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText(null);
+			alert.setContentText("Invalid Input");
+			alert.showAndWait();
 		}
+
+		// TODO fill tfPutPart_partId with ID
 	}
 
-	// Network Methods
-	public void registerPart(Part part) throws RemoteException {
-		view.show("[Server Response] " + logicServer.validateRegisterPart(part));
+	@FXML
+	void onPutPart(ActionEvent event) throws RemoteException {
+
+		try {
+			int partId = Integer.parseInt(tfPutPart_partId.getText());
+			int palletId = Integer.parseInt(tfPutPart_palletId.getText());
+
+			String serverResponse = logicServer.validatePutPart(partId, palletId);
+
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Server Response");
+			alert.setHeaderText(null);
+			alert.setContentText(serverResponse);
+			alert.showAndWait();
+
+		} catch (NumberFormatException e) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText(null);
+			alert.setContentText("Invalid Input");
+			alert.showAndWait();
+		}
+
 	}
 
-	public void registerPallet(Pallet pallet) throws RemoteException {
-		view.show("[Server Response] " + logicServer.validateRegisterPallet(pallet));
+	@FXML
+	void onFinishPallet(ActionEvent event) throws RemoteException {
+		try {
+			int palletId = Integer.parseInt(tfFinishPallet_palletId.getText());
+
+			String serverResponse = logicServer.validateFinishPallet(palletId);
+
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Server Response");
+			alert.setHeaderText(null);
+			alert.setContentText(serverResponse);
+			alert.showAndWait();
+		} catch (NumberFormatException e) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText(null);
+			alert.setContentText("Invalid Input");
+			alert.showAndWait();
+		}
+
+	}
+
+	@FXML
+	void onFinishCar(ActionEvent event) throws RemoteException {
+		String chassisNumber = tfFinishCar_chassisNumber.getText();
+
+		String serverResponse = logicServer.validateFinishDismantling(chassisNumber);
+
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("Server Response");
+		alert.setHeaderText(null);
+		alert.setContentText(serverResponse);
+		alert.showAndWait();
 	}
 }
