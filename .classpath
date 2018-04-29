@@ -151,5 +151,6 @@
 	<classpathentry kind="lib" path="C:/Users/mskn/Desktop/ICT/4th Semester/SDJ3/Axis2/axis2-1.7.7/lib/xmlbeans-2.5.0.jar"/>
 	<classpathentry kind="lib" path="C:/Users/mskn/Desktop/ICT/4th Semester/SDJ3/Axis2/axis2-1.7.7/lib/xml-resolver-1.2.jar"/>
 	<classpathentry kind="lib" path="C:/Users/mskn/Desktop/ICT/4th Semester/SDJ3/Axis2/axis2-1.7.7/lib/xmlschema-core-2.2.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_144"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
