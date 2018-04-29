@@ -192,18 +192,18 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 		// Update Database
 
 		try {
-			part = dataServer.executeUpdatePartPallet(part, palletId);
+			part = dataServer.executeUpdatePartPallet(part, pallet);
 
 			if (part == null)
 				return "[FAIL] 1";
 
-			pallet = dataServer.executeUpdatePalletWeight(pallet, part.getWeight()); // TODO not implemented yet
+			pallet.setWeight(pallet.getWeight() + part.getWeight());
+			pallet = dataServer.executeUpdatePalletWeight(pallet); // TODO will this database method return an pallet object with updated weight?
 
 			if (pallet == null)
-				return "[FAIL] 2s"; // TODO what if we fail here? above method was executed in database already
+				return "[FAIL] 2"; // TODO what if we fail here? above method was executed in database already
 
-			pallet.getPartList().addPart(part); // TODO seems useless, we newer really need (fast) access to all parts
-												// of a pallet
+			pallet.getPartList().addPart(part); // TODO so far it seems useless to have PartList in Pallet object ... do we need it dor anything?
 
 			if (pallet.getPartType().equals("-1"))
 				pallet.setPartType(part.getType());
