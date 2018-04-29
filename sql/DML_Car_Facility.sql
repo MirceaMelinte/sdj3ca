@@ -29,7 +29,7 @@ INSERT INTO Part (type, weight, carId, palletId, productId)
     VALUES ('WINDSHIELD', 23.3, 1, -1, -1);
 
 INSERT INTO Pallet (partType, weight, maxWeight, state)
-    VALUES ('Tires', 0, 500, 'Finished');
+    VALUES ('Tires', 0, 500, 'Available');
       
 commit;
     
