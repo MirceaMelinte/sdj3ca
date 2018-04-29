@@ -38,7 +38,7 @@ public class CarClientController {
 			String model = tfModel.getText();
 			int year = Integer.parseInt(tfYear.getText());
 			double weight = Double.parseDouble(tfWeight.getText());
-			String state = "In progress";
+			String state = Car.AVAILABLE;
 			
 			car = new Car(chassisNumber, manufacturer, model, year, weight, state);
 
