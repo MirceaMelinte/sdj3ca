@@ -275,15 +275,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		for (Pallet pallet : this.cacheMemory.getPalletCache().getCache().values()) {
 			if (pallet.getPartType().equals(part.getType())
 					&& (pallet.getWeight() + part.getWeight()) <= pallet.getMaxWeight()) {
-				
-				double totalPartsWeight = 0;
-				for (Part palletPart : pallet.getPartList().getList()) {
-					totalPartsWeight += palletPart.getWeight();
-				}
-				
-				if ((totalPartsWeight + part.getWeight()) <= pallet.getMaxWeight()) {
-					return pallet;
-				}
+				return pallet;
 			}
 		}
 		
