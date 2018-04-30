@@ -18,7 +18,7 @@ public class XmlMarshaller<T>
    @SuppressWarnings("unchecked")
    public T createObjectFromXMLString(String xml, Class<?> cls) throws JAXBException
    {
-      if(!(xml == (null)))
+      if(xml != null)
       {
          JAXBContext jaxbContext = JAXBContext.newInstance(cls);
          Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
@@ -33,7 +33,7 @@ public class XmlMarshaller<T>
    // is the class type of the object to be marshalled e.g. PartList.class
    public String createXMLString(T obj, Class<?> cls) throws JAXBException
    {
-      if(!(obj == (null)))
+      if(obj != null)
       {
          JAXBContext jaxbContext = JAXBContext.newInstance(cls);
          Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -44,7 +44,6 @@ public class XmlMarshaller<T>
             
          return xmlString;
       }
-      
       return null;
    }   
 }
