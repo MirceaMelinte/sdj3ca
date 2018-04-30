@@ -66,9 +66,17 @@ public class SkeletonSingleton implements ICarServiceSkeletonInterface
       {
          Car car = serCar.createObjectFromXMLString(xmlCar, Car.class); // Create car object from XML string      
          PartList partList = logicServer.validateGetStolenParts(car); // Call RMI method and return PartList object
-         String xmlPartList = serPartList.createXMLString(partList, PartList.class); // Xreate XML string representation of PartList object
-         res.set_return(xmlPartList); // Set return value to the web service response object created in step 1
-         System.out.println("Trace stolen parts service is called, chassisNumber: " + car.getChassisNumber());
+         
+         if(partList != null)
+         {
+            String xmlPartList = serPartList.createXMLString(partList, PartList.class); // Xreate XML string representation of PartList object
+            res.set_return(xmlPartList); // Set return value to the web service response object created in step 1
+            System.out.println("Trace stolen parts service is called, chassisNumber: " + car.getChassisNumber());
+         }
+         else
+         {
+            res.set_return(null);
+         }         
       }
       catch (JAXBException | RemoteException e)
       {
@@ -93,9 +101,16 @@ public class SkeletonSingleton implements ICarServiceSkeletonInterface
       {
          Car car = serCar.createObjectFromXMLString(xmlCar, Car.class);     
          ProductList productList = logicServer.validateGetStolenProducts(car); 
-         String xmlProductList = serProductList.createXMLString(productList, ProductList.class); 
-         res.set_return(xmlProductList); 
-         System.out.println("Trace stolen products service is called, chassisNumber: " + car.getChassisNumber());
+         if(productList != null)
+         {
+            String xmlProductList = serProductList.createXMLString(productList, ProductList.class); 
+            res.set_return(xmlProductList); 
+            System.out.println("Trace stolen products service is called, chassisNumber: " + car.getChassisNumber());
+         }
+         else
+         {
+            res.set_return(null);
+         }         
       }
       catch (JAXBException | RemoteException e)
       {
@@ -117,9 +132,16 @@ public class SkeletonSingleton implements ICarServiceSkeletonInterface
       try
       {     
          Car car = logicServer.validateGetStolenCar(chassisNumber); 
-         String xmlCar = serCar.createXMLString(car, Car.class); 
-         res.set_return(xmlCar); 
-         System.out.println("Trace stolen car service is called, chassisNumber: " + car.getChassisNumber());
+         if(car != null)
+         {
+            String xmlCar = serCar.createXMLString(car, Car.class); 
+            res.set_return(xmlCar); 
+            System.out.println("Trace stolen car service is called, chassisNumber: " + car.getChassisNumber());
+         }
+         else
+         {
+            res.set_return(null);
+         }    
       }
       catch (JAXBException | RemoteException e)
       {

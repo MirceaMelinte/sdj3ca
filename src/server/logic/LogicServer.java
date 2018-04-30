@@ -346,7 +346,10 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 					stolenParts.addPart(y);
 				}
 			});
-
+			if(stolenParts.count() == 0)
+			{
+			   return null;
+			}
 			return stolenParts;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -366,20 +369,23 @@ public class LogicServer extends UnicastRemoteObject implements ILogicServer {
 					}
 				});
 			});
+			if(stolenProducts.count() == 0)
+			{
+			   return null;
+			}
 			return stolenProducts;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		return null;
 	}
 
 	@Override
 	public Car validateGetStolenCar(String chassisNumber) throws RemoteException {
 		try {
-
-			return cacheMemory.getCarCache().getCache().get(chassisNumber);
-
+		   Car car = cacheMemory.getCarCache().getCache().get(chassisNumber);
+			return car;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -4,7 +4,7 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 
 import remote.interfaces.ILogicServer;
-import client.view.PartClientView;
+//import client.view.PartClientView;
 import client.view.ProductClientView;
 import model.Car;
 import model.Pallet;

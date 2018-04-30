@@ -47,40 +47,61 @@ public class WebServiceClient
             traceStolenParts.setArgs0(carXml);
             ICarServiceStub.TraceStolenPartsResponse res = stub.traceStolenParts(traceStolenParts);
             String partListXml = res.get_return();
-            PartList partList = serPartList.createObjectFromXMLString(partListXml, PartList.class);
-            System.out.println("XML Version of PartList: \n");
-            System.out.println("=================================================================");
-            System.out.println(partListXml);
-            System.out.println("=================================================================");
-            System.out.println("toString() Version of PartList: \n");
-            System.out.println(partList.toString());
-            System.out.println("=================================================================");
+            if(partListXml != null)
+            {
+               PartList partList = serPartList.createObjectFromXMLString(partListXml, PartList.class);
+               System.out.println("XML Version of PartList: \n");
+               System.out.println("=================================================================");
+               System.out.println(partListXml);
+               System.out.println("=================================================================");
+               System.out.println("toString() Version of PartList: \n");
+               System.out.println(partList.toString());
+               System.out.println("=================================================================");
+            }
+            else
+            {
+               System.out.println("Invalid car chassis number");
+            }
             break;
          case 2:
             traceStolenProducts.setArgs0(carXml);
             ICarServiceStub.TraceStolenProductsResponse res2 = stub.traceStolenProducts(traceStolenProducts);
             String productListXml = res2.get_return();
-            ProductList productList = serProductList.createObjectFromXMLString(productListXml, ProductList.class);
-            System.out.println("XML Version of ProductList: \n");
-            System.out.println("=================================================================");
-            System.out.println(productListXml);
-            System.out.println("=================================================================");
-            System.out.println("toString() Version of ProductList: \n");
-            System.out.println(productList.toString());
-            System.out.println("=================================================================");
+            if(productListXml != null)
+            {
+               ProductList productList = serProductList.createObjectFromXMLString(productListXml, ProductList.class);
+               System.out.println("XML Version of ProductList: \n");
+               System.out.println("=================================================================");
+               System.out.println(productListXml);
+               System.out.println("=================================================================");
+               System.out.println("toString() Version of ProductList: \n");
+               System.out.println(productList.toString());
+               System.out.println("=================================================================");
+            }
+            else
+            {
+               System.out.println("Invalid car chassis number");
+            }
             break;
          case 3:
             traceStolenCar.setArgs0(chassisNumber);
             ICarServiceStub.TraceStolenCarResponse res3 = stub.traceStolenCar(traceStolenCar);
             String carDetailstXml = res3.get_return();
             Car carDetails = serCar.createObjectFromXMLString(carDetailstXml, Car.class);
-            System.out.println("XML Version of ProductList: \n");
-            System.out.println("=================================================================");
-            System.out.println(carDetailstXml);
-            System.out.println("=================================================================");
-            System.out.println("toString() Version of ProductList: \n");
-            System.out.println(carDetails.toString());
-            System.out.println("=================================================================");
+            if(carDetails != null)
+            {
+               System.out.println("XML Version of ProductList: \n");
+               System.out.println("=================================================================");
+               System.out.println(carDetailstXml);
+               System.out.println("=================================================================");
+               System.out.println("toString() Version of ProductList: \n");
+               System.out.println(carDetails.toString());
+               System.out.println("=================================================================");
+            }
+            else
+            {
+               System.out.println("Invalid car chassis number");
+            }
             break;
          case 4:
             break;
