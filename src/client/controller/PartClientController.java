@@ -101,9 +101,7 @@ public class PartClientController {
 			String type = tfRegisterPart_type.getText();
 			double weight = Double.parseDouble(tfRegisterPart_weight.getText());
 
-			// TODO ?? too many -1
-			// maybe car constructor only chassis number
-			Part part = new Part(-1, type, weight, new Car(chassisNumber, "-1", "-1", -1, -1, "-1"));
+			Part part = new Part(-1, type, weight, chassisNumber);
 
 			String serverResponse = logicServer.validateRegisterPart(part);
 

@@ -56,15 +56,17 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 				part.setType(resultSet.getString("partType"));
 				part.setWeight(resultSet.getDouble("partWeight"));
 				
-				Car car = new Car();
-				car.setChassisNumber(resultSet.getString("carChassisNumber"));
-				car.setModel(resultSet.getString("carModel"));
-				car.setManufacturer(resultSet.getString("carManufacturer"));
-				car.setYear(resultSet.getInt("carYear"));
-				car.setWeight(resultSet.getDouble("carWeight"));
-				car.setState(resultSet.getString("carState"));
-				part.setCar(car);
+//				Car car = new Car();
+//				car.setChassisNumber(resultSet.getString("carChassisNumber"));
+//				car.setModel(resultSet.getString("carModel"));
+//				car.setManufacturer(resultSet.getString("carManufacturer"));
+//				car.setYear(resultSet.getInt("carYear"));
+//				car.setWeight(resultSet.getDouble("carWeight"));
+//				car.setState(resultSet.getString("carState"));
+//				part.setCar(car);
 
+				part.setChassisNumber(resultSet.getString("carChassisNumber"));
+				
 				part.setPalletId(resultSet.getInt("partPalletId"));
 				part.setProductId(resultSet.getInt("partProductId"));				
 
@@ -154,14 +156,16 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 					part.setType(partsResultSet.getString("partType"));
 					part.setWeight(partsResultSet.getDouble("partWeight"));
 					
-					Car car = new Car();
-					car.setChassisNumber(partsResultSet.getString("carChassisNumber"));
-					car.setModel(partsResultSet.getString("carModel"));
-					car.setManufacturer(partsResultSet.getString("carManufacturer"));
-					car.setYear(partsResultSet.getInt("carYear"));
-					car.setWeight(partsResultSet.getDouble("carWeight"));
-					car.setState(partsResultSet.getString("carState"));
-					part.setCar(car);
+//					Car car = new Car();
+//					car.setChassisNumber(partsResultSet.getString("carChassisNumber"));
+//					car.setModel(partsResultSet.getString("carModel"));
+//					car.setManufacturer(partsResultSet.getString("carManufacturer"));
+//					car.setYear(partsResultSet.getInt("carYear"));
+//					car.setWeight(partsResultSet.getDouble("carWeight"));
+//					car.setState(partsResultSet.getString("carState"));
+//					part.setCar(car);
+					
+					part.setChassisNumber(partsResultSet.getString("carChassisNumber"));
 
 					part.setPalletId(palletId);
 					part.setProductId(partsResultSet.getInt("partProductId"));				
@@ -224,15 +228,17 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 					part.setType(partsResultSet.getString("partType"));
 					part.setWeight(partsResultSet.getDouble("partWeight"));
 					
-					Car car = new Car();
-					car.setChassisNumber(partsResultSet.getString("carChassisNumber"));
-					car.setModel(partsResultSet.getString("carModel"));
-					car.setManufacturer(partsResultSet.getString("carManufacturer"));
-					car.setYear(partsResultSet.getInt("carYear"));
-					car.setWeight(partsResultSet.getDouble("carWeight"));
-					car.setState(partsResultSet.getString("carState"));
-					part.setCar(car);
+//					Car car = new Car();
+//					car.setChassisNumber(partsResultSet.getString("carChassisNumber"));
+//					car.setModel(partsResultSet.getString("carModel"));
+//					car.setManufacturer(partsResultSet.getString("carManufacturer"));
+//					car.setYear(partsResultSet.getInt("carYear"));
+//					car.setWeight(partsResultSet.getDouble("carWeight"));
+//					car.setState(partsResultSet.getString("carState"));
+//					part.setCar(car);
 
+					part.setChassisNumber(partsResultSet.getString("carChassisNumber"));
+					
 					part.setPalletId(partsResultSet.getInt("partPalletId"));
 					part.setProductId(productId);				
 
@@ -410,7 +416,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 					.prepareStatement("SELECT * FROM (SELECT id FROM car WHERE chassisNumber = ?) "
 									+ "WHERE ROWNUM = 1");
 			
-			carStatement.setString(1, part.getCar().getChassisNumber());
+			carStatement.setString(1, part.getChassisNumber());
 			ResultSet carResultSet = carStatement.executeQuery();
 			
 			int carId = -1;

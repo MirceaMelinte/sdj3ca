@@ -123,16 +123,16 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		if (part.getWeight() <= 0)
 			return "[VALIDATION ERROR] Invalid part weight.";
 
-		if (part.getCar() == null)
+		if (part.getChassisNumber() == null || part.getChassisNumber().isEmpty())
 			return "[VALIDATION ERROR] There was no car set for this part.";
 
-		if (!Validation.validate(part.getCar().getChassisNumber(), Validation.CHASSIS_NUMBER))
+		if (!Validation.validate(part.getChassisNumber(), Validation.CHASSIS_NUMBER))
 			return "[VALIDATION ERROR] Invalid car chassis number.";
 
-		if (!this.cacheMemory.getCarCache().contains(part.getCar().getChassisNumber()))
+		if (!this.cacheMemory.getCarCache().contains(part.getChassisNumber()))
 			return "[VALIDATION ERROR] This car does not exist.";
 
-		if (this.cacheMemory.getCarCache().getCar(part.getCar().getChassisNumber()).getState().equals(Car.FINISHED))
+		if (this.cacheMemory.getCarCache().getCar(part.getChassisNumber()).getState().equals(Car.FINISHED))
 			return "[VALIDATION ERROR] This car is already finished.";
 
 		// Update Database
@@ -149,15 +149,12 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		// Update Cache
 
-		Car car = this.cacheMemory.getCarCache().getCar(part.getCar().getChassisNumber());
+		Car car = this.cacheMemory.getCarCache().getCar(part.getChassisNumber());
 		car.setState(Car.IN_PROGRESS); // Update car cache
 
 		this.cacheMemory.getCarCache().getCache().replace(car.getChassisNumber(), car); // Do I need this line?
 
-		part.setCar(car);
-
-		this.cacheMemory.getPartCache().addPart(part); // Update Part Cache
-
+		
 		return "[SUCCESS] The part was registered. ID: " + part.getPartId();
 
 	}
@@ -368,7 +365,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		try {
 			PartList stolenParts = new PartList();
 			this.cacheMemory.getPartCache().getCache().forEach((x, y) -> {
-				if (y.getCar().getChassisNumber().equals(car.getChassisNumber())) {
+				if (y.getChassisNumber().equals(car.getChassisNumber())) {
 					stolenParts.addPart(y);
 				}
 			});
@@ -389,7 +386,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			ProductList stolenProducts = new ProductList();
 			this.cacheMemory.getProductCache().getCache().forEach((x, y) -> {
 				y.getPartList().getList().forEach((z) -> {
-					if (z.getCar().getChassisNumber().equals(car.getChassisNumber())) {
+					if (z.getChassisNumber().equals(car.getChassisNumber())) {
 						stolenProducts.addProduct(y);
 					}
 				});

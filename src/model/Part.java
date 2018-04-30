@@ -17,18 +17,18 @@ public class Part implements Serializable
 	private int partId, palletId, productId;
 	private String type;
 	private double weight;
-	private Car car;
+	private String chassisNumber;
 	
 	public Part() {}
 	
-	public Part(int partId, String type, double weight, Car car)
+	public Part(int partId, String type, double weight, String chassisNumber)
    {
       this.partId = partId;
       this.palletId = -1;
       this.productId = -1;
       this.type = type;
       this.weight = weight;
-      this.car = car;
+      this.chassisNumber = chassisNumber;
    } 
 	
 	public int getPartId() { return partId; }
@@ -46,9 +46,9 @@ public class Part implements Serializable
 	public double getWeight() { return weight; }
 	public void setWeight(double weight) { this.weight = weight; }	
 	
-	public Car getCar() { return car; } 
-	public void setCar(Car car) { this.car = car; }
-	
+	public String getChassisNumber() { return chassisNumber; }
+	public void setChassisNumber(String chassisNumber) { this.chassisNumber = chassisNumber; }
+
 	@Override
    public String toString()
    {
@@ -56,9 +56,10 @@ public class Part implements Serializable
       
       s.append("Part id: " + partId);
       s.append(", Pallet id: " + palletId);
-      s.append(", Prodocut id: " + productId);
+      s.append(", Product id: " + productId);
       s.append(", Part type: " + type);
       s.append(", Weight: " + weight);
+      s.append(", Chassis Number: " + chassisNumber);
       
       return s.toString();
    }

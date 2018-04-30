@@ -73,9 +73,9 @@ public class DataServer_LOCAL_TEST extends UnicastRemoteObject implements IDataS
 	@Override
 	public PartCache executeGetPartCache() throws RemoteException, SQLException {
 		PartCache pc = new PartCache();
-		Part p1 =  new Part(11110000, "wheel", 3, new Car("1234567c", "porshe", "300", 2001, 2400, Car.IN_PROGRESS));
+		Part p1 =  new Part(11110000, "wheel", 3, "1234567c");
 		p1.setPalletId(2222);
-		Part p2 =  new Part(11110001, "wheel", 3, new Car("1234567f", "ferrary", "600", 2004, 1900, Car.FINISHED));
+		Part p2 =  new Part(11110001, "wheel", 3, "1234567f");
 		p2.setPalletId(2222);
 		
 		pc.addPart(p1);
