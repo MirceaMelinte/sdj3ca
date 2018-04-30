@@ -1,75 +1,100 @@
 package client.controller;
 
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
-import remote.interfaces.ILogicServer;
-//import client.view.PartClientView;
-import client.view.ProductClientView;
-import model.Car;
-import model.Pallet;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
 import model.Part;
 import model.PartList;
 import model.Product;
+import remote.interfaces.ILogicServer;
 
 public class ProductClientController {
 
-	private ProductClientView view;
 	private ILogicServer logicServer;
+	private PartList partList = new PartList();
 
-	public ProductClientController(ProductClientView view) throws RemoteException {
-		this.view = view;
+	public ProductClientController() throws RemoteException, MalformedURLException, NotBoundException {
+		logicServer = (ILogicServer) Naming.lookup("rmi://localhost/logicServer");
 	}
 
-	public void execute(String what) throws RemoteException {
-		switch (what) {
-		case "Add Product":
-			Product product = new Product();
-			product.setName(view.get("Name"));
-			product.setType(view.get("Type"));
-			PartList partList = new PartList();
-			while (true) {
-				String input = view.get("Part ID (enter '0' to exit)");
-				if (input.equals("0")) break;
-				
-				Part part = new Part();
-				part.setPartId(Integer.parseInt(input));
-				partList.addPart(part);
-			}
-			registerProduct(product, partList);
-			break;
-		case "List Parts":
-			listParts();
-			break;
-		case "Quit":
-			System.exit(0);
-			break;
-		default:
-			break;
-		}
-	}
+	@FXML
+	private Button btnClearListOfParts;
 
-	// Network Connection
-	public void begin() {
+	@FXML
+	private ListView<String> lvListOfParts = new ListView<String>();
+
+	@FXML
+	private TextField tfPartId;
+
+	@FXML
+	private Button btnAddPart;
+
+	@FXML
+	private Button btnRegisterProduct;
+
+	@FXML
+	private TextField tfProductName;
+
+	@FXML
+	private TextField tfProductType;
+
+	@FXML
+	void onAddPart(ActionEvent event) {
 		try {
-			String ip = "localhost";
-			String URL = "rmi://" + ip + "/" + "logicServer";
-
-			logicServer = (ILogicServer) Naming.lookup(URL);
-
-			view.show("Part Client connection established");
-		} catch (Exception ex) {
-			ex.printStackTrace();
+			int partId = Integer.parseInt(tfPartId.getText());
+			Part part = new Part();
+			part.setPartId(partId);
+			partList.addPart(part);
+			rerenderPartList();
+		} catch (NumberFormatException e) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText(null);
+			alert.setContentText("Invalid Input");
+			alert.showAndWait();
 		}
 	}
 
-	// Network Methods
-	public void registerProduct(Product product, PartList partList) throws RemoteException {
-		view.show("[Server Response] " + logicServer.validateRegisterProduct(product, partList));
+	@FXML
+	void onSubmitProduct(ActionEvent event) throws RemoteException {
+		Product product = new Product();
+		product.setName(tfProductName.getText());
+		product.setType(tfProductType.getText());
+		
+		String serverResponse = logicServer.validateRegisterProduct(product, partList);
+
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("Server Response");
+		alert.setHeaderText(null);
+		alert.setContentText(serverResponse);
+		alert.showAndWait();
 	}
 
-	public void listParts() throws RemoteException {
-		view.show(logicServer.getParts().toString());
+	@FXML
+	void onClear(ActionEvent event) {
+		partList = new PartList();
+		rerenderPartList();
 	}
 
+	private void rerenderPartList() {
+		ObservableList<String> items = FXCollections.observableArrayList();
+
+		for (Part part : partList.getList()) {
+			items.add(Integer.toString(part.getPartId()));
+		}
+
+		lvListOfParts.setItems(items);
+	}
 }
+

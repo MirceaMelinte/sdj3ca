@@ -1,18 +1,25 @@
 package client;
 
-import java.rmi.RemoteException;
-import client.controller.ProductClientController;
-import client.view.ProductClientView;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
-public class ProductClient
+
+public class ProductClient extends Application
 {
 
-   public static void main(String[] args) throws RemoteException
+   public static void main(String[] args)
    {
-	   ProductClientView view =  new ProductClientView();
-	   ProductClientController controller =  new ProductClientController(view);
-	   
-	   controller.begin();
-	   view.start(controller);
+      Application.launch(args);
+   }
+
+   @Override
+   public void start(Stage primaryStage) throws Exception
+   {
+      Pane mainPane = (Pane) FXMLLoader.load(ProductClient.class.getResource("view/ProductClientGUI.fxml"));
+      primaryStage.setScene(new Scene(mainPane));
+      primaryStage.show();
    }
 }
