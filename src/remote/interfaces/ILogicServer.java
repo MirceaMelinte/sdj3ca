@@ -32,8 +32,6 @@ public interface ILogicServer extends Remote {
 	
 	String validateRegisterProduct(Product product, PartList partList) throws RemoteException;
 
-	PartCache getParts() throws RemoteException;
-
 	
 	// client 4
 	

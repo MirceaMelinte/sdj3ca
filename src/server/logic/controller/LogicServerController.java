@@ -353,10 +353,6 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		return "[APPLICATION FAILURE] The product registration has failed. ";
 	}
 
-	@Override
-	public PartCache getParts() throws RemoteException {
-		return (this.cacheMemory.getPartCache() != null) ? this.cacheMemory.getPartCache() : null;
-	}
 
 	// FOURTH CLIENT
 
