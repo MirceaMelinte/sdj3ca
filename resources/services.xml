@@ -9,9 +9,21 @@
         <parameter name="ServiceClass">webservice.skeleton.ICarServiceSkeleton</parameter>
         <parameter name="useOriginalwsdl">true</parameter>
         <parameter name="modifyUserWSDLPortAddress">true</parameter>
-        <operation name="traceCar" mep="http://www.w3.org/ns/wsdl/in-out" namespace="http://webservice">
-            <actionMapping>urn:traceCar</actionMapping>
-            <outputActionMapping>urn:traceCarResponse</outputActionMapping>
+        <operation name="traceStolenProducts" mep="http://www.w3.org/ns/wsdl/in-out" namespace="http://webservice">
+            <actionMapping>urn:traceStolenProducts</actionMapping>
+            <outputActionMapping>urn:traceStolenProductsResponse</outputActionMapping>
+        </operation>
+        <operation name="traceStolenParts" mep="http://www.w3.org/ns/wsdl/in-out" namespace="http://webservice">
+            <actionMapping>urn:traceStolenParts</actionMapping>
+            <outputActionMapping>urn:traceStolenPartsResponse</outputActionMapping>
+        </operation>
+        <operation name="traceStolenCar" mep="http://www.w3.org/ns/wsdl/in-out" namespace="http://webservice">
+            <actionMapping>urn:traceStolenCar</actionMapping>
+            <outputActionMapping>urn:traceStolenCarResponse</outputActionMapping>
+        </operation>
+        <operation name="traceStolenPallets" mep="http://www.w3.org/ns/wsdl/in-out" namespace="http://webservice">
+            <actionMapping>urn:traceStolenPallets</actionMapping>
+            <outputActionMapping>urn:traceStolenPalletsResponse</outputActionMapping>
         </operation>
     </service>
 </serviceGroup>

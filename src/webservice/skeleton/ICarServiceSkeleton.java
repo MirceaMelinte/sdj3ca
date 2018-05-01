@@ -6,6 +6,9 @@
  */
 package webservice.skeleton;
 
+import webservice.TraceStolenPallets;
+import webservice.TraceStolenPalletsResponse;
+
 /**
  *  ICarServiceSkeleton java skeleton for the axisService
  */
@@ -13,39 +16,28 @@ public class ICarServiceSkeleton implements ICarServiceSkeletonInterface {
    
     private SkeletonSingleton skeleton = SkeletonSingleton.getInstance();
     
-    /**
-     * Auto generated method signature
-     *
-     * @param traceStolenProducts0
-     * @return traceStolenProductsResponse1
-     */
     public webservice.TraceStolenProductsResponse traceStolenProducts(
         webservice.TraceStolenProducts traceStolenProducts0) {
         
        return skeleton.traceStolenProducts(traceStolenProducts0);
     }
 
-    /**
-     * Auto generated method signature
-     *
-     * @param traceStolenParts2
-     * @return traceStolenPartsResponse3
-     */
     public webservice.TraceStolenPartsResponse traceStolenParts(
         webservice.TraceStolenParts traceStolenParts2) {
         
        return skeleton.traceStolenParts(traceStolenParts2);
     }
 
-    /**
-     * Auto generated method signature
-     *
-     * @param traceStolenCar4
-     * @return traceStolenCarResponse5
-     */
     public webservice.TraceStolenCarResponse traceStolenCar(
         webservice.TraceStolenCar traceStolenCar4) {
        
         return skeleton.traceStolenCar(traceStolenCar4);
     }
+
+   @Override
+   public TraceStolenPalletsResponse traceStolenPallets(
+         TraceStolenPallets traceStolenPallets)
+   {
+        return skeleton.traceStolenPallets(traceStolenPallets);
+   }
 }
