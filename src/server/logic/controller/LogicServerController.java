@@ -48,43 +48,12 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			this.cacheMemory = new Cache();
 			this.synchronizeServerCaches();
 
-			test();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void test() {
-		System.out.println(this.cacheMemory.getCarCache());
-		System.out.println(this.cacheMemory.getPalletCache());
-		System.out.println(this.cacheMemory.getPartCache());
-		System.out.println(this.cacheMemory.getProductCache());
-
-		PartList pl = new PartList();
-		Part p = new Part();
-		p.setPartId(11110009);
-		pl.addPart(p);
-		Part p2 = new Part();
-		p2.setPartId(11110002);
-		pl.addPart(p2);
-
-		System.out.println(pl);
-		Product pd = new Product();
-		pd.setName("asdasd");
-		pd.setType("ad");
-
-		try {
-			System.out.println(validateRegisterProduct(pd, pl));
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-
-		System.out.println(this.cacheMemory.getCarCache());
-		System.out.println(this.cacheMemory.getPalletCache());
-		System.out.println(this.cacheMemory.getPartCache());
-		System.out.println(this.cacheMemory.getProductCache());
-	}
 
 	// Network Methods
 
