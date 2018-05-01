@@ -38,6 +38,8 @@ public interface ILogicServer extends Remote {
 	PartList validateGetStolenParts(Car car) throws RemoteException;
 
 	ProductList validateGetStolenProducts(Car car) throws RemoteException;
+	
+	PalletList validateGetStolenPallets(Car car) throws RemoteException;
 
 	Car validateGetStolenCar(String chassisNumber) throws RemoteException;
 }

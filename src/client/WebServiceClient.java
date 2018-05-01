@@ -29,7 +29,6 @@ public class WebServiceClient
    public static void main(String[] args) throws RemoteException, JAXBException
    {
       stub = new ICarServiceStub( URL );  
-      //Scanner in = new Scanner(System.in);
       System.out.println("Enter car chassis number: ");
       Car c = new Car();
       chassisNumber = in.nextLine();
