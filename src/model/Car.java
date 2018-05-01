@@ -17,7 +17,7 @@ public class Car implements Serializable {
 	private String chassisNumber, manufacturer, model, state;
 	private int year;
 	private double weight;
-	private PartList parts;
+	private PartList parts = new PartList();
 
 	public final static String AVAILABLE = "Available";
 	public final static String IN_PROGRESS = "In progress";
@@ -103,6 +103,7 @@ public class Car implements Serializable {
 		s.append(", Year: " + year);
 		s.append(", Weight: " + weight);
 		s.append(", State: " + state);
+		s.append("\n[" + parts.toString() + "]");
 
 		return s.toString();
 	}

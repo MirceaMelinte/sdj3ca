@@ -88,6 +88,7 @@ public class Pallet implements Serializable {
 		s.append(", Pallet weight: " + weight);
 		s.append(", Pallet max weight: " + maxWeight);
 		s.append(", Pallet state: " + state);
+		s.append("\n[" + partList.toString() + "]");
 
 		return s.toString();
 	}

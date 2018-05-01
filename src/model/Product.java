@@ -47,7 +47,8 @@ public class Product implements Serializable
       s.append("Product id: " + productId);
       s.append(", Product type: " + type);
       s.append(", Product name: " + name);
-      
+	  s.append("\n[" + partList.toString() + "]");
+		
       return s.toString();
    }
 }
