@@ -32,4 +32,12 @@ public interface IDataServer extends Remote {
 	Pallet executeSetPalletState(Pallet pallet, String state) throws RemoteException, SQLException;
 
 	Car executeSetCarState(Car car, String state) throws RemoteException, SQLException;
+	
+	PartList executeGetStolenParts(Car car) throws RemoteException, SQLException;
+	  
+	ProductList executeGetStolenProducts(Car car) throws RemoteException, SQLException;
+	   
+	PalletList executeGetStolenPallets(Car car) throws RemoteException, SQLException;
+
+	Car executeGetStolenCar(String chassisNumber) throws RemoteException, SQLException;
 }

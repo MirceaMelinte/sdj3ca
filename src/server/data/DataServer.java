@@ -551,4 +551,113 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 		d.begin();
 	}
+
+   @Override
+   public PartList executeGetStolenParts(Car car) throws RemoteException,
+         SQLException
+   {
+      try 
+      {
+         PreparedStatement statement = 
+               DataServer.connection.prepareStatement("SELECT * FROM Part "
+                                             + "WHERE carId = (SELECT carId FROM Car WHERE chassisNumber = ?)");
+         
+         statement.setString(1, car.getChassisNumber());
+         ResultSet resultSet = statement.executeQuery();
+         PartList partList = new PartList();
+         
+         while(resultSet.next())
+         {
+            Part part = new Part();
+            part.setPartId(resultSet.getInt("id"));
+            part.setType(resultSet.getString("type"));
+            part.setWeight(resultSet.getDouble("weight"));
+            partList.addPart(part);
+         }
+
+         statement.close();
+         resultSet.close();
+         
+         System.out.println("[SUCCESS] Part List Retrieved");
+         
+         return partList;
+      }
+      catch (SQLException e) {
+         System.out.println("[FAIL] Part List Retrieval Failed");
+         e.printStackTrace();
+      }
+      return null;
+   }
+
+   @Override
+   public ProductList executeGetStolenProducts(Car car) throws RemoteException,
+         SQLException
+   {
+   // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public PalletList executeGetStolenPallets(Car car) throws RemoteException,
+         SQLException
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public Car executeGetStolenCar(String chassisNumber) throws RemoteException,
+         SQLException
+   {
+      try 
+      {
+         PreparedStatement carStatement = 
+               DataServer.connection.prepareStatement("SELECT * FROM Car "
+                                             + "WHERE chassisNumber = ?");
+         
+         PreparedStatement partStatement = 
+               DataServer.connection.prepareStatement("SELECT * FROM Part "
+                     + "WHERE carId = (SELECT carId FROM Car WHERE chassisNumber = ?)");
+         
+         carStatement.setString(1, chassisNumber);
+         partStatement.setString(1, chassisNumber);
+         ResultSet carResultSet = carStatement.executeQuery();
+         ResultSet partResultSet = partStatement.executeQuery();
+         
+         Car car = new Car();
+         PartList partList = new PartList();
+
+         while (carResultSet.next()) {
+            car.setChassisNumber(carResultSet.getString("chassisNumber"));
+            car.setModel(carResultSet.getString("model"));
+            car.setManufacturer(carResultSet.getString("manufacturer"));
+            car.setYear(carResultSet.getInt("year"));
+            car.setWeight(carResultSet.getDouble("weight"));
+            car.setState(carResultSet.getString("state"));
+         }
+         
+         while(partResultSet.next())
+         {
+            Part part = new Part();
+            part.setPartId(partResultSet.getInt("id"));
+            part.setType(partResultSet.getString("type"));
+            part.setWeight(partResultSet.getDouble("weight"));
+            partList.addPart(part);
+         }
+         
+         car.setPartList(partList);
+
+         carStatement.close();
+         carResultSet.close();
+         
+         System.out.println("[SUCCESS] Part List Retrieved");
+         
+         return car;
+      }
+      catch (SQLException e) {
+         System.out.println("[FAIL] Part List Retrieval Failed");
+         e.printStackTrace();
+      }
+      return null;
+   }
 }

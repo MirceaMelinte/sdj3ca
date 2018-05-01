@@ -374,14 +374,29 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 	@Override
 	public PartList validateGetStolenParts(Car car) throws RemoteException {
-		try {
-			return cacheMemory.getCarCache().
-			      getCache().get(car.getChassisNumber()).getPartList();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	   try {        
+         Car stolenCar = cacheMemory.getCarCache().
+               getCache().get(car.getChassisNumber());
+         
+         if(stolenCar != null)
+         {
+            return stolenCar.getPartList();
+         }
+         else
+         {
+            PartList partList = dataServer.executeGetStolenParts(car);
+            if(partList != null)
+            {
+               partList.getList().forEach((x) -> 
+               cacheMemory.getPartCache().getCache().put(x.getPartId(), x));
+            } 
+            return partList;
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
 
-		return null;
+      return null;
 	}
 
 	@Override
@@ -441,6 +456,15 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	public Car validateGetStolenCar(String chassisNumber) throws RemoteException {
 		try {
 			Car car = cacheMemory.getCarCache().getCache().get(chassisNumber);
+			
+			if(car == null)
+			{
+			   car = dataServer.executeGetStolenCar(chassisNumber);
+			   if(car != null)
+			   {
+			      cacheMemory.getCarCache().getCache().put(car.getChassisNumber(), car);
+			   }
+			}
 			return car;
 
 		} catch (Exception e) {
