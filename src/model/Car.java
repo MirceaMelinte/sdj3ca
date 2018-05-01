@@ -17,6 +17,7 @@ public class Car implements Serializable {
 	private String chassisNumber, manufacturer, model, state;
 	private int year;
 	private double weight;
+	private PartList parts;
 
 	public final static String AVAILABLE = "Available";
 	public final static String IN_PROGRESS = "In progress";
@@ -80,6 +81,16 @@ public class Car implements Serializable {
 
 	public void setState(String state) {
 		this.state = state;
+	}
+	
+	public PartList getPartList()
+	{
+	   return parts;
+	}
+	
+	public void setPartList(PartList parts)
+	{
+	   this.parts = parts;
 	}
 
 	@Override
