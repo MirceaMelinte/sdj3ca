@@ -25,9 +25,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	}
 
 	private IDataServer dataServer;
-
-	private CarList availableCars;
-	private PalletList availablePallets;
+	
 	private Cache cacheMemory;
 
 	// Network Connection
@@ -46,9 +44,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			view.show("Logic server is running... ");
 
 			this.cacheMemory = new Cache();
-			this.synchronizeServerCaches();
-
-
+			System.out.println("Caches initialized. ");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -89,7 +85,6 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		this.cacheMemory.getCarCache().addCar(car);
 		return "[SUCCESS] The car was registered.";
-
 	}
 
 	// SECOND CLIENT
@@ -110,13 +105,11 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 	}
 
-	/*
-	 * Car object inside a part only has only chassis number set ... is that a
-	 * problem?
-	 */
 	@Override
 	public String validateRegisterPart(Part part) throws RemoteException {
-
+		
+		Car car = this.dataServer.getCarByPart(part.getPartId());
+		
 		// Validate
 
 		if (part.getType() == null || part.getType().isEmpty())
@@ -124,19 +117,23 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		if (part.getWeight() <= 0)
 			return "[VALIDATION ERROR] Invalid part weight.";
-
-		if (part.getChassisNumber() == null || part.getChassisNumber().isEmpty())
+		
+		if (car == null) {
+			return "[VALIDATION ERROR] Car could not be retrieved. ";
+		}
+		
+		if (car.getChassisNumber() == null || car.getChassisNumber().isEmpty())
 			return "[VALIDATION ERROR] There was no car set for this part.";
 
-		if (!Validation.validate(part.getChassisNumber(), Validation.CHASSIS_NUMBER))
+		if (!Validation.validate(car.getChassisNumber(), Validation.CHASSIS_NUMBER))
 			return "[VALIDATION ERROR] Invalid car chassis number.";
 
-		if (!this.cacheMemory.getCarCache().contains(part.getChassisNumber()))
+		if (!this.cacheMemory.getCarCache().contains(car.getChassisNumber()))
 			return "[VALIDATION ERROR] This car does not exist.";
 
-		if (this.cacheMemory.getCarCache().getCar(part.getChassisNumber()).getState().equals(Car.FINISHED))
+		if (this.cacheMemory.getCarCache().getCar(car.getChassisNumber()).getState().equals(Car.FINISHED))
 			return "[VALIDATION ERROR] This car is already finished.";
-
+		
 		// Update Database
 
 		try {
@@ -150,14 +147,12 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		}
 
 		// Update Cache
-
-		Car car = this.cacheMemory.getCarCache().getCar(part.getChassisNumber());
-		car.setState(Car.IN_PROGRESS); // Update car cache
-
-		this.cacheMemory.getCarCache().getCache().replace(car.getChassisNumber(), car); // Do I need this line?
+		
+		car.getPartList().addPart(part);
+		car.setState(Car.IN_PROGRESS);
+		this.cacheMemory.getCarCache().addCar(car);
 
 		return "[SUCCESS] The part was registered. ID: " + part.getPartId();
-
 	}
 
 	@Override
@@ -171,18 +166,17 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		if (!Validation.validate(palletId, Validation.PALLET_ID))
 			return "[VALIDATION ERROR] Invalid palled id.";
 
-		if (!this.cacheMemory.getPartCache().contains(partId))
-			return "[VALIDATION ERROR] Part does not exist";
-
-		if (!this.cacheMemory.getPalletCache().contains(palletId))
-			return "[VALIDATION ERROR] Pallet does not exist";
-
-		Part part = this.cacheMemory.getPartCache().getPart(partId);
-		Pallet pallet = this.cacheMemory.getPalletCache().getPallet(palletId);
+		Part part = !(this.cacheMemory.getPartCache().contains(palletId))
+					? this.dataServer.getPartById(partId)
+					: this.cacheMemory.getPartCache().getPart(partId);
+		
+		Pallet pallet = !(this.cacheMemory.getPalletCache().contains(palletId))
+						? this.dataServer.getPalletById(partId)
+						: this.cacheMemory.getPalletCache().getPallet(palletId);
 
 		double availableWeightCapacity = pallet.getMaxWeight() - pallet.getWeight();
 
-		if (availableWeightCapacity < part.getWeight()) // if doesn't fits on pallet
+		if (availableWeightCapacity < part.getWeight())
 			return "[FAIL] Not enough space on the pallet";
 
 		if (!pallet.getState().equals(Pallet.AVAILABLE))
@@ -198,17 +192,15 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			part = dataServer.executeUpdatePartPallet(part, pallet);
 
 			if (part == null)
-				return "[FAIL] 1";
+				return "[FAIL] Failed database update part pallet. ";
 
 			pallet.setWeight(pallet.getWeight() + part.getWeight());
-			pallet = dataServer.executeUpdatePalletWeight(pallet); // TODO will this database method return an pallet
-																	// object with updated weight?
-
+			pallet = dataServer.executeUpdatePalletWeight(pallet);
+			
 			if (pallet == null)
-				return "[FAIL] 2"; // TODO what if we fail here? above method was executed in database already
+				return "[FAIL] Failed database update pallet weight. ";
 
-			pallet.getPartList().addPart(part); // TODO so far it seems useless to have PartList in Pallet object ... do
-												// we need it dor anything?
+			pallet.getPartList().addPart(part);
 
 			if (pallet.getPartType().equals("-1"))
 				pallet.setPartType(part.getType());
@@ -219,8 +211,8 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		// Update Cache
 
-		this.cacheMemory.getPalletCache().getCache().replace(pallet.getPalletId(), pallet);
-		this.cacheMemory.getPartCache().getCache().replace(part.getPartId(), part);
+		this.cacheMemory.getPalletCache().addPallet(pallet);
+		this.cacheMemory.getPartCache().addPart(part);
 
 		return "[SUCCESS] Part was put on pallet";
 
@@ -351,33 +343,20 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		}
 
-		PartList fullPartList = new PartList(); // contains parts with more information than just part id
-		for (Part part : partList.getList()) {
-			fullPartList.addPart(this.cacheMemory.getPartCache().getCache().get(part.getPartId()));
-		}
+		PartList fullPartList = this.dataServer.getPartsByProduct(product.getProductId());
+		fullPartList.getList().forEach(x -> {
+			this.cacheMemory.getPartCache().addPart(x);
+		});
 
 		// TODO check if part is already a part of a product
-
-		// is the part on a pallet that is finished?
-		for (Part part : fullPartList.getList()) {
-			if (!this.cacheMemory.getPalletCache().getPallet(part.getPalletId()).getState().equals(Pallet.FINISHED))
-				return "[VALIDATION ERROR] Part is not on finished pallet.";
-		}
 
 		// Update Database
 
 		try {
 			product = dataServer.executeRegisterProduct(product);
-
+			
 			if (product == null)
-				return "[FAIL] 1";
-
-			for (int i = 0; i < fullPartList.getList().size(); i++) {
-				fullPartList.getList().set(i,
-						dataServer.executeUpdatePartProduct(fullPartList.getList().get(i), product));
-				if (fullPartList.getList().get(i) == null)
-					return "[FAIL] 2";
-			}
+				return "[FAIL] Fail in the database query. ";
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -386,10 +365,6 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		// Update Cache
 
 		this.cacheMemory.getProductCache().addProduct(product);
-
-		fullPartList.getList().forEach(part -> {
-			this.cacheMemory.getPartCache().getCache().replace(part.getPartId(), part);
-		});
 
 		return "[SUCCESS] The product was registered. ID: " + product.getProductId();
 
@@ -449,47 +424,5 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		}
 
 		return null;
-	}
-
-	// PRIVATE METHODS
-
-	private void synchronizeServerCaches() {
-		try {
-			this.cacheMemory.setPartCache(this.dataServer.executeGetPartCache());
-			view.show((this.cacheMemory.getPartCache() != null) ? "PARTS cache is now up-to-date. "
-					: "A problem has occured when updating the PARTS cache. ");
-
-			this.cacheMemory.setCarCache(this.dataServer.executeGetCarCache());
-			view.show((this.cacheMemory.getCarCache() != null) ? "CARS cache is now up-to-date. "
-					: "A problem has occured when updating the CARS cache. ");
-
-			this.cacheMemory.setPalletCache(this.dataServer.executeGetPalletCache());
-			view.show((this.cacheMemory.getPalletCache() != null) ? "PALLETS cache is now up-to-date. "
-					: "A problem has occured when updating the PALLETS cache. ");
-
-			this.cacheMemory.setProductCache(this.dataServer.executeGetProductCache());
-			view.show((this.cacheMemory.getProductCache() != null) ? "PRODUCTS cache is now up-to-date. "
-					: "A problem has occured when updating the PRODUCTS cache. ");
-
-			if (this.cacheMemory.getCarCache() != null) {
-				this.availableCars = new CarList();
-				this.cacheMemory.getCarCache().getCache().forEach((x, y) -> {
-					if (y.getState() == "In progress") {
-						this.availableCars.addCar(y);
-					}
-				});
-			}
-
-			if (this.cacheMemory.getPalletCache() != null) {
-				this.availablePallets = new PalletList();
-				this.cacheMemory.getPalletCache().getCache().forEach((x, y) -> {
-					if (y.getState() == "Finished") {
-						this.availablePallets.addPallet(y);
-					}
-				});
-			}
-		} catch (RemoteException | SQLException e) {
-			e.printStackTrace();
-		}
 	}
 }

@@ -11,10 +11,6 @@ import java.sql.SQLException;
 
 import remote.interfaces.IDataServer;
 import model.*;
-import model.cache.CarCache;
-import model.cache.PalletCache;
-import model.cache.PartCache;
-import model.cache.ProductCache;
 
 public class DataServer extends UnicastRemoteObject implements IDataServer {
 	private static final long serialVersionUID = 1L;
@@ -36,102 +32,17 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			e.printStackTrace();
 		}
 	}
-
-	@Override
-	public PartCache executeGetPartCache() throws RemoteException, SQLException {
-		try {
-			PreparedStatement selectStatement = DataServer.connection.prepareStatement(
-					"SELECT p.id AS \"partId\", p.type AS \"partType\", p.weight AS \"partWeight\", "
-				        + "p.palletId AS \"partPalletId\", p.productId AS \"partProductId\", "
-				        + "c.model AS \"carModel\", c.manufacturer AS \"carManufacturer\", c.year AS \"carYear\", "
-				        + "c.weight as \"carWeight\", c.chassisNumber AS \"carChassisNumber\", c.state AS \"carState\" "
-				    + "FROM part p INNER JOIN Car c ON (p.carId = c.id)");
-
-			ResultSet resultSet = selectStatement.executeQuery();
-			PartCache parts = new PartCache();
-
-			while (resultSet.next()) {
-				Part part = new Part();
-				part.setPartId(resultSet.getInt("partId"));
-				part.setType(resultSet.getString("partType"));
-				part.setWeight(resultSet.getDouble("partWeight"));
-				
-//				Car car = new Car();
-//				car.setChassisNumber(resultSet.getString("carChassisNumber"));
-//				car.setModel(resultSet.getString("carModel"));
-//				car.setManufacturer(resultSet.getString("carManufacturer"));
-//				car.setYear(resultSet.getInt("carYear"));
-//				car.setWeight(resultSet.getDouble("carWeight"));
-//				car.setState(resultSet.getString("carState"));
-//				part.setCar(car);
-
-				part.setChassisNumber(resultSet.getString("carChassisNumber"));
-				
-				part.setPalletId(resultSet.getInt("partPalletId"));
-				part.setProductId(resultSet.getInt("partProductId"));				
-
-				parts.addPart(part);
-			}
-
-			selectStatement.close();
-			resultSet.close();
-			System.out.println("[SUCCESS] Successful retrieval of " + parts.count() + " parts from the database. ");
-
-			return parts;
-		} catch (Exception e) {
-			System.out.println("[FAIL] Failed execution of parts retrieval. ");
-			e.printStackTrace();
-		}
-
-		return null;
-	}
 	
 	@Override
-	public CarCache executeGetCarCache() throws RemoteException, SQLException {
+	public Pallet getPalletById(int palletId) throws RemoteException {
 		try {
 			PreparedStatement selectStatement = DataServer.connection
-					.prepareStatement("SELECT manufacturer, model, year, weight, chassisNumber, state FROM car");
-
-			ResultSet carResultSet = selectStatement.executeQuery();
-			CarCache cars = new CarCache();
-
-			while (carResultSet.next()) {
-				Car car = new Car();
-				car.setModel(carResultSet.getString("model"));
-				car.setManufacturer(carResultSet.getString("manufacturer"));
-				car.setYear(carResultSet.getInt("year"));
-				car.setWeight(carResultSet.getDouble("weight"));
-				car.setChassisNumber(carResultSet.getString("chassisNumber"));
-				car.setState(carResultSet.getString("state"));	
-
-				cars.addCar(car);
-			}
-
-			selectStatement.close();
-			carResultSet.close();
-			System.out.println("[SUCCESS] Successful retrieval of " + cars.count() + " cars from the database. ");
-
-			return cars;
-		} catch (Exception e) {
-			System.out.println("[FAIL] Failed execution of cars retrieval. ");
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-
-	@Override
-	public PalletCache executeGetPalletCache() throws RemoteException, SQLException {
-		try {
-			PreparedStatement selectStatement = DataServer.connection
-					.prepareStatement("SELECT id, partType, weight, maxWeight, state FROM pallet");
+					.prepareStatement("SELECT partType, weight, maxWeight, state FROM pallet");
 
 			ResultSet resultSet = selectStatement.executeQuery();
-			PalletCache pallets = new PalletCache();
-
+			Pallet pallet = new Pallet();
+			
 			while (resultSet.next()) {
-				Pallet pallet = new Pallet();
-				int palletId = resultSet.getInt("id");
 				pallet.setPalletId(palletId);
 				pallet.setPartType(resultSet.getString("partType"));
 				pallet.setWeight(resultSet.getDouble("weight"));
@@ -141,11 +52,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 				PartList palletPartList = new PartList();
 				
 				PreparedStatement partsSelectStatement = DataServer.connection.prepareStatement(
-						"SELECT p.id AS \"partId\", p.type AS \"partType\", p.weight AS \"partWeight\", "
-					        + "p.productId AS \"partProductId\", c.model AS \"carModel\", "
-					        + "c.manufacturer AS \"carManufacturer\", c.year AS \"carYear\", "
-					        + "c.weight as \"carWeight\", c.chassisNumber AS \"carChassisNumber\", c.state AS \"carState\" "
-					    + "FROM part p INNER JOIN Car c ON (p.carId = c.id) WHERE p.palletId = ?");
+						"SELECT p.id AS \"partId\", p.type AS \"partType\", p.weight AS \"partWeight\" "
+					    + "FROM part p WHERE p.palletId = ?");
 				
 				partsSelectStatement.setInt(1, palletId);
 				ResultSet partsResultSet = partsSelectStatement.executeQuery();
@@ -156,20 +64,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 					part.setType(partsResultSet.getString("partType"));
 					part.setWeight(partsResultSet.getDouble("partWeight"));
 					
-//					Car car = new Car();
-//					car.setChassisNumber(partsResultSet.getString("carChassisNumber"));
-//					car.setModel(partsResultSet.getString("carModel"));
-//					car.setManufacturer(partsResultSet.getString("carManufacturer"));
-//					car.setYear(partsResultSet.getInt("carYear"));
-//					car.setWeight(partsResultSet.getDouble("carWeight"));
-//					car.setState(partsResultSet.getString("carState"));
-//					part.setCar(car);
-					
-					part.setChassisNumber(partsResultSet.getString("carChassisNumber"));
-
-					part.setPalletId(palletId);
-					part.setProductId(partsResultSet.getInt("partProductId"));				
-
 					palletPartList.addPart(part);
 				}
 
@@ -177,15 +71,13 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 				partsResultSet.close();
 				
 				pallet.setPartList(palletPartList);
-				
-				pallets.addPallet(pallet);
 			}
 
 			selectStatement.close();
 			resultSet.close();
-			System.out.println("[SUCCESS] Successful retrieval of " + pallets.count() + " pallets from the database. ");
+			System.out.println("[SUCCESS] Successful retrieval of pallet #" + pallet.getPalletId() + " from the database. ");
 
-			return pallets;
+			return pallet;
 		} catch (Exception e) {
 			System.out.println("[FAIL] Failed execution of pallets retrieval. ");
 			e.printStackTrace();
@@ -193,73 +85,98 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 		return null;
 	}
-
+	
 	@Override
-	public ProductCache executeGetProductCache() throws RemoteException, SQLException {
+	public Part getPartById(int partId) throws RemoteException {
 		try {
-			PreparedStatement selectStatement = DataServer.connection
-					.prepareStatement("SELECT id, type, name FROM product");
-
+			PreparedStatement selectStatement = DataServer.connection.prepareStatement(
+					"SELECT p.type AS \"partType\", p.weight AS \"partWeight\" "
+				    + "FROM part p WHERE p.id = ?");
+			selectStatement.setInt(1, partId);
+			
 			ResultSet resultSet = selectStatement.executeQuery();
-			ProductCache products = new ProductCache();
-
+			Part part = new Part();
+			
 			while (resultSet.next()) {
-				Product product = new Product();
-				int productId = resultSet.getInt("id");
-				product.setProductId(productId);
-				product.setType(resultSet.getString("type"));
-				product.setName(resultSet.getString("name"));
-				
-				PartList productPartList = new PartList();
-				
-				PreparedStatement partsSelectStatement = DataServer.connection.prepareStatement(
-						"SELECT p.id AS \"partId\", p.type AS \"partType\", p.weight AS \"partWeight\", "
-					        + "p.palletId AS \"partPalletId\", c.model AS \"carModel\", "
-					        + "c.manufacturer AS \"carManufacturer\", c.year AS \"carYear\", "
-					        + "c.weight as \"carWeight\", c.chassisNumber AS \"carChassisNumber\", c.state AS \"carState\" "
-					    + "FROM part p INNER JOIN Car c ON (p.carId = c.id) WHERE p.productId = ?");
-				
-				partsSelectStatement.setInt(1, productId);
-				ResultSet partsResultSet = partsSelectStatement.executeQuery();
-
-				while (partsResultSet.next()) {
-					Part part = new Part();
-					part.setPartId(partsResultSet.getInt("partId"));
-					part.setType(partsResultSet.getString("partType"));
-					part.setWeight(partsResultSet.getDouble("partWeight"));
-					
-//					Car car = new Car();
-//					car.setChassisNumber(partsResultSet.getString("carChassisNumber"));
-//					car.setModel(partsResultSet.getString("carModel"));
-//					car.setManufacturer(partsResultSet.getString("carManufacturer"));
-//					car.setYear(partsResultSet.getInt("carYear"));
-//					car.setWeight(partsResultSet.getDouble("carWeight"));
-//					car.setState(partsResultSet.getString("carState"));
-//					part.setCar(car);
-
-					part.setChassisNumber(partsResultSet.getString("carChassisNumber"));
-					
-					part.setPalletId(partsResultSet.getInt("partPalletId"));
-					part.setProductId(productId);				
-
-					productPartList.addPart(part);
-				}
-
-				partsSelectStatement.close();
-				partsResultSet.close();
-				
-				product.setPartList(productPartList);
-				
-				products.addProduct(product);
+				part.setPartId(partId);
+				part.setType(resultSet.getString("partType"));
+				part.setWeight(resultSet.getDouble("partWeight"));
 			}
 
 			selectStatement.close();
 			resultSet.close();
-			System.out.println("[SUCCESS] Successful retrieval of " + products.count() + " products from the database. ");
+			System.out.println("[SUCCESS] Successful retrieval of part #" + part.getPartId() + " from the database. ");
 
-			return products;
+			return part;
 		} catch (Exception e) {
-			System.out.println("[FAIL] Failed execution of products retrieval. ");
+			System.out.println("[FAIL] Failed execution of part retrieval. ");
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	@Override
+	public Car getCarByPart(int partId) throws RemoteException {
+		try {
+			PreparedStatement selectStatement = DataServer.connection.prepareStatement(
+					"SELECT c.model AS \"carModel\", c.manufacturer AS \"carManufacturer\", c.year AS \"carYear\", "
+					        + "c.weight as \"carWeight\", c.chassisNumber AS \"carChassisNumber\", c.state AS \"carState\" "
+					    + "FROM car c INNER JOIN part p ON (p.carId = c.id) WHERE p.id = ?");
+			selectStatement.setInt(1, partId);
+			
+			ResultSet resultSet = selectStatement.executeQuery();
+			Car car = new Car();
+
+			while (resultSet.next()) {
+				car.setChassisNumber(resultSet.getString("carChassisNumber"));
+				car.setModel(resultSet.getString("carModel"));
+				car.setManufacturer(resultSet.getString("carManufacturer"));
+				car.setYear(resultSet.getInt("carYear"));
+				car.setWeight(resultSet.getDouble("carWeight"));
+				car.setState(resultSet.getString("carState"));
+			}
+
+			selectStatement.close();
+			resultSet.close();
+			System.out.println("[SUCCESS] Successful retrieval of car " + car.getChassisNumber());
+
+			return car;
+		} catch (Exception e) {
+			System.out.println("[FAIL] Failed execution of car retrieval. ");
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	@Override
+	public PartList getPartsByProduct(int productId) throws RemoteException {
+		try {
+			PreparedStatement selectStatement = DataServer.connection.prepareStatement(
+					"SELECT p.id AS \"partId\", p.type AS \"partType\", p.weight AS \"partWeight\""
+				    + "FROM part p WHERE p.productId = ?");
+			selectStatement.setInt(1, productId);
+			
+			ResultSet resultSet = selectStatement.executeQuery();
+			PartList parts = new PartList();
+
+			while (resultSet.next()) {
+				Part part = new Part();
+				part.setPartId(resultSet.getInt("partId"));
+				part.setType(resultSet.getString("partType"));
+				part.setWeight(resultSet.getDouble("partWeight"));
+				
+				parts.addPart(part);
+			}
+
+			selectStatement.close();
+			resultSet.close();
+			System.out.println("[SUCCESS] Successful retrieval of " + parts.count() + " parts from the database. ");
+
+			return parts;
+		} catch (Exception e) {
+			System.out.println("[FAIL] Failed execution of parts retrieval. ");
 			e.printStackTrace();
 		}
 
@@ -411,31 +328,12 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	public Part executeRegisterNewPart(Part part) throws RemoteException, SQLException {
 		try {
 			DataServer.addNonExistentEntities();
-			
-			PreparedStatement carStatement = DataServer.connection
-					.prepareStatement("SELECT * FROM (SELECT id FROM car WHERE chassisNumber = ?) "
-									+ "WHERE ROWNUM = 1");
-			
-			carStatement.setString(1, part.getChassisNumber());
-			ResultSet carResultSet = carStatement.executeQuery();
-			
-			int carId = -1;
-			while (carResultSet.next()) {
-				carId = carResultSet.getInt("id");
-			}
-			
-			carResultSet.close();
-			carStatement.close();
 
 			PreparedStatement insertStatement = DataServer.connection
-					.prepareStatement("INSERT INTO part (type, weight, carId, palletId, productId) VALUES "
-							+ "(?, ?, ?, ?, ?)");
+					.prepareStatement("INSERT INTO part (type, weight) VALUES (?, ?)");
 
 			insertStatement.setString(1, part.getType());
 			insertStatement.setDouble(2, part.getWeight());
-			insertStatement.setInt(3, carId);
-			insertStatement.setInt(4, part.getPalletId());
-			insertStatement.setInt(5, part.getProductId());
 			insertStatement.execute();
 			insertStatement.close();
 
@@ -486,8 +384,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			updateStatement.close();
 			DataServer.connection.commit();
 
-			part.setPalletId(pallet.getPalletId());
-
 			return part;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
@@ -517,8 +413,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 			updateStatement.close();
 			DataServer.connection.commit();
-
-			part.setProductId(product.getProductId());
 
 			return part;
 		} catch (Exception e) {

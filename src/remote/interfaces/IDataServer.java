@@ -5,20 +5,16 @@ import java.rmi.RemoteException;
 import java.sql.SQLException;
 
 import model.*;
-import model.cache.CarCache;
-import model.cache.PalletCache;
-import model.cache.PartCache;
-import model.cache.ProductCache;
 
 public interface IDataServer extends Remote {
-	PartCache executeGetPartCache() throws RemoteException, SQLException;
+	Pallet getPalletById(int palletId) throws RemoteException;
 	
-	CarCache executeGetCarCache() throws RemoteException, SQLException;
+	Part getPartById(int partId) throws RemoteException;
 	
-	PalletCache executeGetPalletCache() throws RemoteException, SQLException;
+	Car getCarByPart(int partId) throws RemoteException;
 	
-	ProductCache executeGetProductCache() throws RemoteException, SQLException;
-
+	PartList getPartsByProduct(int productId) throws RemoteException;
+	
 	Car executeRegisterCar(Car car) throws RemoteException, SQLException;
 
 	Pallet executeRegisterPallet(Pallet pallet) throws RemoteException, SQLException;
