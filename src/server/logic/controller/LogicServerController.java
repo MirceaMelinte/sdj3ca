@@ -375,16 +375,8 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	@Override
 	public PartList validateGetStolenParts(Car car) throws RemoteException {
 		try {
-			PartList stolenParts = new PartList();
-			this.cacheMemory.getPartCache().getCache().forEach((x, y) -> {
-				if (y.getChassisNumber().equals(car.getChassisNumber())) {
-					stolenParts.addPart(y);
-				}
-			});
-			if (stolenParts.count() == 0) {
-				return null;
-			}
-			return stolenParts;
+			return cacheMemory.getCarCache().
+			      getCache().get(car.getChassisNumber()).getPartList();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -395,12 +387,17 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	@Override
 	public ProductList validateGetStolenProducts(Car car) throws RemoteException {
 		try {
-			ProductList stolenProducts = new ProductList();
+		   
+		   PartList stolenParts = cacheMemory.getCarCache().
+               getCache().get(car.getChassisNumber()).getPartList();
+		   
+		   ProductList stolenProducts = new ProductList();
+		   
 			this.cacheMemory.getProductCache().getCache().forEach((x, y) -> {
 				y.getPartList().getList().forEach((z) -> {
-					if (z.getChassisNumber().equals(car.getChassisNumber())) {
-						stolenProducts.addProduct(y);
-					}
+				   if(stolenParts.contains(z)) {
+		               stolenProducts.addProduct(y);
+				   }
 				});
 			});
 			if (stolenProducts.count() == 0) {
@@ -412,6 +409,33 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		}
 		return null;
 	}
+	
+	  @Override
+	   public PalletList validateGetStolenPallets(Car car) throws RemoteException
+	   {
+	     try {
+	         
+	         PartList stolenParts = cacheMemory.getCarCache().
+	               getCache().get(car.getChassisNumber()).getPartList();
+	         
+	         PalletList stolenPallets = new PalletList();
+	         
+	         this.cacheMemory.getPalletCache().getCache().forEach((x, y) -> {
+	            y.getPartList().getList().forEach((z) -> {
+	               if(stolenParts.contains(z)) {
+	                  stolenPallets.addPallet(y);
+	               }
+	            });
+	         });
+	         if (stolenPallets.count() == 0) {
+	            return null;
+	         }
+	         return stolenPallets;
+	      } catch (Exception e) {
+	         e.printStackTrace();
+	      }
+	      return null;
+	   }
 
 	@Override
 	public Car validateGetStolenCar(String chassisNumber) throws RemoteException {
