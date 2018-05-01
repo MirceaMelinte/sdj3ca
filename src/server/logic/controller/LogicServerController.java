@@ -48,9 +48,42 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			this.cacheMemory = new Cache();
 			this.synchronizeServerCaches();
 
+			test();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void test() {
+		System.out.println(this.cacheMemory.getCarCache());
+		System.out.println(this.cacheMemory.getPalletCache());
+		System.out.println(this.cacheMemory.getPartCache());
+		System.out.println(this.cacheMemory.getProductCache());
+
+		PartList pl = new PartList();
+		Part p = new Part();
+		p.setPartId(11110009);
+		pl.addPart(p);
+		Part p2 = new Part();
+		p2.setPartId(11110002);
+		pl.addPart(p2);
+
+		System.out.println(pl);
+		Product pd = new Product();
+		pd.setName("asdasd");
+		pd.setType("ad");
+
+		try {
+			System.out.println(validateRegisterProduct(pd, pl));
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println(this.cacheMemory.getCarCache());
+		System.out.println(this.cacheMemory.getPalletCache());
+		System.out.println(this.cacheMemory.getPartCache());
+		System.out.println(this.cacheMemory.getProductCache());
 	}
 
 	// Network Methods
@@ -154,7 +187,6 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		this.cacheMemory.getCarCache().getCache().replace(car.getChassisNumber(), car); // Do I need this line?
 
-		
 		return "[SUCCESS] The part was registered. ID: " + part.getPartId();
 
 	}
@@ -260,7 +292,9 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		return "[SUCCESS] The pallet finishing was registered. ";
 
 	}
-	
+
+	// TODO not yet used in client
+
 	@Override
 	public Pallet findAvailablePallet(Part part) throws RemoteException {
 		if (!Validation.validate(part.getPartId(), Validation.PART_ID))
@@ -268,14 +302,14 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		if (!this.cacheMemory.getPartCache().contains(part.getPartId()))
 			return null;
-		
+
 		for (Pallet pallet : this.cacheMemory.getPalletCache().getCache().values()) {
 			if (pallet.getPartType().equals(part.getType())
 					&& (pallet.getWeight() + part.getWeight()) <= pallet.getMaxWeight()) {
 				return pallet;
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -323,36 +357,74 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 	// THIRD CLIENT
 
-	// TODO those are not yet refactored
-
+	/*
+	 * partList has only a list of parts that contain only theit Id
+	 */
 	@Override
 	public String validateRegisterProduct(Product product, PartList partList) throws RemoteException {
+
+		// Validate
+
+		if (product == null || partList == null)
+			return "[VALIDATION ERROR] Null objects.";
+
+		if (product.getName() == null || product.getName().isEmpty())
+			return "[VALIDATION ERROR] Product name is not set.";
+
+		if (product.getType() == null || product.getType().isEmpty())
+			return "[VALIDATION ERROR] Product type is not set.";
+
+		for (Part part : partList.getList()) {
+			if (!Validation.validate(part.getPartId(), Validation.PART_ID))
+				return "[VALIDATION ERROR] Invalid part Id.";
+			if (!this.cacheMemory.getPartCache().contains(part.getPartId()))
+				return "[VALIDATION ERROR] Part does not exist.";
+
+		}
+
+		PartList fullPartList = new PartList(); // contains parts with more information than just part id
+		for (Part part : partList.getList()) {
+			fullPartList.addPart(this.cacheMemory.getPartCache().getCache().get(part.getPartId()));
+		}
+
+		// TODO check if part is already a part of a product
+
+		// is the part on a pallet that is finished?
+		for (Part part : fullPartList.getList()) {
+			if (!this.cacheMemory.getPalletCache().getPallet(part.getPalletId()).getState().equals(Pallet.FINISHED))
+				return "[VALIDATION ERROR] Part is not on finished pallet.";
+		}
+
+		// Update Database
+
 		try {
-			partList.getList().forEach(x -> {
-				try {
-					dataServer.executeUpdatePartProduct(x, product);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			});
+			product = dataServer.executeRegisterProduct(product);
 
-			Product registeredProduct = dataServer.executeRegisterProduct(product);
-			if (registeredProduct != null) {
-				this.cacheMemory.getProductCache().addProduct(registeredProduct);
+			if (product == null)
+				return "[FAIL] 1";
 
-				partList.getList().forEach(x -> {
-					Part currentPart = this.cacheMemory.getPartCache().getCache().get(x.getPartId());
-					this.cacheMemory.getPartCache().getCache().replace(x.getPartId(), currentPart);
-				});
-
-				return "[SUCCESS] The product was registered. ID: " + registeredProduct.getProductId();
+			for (int i = 0; i < fullPartList.getList().size(); i++) {
+				fullPartList.getList().set(i,
+						dataServer.executeUpdatePartProduct(fullPartList.getList().get(i), product));
+				if (fullPartList.getList().get(i) == null)
+					return "[FAIL] 2";
 			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return "[APPLICATION FAILURE] The product registration has failed. ";
-	}
 
+		// Update Cache
+
+		this.cacheMemory.getProductCache().addProduct(product);
+
+		fullPartList.getList().forEach(part -> {
+			this.cacheMemory.getPartCache().getCache().replace(part.getPartId(), part);
+		});
+
+		return "[SUCCESS] The product was registered. ID: " + product.getProductId();
+
+	}
 
 	// FOURTH CLIENT
 

@@ -50,8 +50,8 @@ public class DataServer_LOCAL_TEST extends UnicastRemoteObject implements IDataS
 
 	@Override
 	public Product executeRegisterProduct(Product product) throws RemoteException, SQLException {
-
-		return null;
+		product.setProductId(90901111);
+		return product;
 	}
 
 	@Override
@@ -64,8 +64,9 @@ public class DataServer_LOCAL_TEST extends UnicastRemoteObject implements IDataS
 
 	@Override
 	public Part executeUpdatePartProduct(Part part, Product product) throws RemoteException, SQLException {
-		
-		return null;
+		part.setProductId(product.getProductId());
+		System.out.println(product.getProductId());
+		return part;
 	}
 
 
@@ -76,11 +77,13 @@ public class DataServer_LOCAL_TEST extends UnicastRemoteObject implements IDataS
 		Part p1 =  new Part(11110000, "wheel", 3, "1234567c");
 		p1.setPalletId(2222);
 		Part p2 =  new Part(11110001, "wheel", 3, "1234567f");
-		p2.setPalletId(2222);
+		p2.setPalletId(4444);
+		Part p3 =  new Part(11110002, "wheel", 3, "1234567f");
+		p3.setPalletId(4444);
 		
 		pc.addPart(p1);
 		pc.addPart(p2);
-		
+		pc.addPart(p3);
 		return pc;
 
 	}
@@ -112,8 +115,8 @@ public class DataServer_LOCAL_TEST extends UnicastRemoteObject implements IDataS
 		p1.setPartType("wheel");
 		Pallet p2 = new Pallet(3333, 1000, Pallet.AVAILABLE);
 		p2.setPartType("hood");
-		Pallet p3 = new Pallet(4444, 1000, Pallet.AVAILABLE);
-		p3.setPartType("-1");
+		Pallet p3 = new Pallet(4444, 1000, Pallet.FINISHED);
+		p3.setPartType("wheel");
 		
 		pc.addPallet(p1);
 		pc.addPallet(p2);
@@ -124,8 +127,8 @@ public class DataServer_LOCAL_TEST extends UnicastRemoteObject implements IDataS
 
 	@Override
 	public ProductCache executeGetProductCache() throws RemoteException, SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		ProductCache pc = new ProductCache();
+		return pc;
 	}
 	
 	
