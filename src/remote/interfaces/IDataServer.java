@@ -7,17 +7,19 @@ import java.sql.SQLException;
 import model.*;
 
 public interface IDataServer extends Remote {
-	PalletList getAvailablePallets(Part part) throws RemoteException;
+	Car executeGetCarByChassisNumber(String chassisNumber) throws RemoteException;
 	
-	CarList getAvailableCars() throws RemoteException;
+	PalletList executeGetAvailablePallets(Part part) throws RemoteException;
 	
-	Pallet getPalletById(int palletId) throws RemoteException;
+	CarList executeGetAvailableCars() throws RemoteException;
 	
-	Part getPartById(int partId) throws RemoteException;
+	Pallet executeGetPalletById(int palletId) throws RemoteException;
 	
-	Car getCarByPart(int partId) throws RemoteException;
+	Part executeGetPartById(int partId) throws RemoteException;
 	
-	PartList getPartsByProduct(int productId) throws RemoteException;
+	Car executeGetCarByPart(int partId) throws RemoteException;
+	
+	PartList executeGetPartsByProduct(int productId) throws RemoteException;
 	
 	Car executeRegisterCar(Car car) throws RemoteException, SQLException;
 

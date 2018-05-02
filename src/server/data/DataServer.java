@@ -34,7 +34,77 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 	
 	@Override
-	public PalletList getAvailablePallets(Part part) throws RemoteException {
+	public Car executeGetCarByChassisNumber(String chassisNumber) throws RemoteException {
+		try {
+			PreparedStatement selectStatement = DataServer.connection.prepareStatement(
+					"SELECT c.model AS \"carModel\", c.manufacturer AS \"carManufacturer\", c.year AS \"carYear\", "
+					        + "c.weight as \"carWeight\", c.state AS \"carState\" "
+					    + "FROM car c WHERE c.chassisNumber = ?");
+			selectStatement.setString(1, chassisNumber);
+			
+			ResultSet resultSet = selectStatement.executeQuery();
+			Car car = new Car();
+
+			while (resultSet.next()) {
+				car.setChassisNumber(chassisNumber);
+				car.setModel(resultSet.getString("carModel"));
+				car.setManufacturer(resultSet.getString("carManufacturer"));
+				car.setYear(resultSet.getInt("carYear"));
+				car.setWeight(resultSet.getDouble("carWeight"));
+				car.setState(resultSet.getString("carState"));
+				
+				PreparedStatement carIdSelectStatement = DataServer.connection.prepareStatement(
+						"SELECT id FROM car WHERE chassisNumber = ?");
+				carIdSelectStatement.setString(1, chassisNumber);
+				ResultSet carIdResultSet = carIdSelectStatement.executeQuery();
+				int carId = -1;
+				
+				while (carIdResultSet.next()) {
+					carId = carIdResultSet.getInt("id");
+				}
+				
+				carIdResultSet.close();
+				carIdSelectStatement.close();
+				
+				PartList carPartList = new PartList();
+				
+				PreparedStatement partsSelectStatement = DataServer.connection.prepareStatement(
+						"SELECT p.id AS \"partId\", p.type AS \"partType\", p.weight AS \"partWeight\" "
+					    + "FROM part p WHERE p.carId = ?");
+				
+				partsSelectStatement.setInt(1, carId);
+				ResultSet partsResultSet = partsSelectStatement.executeQuery();
+
+				while (partsResultSet.next()) {
+					Part newPart = new Part();
+					newPart.setPartId(partsResultSet.getInt("partId"));
+					newPart.setType(partsResultSet.getString("partType"));
+					newPart.setWeight(partsResultSet.getDouble("partWeight"));
+					
+					carPartList.addPart(newPart);
+				}
+
+				partsSelectStatement.close();
+				partsResultSet.close();
+				
+				car.setPartList(carPartList);
+			}
+
+			selectStatement.close();
+			resultSet.close();
+			System.out.println("[SUCCESS] Successful retrieval of car " + car.getChassisNumber());
+
+			return car;
+		} catch (Exception e) {
+			System.out.println("[FAIL] Failed execution of car retrieval. ");
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	@Override
+	public PalletList executeGetAvailablePallets(Part part) throws RemoteException {
 		try {
 			PreparedStatement selectStatement = DataServer.connection
 					.prepareStatement("SELECT pa.id, pa.partType, pa.weight, pa.maxWeight, pa.state "
@@ -92,7 +162,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 	
 	@Override
-	public CarList getAvailableCars() throws RemoteException {
+	public CarList executeGetAvailableCars() throws RemoteException {
 		try {
 			PreparedStatement selectStatement = DataServer.connection.prepareStatement(
 					"SELECT c.model AS \"carModel\", c.manufacturer AS \"carManufacturer\", c.year AS \"carYear\", "
@@ -127,7 +197,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 	
 	@Override
-	public Pallet getPalletById(int palletId) throws RemoteException {
+	public Pallet executeGetPalletById(int palletId) throws RemoteException {
 		try {
 			PreparedStatement selectStatement = DataServer.connection
 					.prepareStatement("SELECT partType, weight, maxWeight, state FROM pallet");
@@ -180,7 +250,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 	
 	@Override
-	public Part getPartById(int partId) throws RemoteException {
+	public Part executeGetPartById(int partId) throws RemoteException {
 		try {
 			PreparedStatement selectStatement = DataServer.connection.prepareStatement(
 					"SELECT p.type AS \"partType\", p.weight AS \"partWeight\" "
@@ -210,7 +280,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 	
 	@Override
-	public Car getCarByPart(int partId) throws RemoteException {
+	public Car executeGetCarByPart(int partId) throws RemoteException {
 		try {
 			PreparedStatement selectStatement = DataServer.connection.prepareStatement(
 					"SELECT c.model AS \"carModel\", c.manufacturer AS \"carManufacturer\", c.year AS \"carYear\", "
@@ -244,7 +314,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 	
 	@Override
-	public PartList getPartsByProduct(int productId) throws RemoteException {
+	public PartList executeGetPartsByProduct(int productId) throws RemoteException {
 		try {
 			PreparedStatement selectStatement = DataServer.connection.prepareStatement(
 					"SELECT p.id AS \"partId\", p.type AS \"partType\", p.weight AS \"partWeight\""

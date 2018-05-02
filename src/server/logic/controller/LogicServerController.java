@@ -91,7 +91,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	@Override
 	public CarList getAvailableCars() throws RemoteException {
 
-		CarList carList = this.dataServer.getAvailableCars();
+		CarList carList = this.dataServer.executeGetAvailableCars();
 		
 		if (carList != null) {
 			carList.getList().forEach(x -> {
@@ -114,7 +114,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		}
 		
 		if (car == null) {
-			this.dataServer.getCarByPart(part.getPartId());
+			this.dataServer.executeGetCarByPart(part.getPartId());
 		}
 		
 		// Validate
@@ -173,11 +173,11 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			return "[VALIDATION ERROR] Invalid palled id.";
 
 		Part part = !(this.cacheMemory.getPartCache().contains(partId))
-					? this.dataServer.getPartById(partId)
+					? this.dataServer.executeGetPartById(partId)
 					: this.cacheMemory.getPartCache().getPart(partId);
 		
 		Pallet pallet = !(this.cacheMemory.getPalletCache().contains(palletId))
-						? this.dataServer.getPalletById(palletId)
+						? this.dataServer.executeGetPalletById(palletId)
 						: this.cacheMemory.getPalletCache().getPallet(palletId);
 
 		double availableWeightCapacity = pallet.getMaxWeight() - pallet.getWeight();
@@ -269,12 +269,22 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		if (!this.cacheMemory.getPartCache().contains(part.getPartId()))
 			return null;
-		
-		// TODO: Retrieve from DB as well. 
-		
+	
 		for (Pallet pallet : this.cacheMemory.getPalletCache().getCache().values()) {
 			if (pallet.getPartType().equals(part.getType())
 					&& (pallet.getWeight() + part.getWeight()) <= pallet.getMaxWeight()) {
+				return pallet;
+			}
+		}
+		
+		PalletList pallets = this.dataServer.executeGetAvailablePallets(part);
+		
+		pallets.getList().forEach(x -> {
+			this.cacheMemory.getPalletCache().addPallet(x);
+		});
+		
+		for (Pallet pallet : this.cacheMemory.getPalletCache().getCache().values()) {
+			if (pallet.getState().equals("Available")) {
 				return pallet;
 			}
 		}
@@ -288,14 +298,15 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		// Validation
 
 		if (!Validation.validate(chassisNumber, Validation.CHASSIS_NUMBER))
-			return "[VALIDATION ERROR] Invalid car chassis number. ";
-
-		if (!this.cacheMemory.getCarCache().contains(chassisNumber)) {
-			view.show(cacheMemory.getCarCache().toString());
-			return "[VALIDATION ERROR] Car does not exist";
-		}
+			return "[VALIDATION ERROR] Invalid car chassis number. ";		
 
 		Car car = this.cacheMemory.getCarCache().getCar(chassisNumber);
+		
+		if (car == null)
+			car = this.dataServer.executeGetCarByChassisNumber(chassisNumber);
+		
+		if (car == null)
+			return "[FAIL] Error retrieving car. ";		
 
 		if (car.getState().equals(Car.FINISHED))
 			return "[FAIL] Car is already finished";
@@ -306,7 +317,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			car = dataServer.executeSetCarState(car, Car.FINISHED);
 
 			if (car == null)
-				return "[FAIL]";
+				return "[FAIL] Failed persisting the new car state. ";
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -314,11 +325,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		// Update Cache
 
-		this.cacheMemory.getCarCache().getCache().replace(car.getChassisNumber(), car);
-
-		// TODO problem - car is also many times referenced in parts cache,
-		// those should be updated as well ... unless we dont use Car as field in Part
-		// ...
+		this.cacheMemory.getCarCache().addCar(car);
 
 		return "[SUCCESS] The car was set as finished.";
 
@@ -346,17 +353,12 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		for (Part part : partList.getList()) {
 			if (!Validation.validate(part.getPartId(), Validation.PART_ID))
 				return "[VALIDATION ERROR] Invalid part Id.";
-			if (!this.cacheMemory.getPartCache().contains(part.getPartId()))
-				return "[VALIDATION ERROR] Part does not exist.";
-
 		}
 
-		PartList fullPartList = this.dataServer.getPartsByProduct(product.getProductId());
+		PartList fullPartList = this.dataServer.executeGetPartsByProduct(product.getProductId());
 		fullPartList.getList().forEach(x -> {
 			this.cacheMemory.getPartCache().addPart(x);
 		});
-
-		// TODO check if part is already a part of a product
 
 		// Update Database
 
@@ -364,7 +366,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			product = dataServer.executeRegisterProduct(product);
 			
 			if (product == null)
-				return "[FAIL] Fail in the database query. ";
+				return "[FAIL] Failed persisting the product. ";
 
 		} catch (SQLException e) {
 			e.printStackTrace();
