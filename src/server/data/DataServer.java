@@ -756,8 +756,72 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
    public ProductList executeGetStolenProducts(Car car) throws RemoteException,
          SQLException
    {
-   // TODO Auto-generated method stub
-      return null;
+      try
+      {
+         System.out.println("executeGetStolenProducts() method called from data server");
+      PreparedStatement partStatement = 
+            DataServer.connection.prepareStatement("SELECT * FROM Part "
+                  + "WHERE carId = (SELECT carId FROM Car WHERE chassisNumber = ?)");
+      
+      PreparedStatement productStatement = 
+            DataServer.connection.prepareStatement("SELECT * FROM Product "
+                  + "WHERE id in (SELECT productId FROM Part "
+                  + "WHERE carId = (SELECT carId FROM Car WHERE chassisNumber = ?))");
+       
+      partStatement.setString(1, car.getChassisNumber());
+      productStatement.setString(1, car.getChassisNumber());
+      ResultSet partResultSet = partStatement.executeQuery();
+      ResultSet productResultSet = productStatement.executeQuery();
+      
+      ProductList productList = new ProductList();
+      
+      while(productResultSet.next())
+      {
+         Product product = new Product();
+         product.setProductId(productResultSet.getInt("id"));
+         product.setName(productResultSet.getString("name"));
+         product.setType(productResultSet.getString("type"));
+         productList.addProduct(product);
+      }
+      
+      while(partResultSet.next())
+      {
+         Part part = new Part();
+         part.setPartId(partResultSet.getInt("id"));
+         part.setType(partResultSet.getString("type"));
+         part.setWeight(partResultSet.getDouble("weight"));
+         productList.getList().forEach((x) -> {
+            try
+            {
+               if(x.getProductId() == partResultSet.getInt("productId"))
+               {
+                  x.getPartList().addPart(part);
+               }
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+            }
+         });
+      }
+       
+      System.out.println(productList.toString());
+
+      partStatement.close();
+      partResultSet.close();
+      productStatement.close();
+      productResultSet.close();
+      
+      System.out.println("[SUCCESS] Product List Retrieved");
+      
+      return productList;
+      
+   }
+   catch (SQLException e) {
+      System.out.println("[FAIL] Product List Retrieval Failed");
+      e.printStackTrace();
+   }
+   return null;
    }
 
    @Override
@@ -810,6 +874,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
          
          car.setPartList(partList);
 
+         partStatement.close();
+         partResultSet.close();
          carStatement.close();
          carResultSet.close();
          

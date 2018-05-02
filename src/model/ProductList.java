@@ -62,6 +62,18 @@ public class ProductList implements Serializable
       return products.size();
    }
    
+   public int countPartsInProducts()
+   {
+      int count = 0;
+      
+      for (Product product : products)
+      {
+         count += product.getPartList().count();
+      }
+      
+      return count;
+   }
+   
    public boolean contains(Product product)
    {
       return products.contains(product);

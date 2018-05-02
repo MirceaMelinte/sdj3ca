@@ -412,23 +412,34 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	@Override
 	public ProductList validateGetStolenProducts(Car car) throws RemoteException {
 		try {
-		   
-		   PartList stolenParts = cacheMemory.getCarCache().
-               getCache().get(car.getChassisNumber()).getPartList();
-		   
-		   ProductList stolenProducts = new ProductList();
-		   
-			this.cacheMemory.getProductCache().getCache().forEach((x, y) -> {
-				y.getPartList().getList().forEach((z) -> {
-				   if(stolenParts.contains(z)) {
-		               stolenProducts.addProduct(y);
-				   }
-				});
-			});
-			if (stolenProducts.count() == 0) {
-				return null;
-			}
-			return stolenProducts;
+		   Car stolenCar = cacheMemory.getCarCache().
+               getCache().get(car.getChassisNumber()); // Check the cache memory if a car with given chassis number exists
+         
+         if(stolenCar != null) // If the car is in the cache memory
+         {
+            final ProductList stolenProductsFromCache = new ProductList(); // Create empty final list of stolen products
+            PartList stolenParts = stolenCar.getPartList(); // Get all the parts from the stolen car
+            cacheMemory.getProductCache().getCache().forEach((x, y) -> { // For each entry in product cache
+               y.getPartList().getList().forEach((z) -> { // For each entry in part list of the product
+                  if(stolenParts.contains(z)) { // Find matching parts and products
+                     stolenProductsFromCache.addProduct(y); // Add stolen products into the list
+                  }
+               });
+            });
+            if (stolenParts.count() != stolenProductsFromCache.countPartsInProducts())  // If a number of stolen parts from car doesn't match number of parts in stolen products
+            { 
+               ProductList stolenProductsFromDataServer = dataServer.executeGetStolenProducts(car); // Retrieve stolen parts list from the data server
+               stolenProductsFromCache.getList().forEach((x) -> {
+                  if(!cacheMemory.getProductCache().getCache().containsKey(x.getProductId())) // For each entry in product cache chech if the productId from data server is already there
+                  {
+                     cacheMemory.getProductCache().getCache().put(x.getProductId(), x); // If productId is not in product cache, add new product
+                  }
+               });
+               return stolenProductsFromDataServer;
+            }
+            return stolenProductsFromCache;
+         }
+         return null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
