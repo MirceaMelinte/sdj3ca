@@ -4,7 +4,6 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 import model.*;
-import model.cache.*;
 
 public interface ILogicServer extends Remote {
 

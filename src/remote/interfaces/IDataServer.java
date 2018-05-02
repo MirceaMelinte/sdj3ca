@@ -7,6 +7,10 @@ import java.sql.SQLException;
 import model.*;
 
 public interface IDataServer extends Remote {
+	PalletList getAvailablePallets(Part part) throws RemoteException;
+	
+	CarList getAvailableCars() throws RemoteException;
+	
 	Pallet getPalletById(int palletId) throws RemoteException;
 	
 	Part getPartById(int partId) throws RemoteException;

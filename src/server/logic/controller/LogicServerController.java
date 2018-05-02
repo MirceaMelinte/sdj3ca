@@ -1,6 +1,5 @@
 package server.logic.controller;
 
-import java.io.Serializable;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -89,17 +88,16 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 	// SECOND CLIENT
 
-	/*
-	 * Also returns in progress cars...
-	 */
 	@Override
 	public CarList getAvailableCars() throws RemoteException {
 
-		CarList carList = new CarList();
-
-		for (Car car : this.cacheMemory.getCarCache().getCache().values())
-			if (!car.getState().equals(Car.FINISHED))
-				carList.addCar(car);
+		CarList carList = this.dataServer.getAvailableCars();
+		
+		if (carList != null) {
+			carList.getList().forEach(x -> {
+				this.cacheMemory.getCarCache().addCar(x);
+			});
+		}
 
 		return carList;
 
@@ -107,8 +105,17 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 	@Override
 	public String validateRegisterPart(Part part) throws RemoteException {
+		Car car = null;
 		
-		Car car = this.dataServer.getCarByPart(part.getPartId());
+		for (Car cachedCar : this.cacheMemory.getCarCache().getCache().values()) {
+			if (cachedCar.getPartList().contains(part)) {
+				car = cachedCar;
+			}
+		}
+		
+		if (car == null) {
+			this.dataServer.getCarByPart(part.getPartId());
+		}
 		
 		// Validate
 
@@ -118,9 +125,8 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		if (part.getWeight() <= 0)
 			return "[VALIDATION ERROR] Invalid part weight.";
 		
-		if (car == null) {
+		if (car == null)
 			return "[VALIDATION ERROR] Car could not be retrieved. ";
-		}
 		
 		if (car.getChassisNumber() == null || car.getChassisNumber().isEmpty())
 			return "[VALIDATION ERROR] There was no car set for this part.";
@@ -166,12 +172,12 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		if (!Validation.validate(palletId, Validation.PALLET_ID))
 			return "[VALIDATION ERROR] Invalid palled id.";
 
-		Part part = !(this.cacheMemory.getPartCache().contains(palletId))
+		Part part = !(this.cacheMemory.getPartCache().contains(partId))
 					? this.dataServer.getPartById(partId)
 					: this.cacheMemory.getPartCache().getPart(partId);
 		
 		Pallet pallet = !(this.cacheMemory.getPalletCache().contains(palletId))
-						? this.dataServer.getPalletById(partId)
+						? this.dataServer.getPalletById(palletId)
 						: this.cacheMemory.getPalletCache().getPallet(palletId);
 
 		double availableWeightCapacity = pallet.getMaxWeight() - pallet.getWeight();
@@ -240,7 +246,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			pallet = dataServer.executeSetPalletState(pallet, Pallet.FINISHED);
 
 			if (pallet == null)
-				return "[FAIL]";
+				return "[FAIL] Could not persist the setting of the pallet state. ";
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -248,7 +254,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		// Update Cache
 
-		this.cacheMemory.getPalletCache().getCache().replace(pallet.getPalletId(), pallet);
+		this.cacheMemory.getPalletCache().addPallet(pallet);
 
 		return "[SUCCESS] The pallet finishing was registered. ";
 
@@ -263,7 +269,9 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		if (!this.cacheMemory.getPartCache().contains(part.getPartId()))
 			return null;
-
+		
+		// TODO: Retrieve from DB as well. 
+		
 		for (Pallet pallet : this.cacheMemory.getPalletCache().getCache().values()) {
 			if (pallet.getPartType().equals(part.getType())
 					&& (pallet.getWeight() + part.getWeight()) <= pallet.getMaxWeight()) {
