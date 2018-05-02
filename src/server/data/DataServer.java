@@ -716,7 +716,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 
    @Override
-   public PartList executeGetStolenParts(Car car) throws RemoteException,
+   public PartList executeGetStolenParts(String chassisNumber) throws RemoteException,
          SQLException
    {
       try 
@@ -725,7 +725,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
                DataServer.connection.prepareStatement("SELECT * FROM Part "
                                              + "WHERE carId = (SELECT carId FROM Car WHERE chassisNumber = ?)");
          
-         statement.setString(1, car.getChassisNumber());
+         statement.setString(1, chassisNumber);
          ResultSet resultSet = statement.executeQuery();
          PartList partList = new PartList();
          
@@ -753,7 +753,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
    }
 
    @Override
-   public ProductList executeGetStolenProducts(Car car) throws RemoteException,
+   public ProductList executeGetStolenProducts(String chassisNumber) throws RemoteException,
          SQLException
    {
       try
@@ -768,8 +768,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
                   + "WHERE id in (SELECT productId FROM Part "
                   + "WHERE carId = (SELECT carId FROM Car WHERE chassisNumber = ?))");
        
-      partStatement.setString(1, car.getChassisNumber());
-      productStatement.setString(1, car.getChassisNumber());
+      partStatement.setString(1, chassisNumber);
+      productStatement.setString(1, chassisNumber);
       ResultSet partResultSet = partStatement.executeQuery();
       ResultSet productResultSet = productStatement.executeQuery();
       
@@ -822,14 +822,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
       e.printStackTrace();
    }
    return null;
-   }
-
-   @Override
-   public PalletList executeGetStolenPallets(Car car) throws RemoteException,
-         SQLException
-   {
-      // TODO Auto-generated method stub
-      return null;
    }
 
    @Override

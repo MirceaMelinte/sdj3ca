@@ -383,10 +383,10 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	// FOURTH CLIENT
 
 	@Override
-	public PartList validateGetStolenParts(Car car) throws RemoteException {
+	public PartList validateGetStolenParts(String chassisNumber) throws RemoteException {
 	   try {        
          Car stolenCar = cacheMemory.getCarCache().
-               getCache().get(car.getChassisNumber());
+               getCache().get(chassisNumber);
          
          if(stolenCar != null)
          {
@@ -394,7 +394,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
          }
          else
          {
-            PartList partList = dataServer.executeGetStolenParts(car);
+            PartList partList = dataServer.executeGetStolenParts(chassisNumber);
             if(partList != null)
             {
                partList.getList().forEach((x) -> 
@@ -410,68 +410,34 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	}
 
 	@Override
-	public ProductList validateGetStolenProducts(Car car) throws RemoteException {
+	public ProductList validateGetStolenProducts(String chassisNumber) throws RemoteException {
 		try {
 		   Car stolenCar = cacheMemory.getCarCache().
-               getCache().get(car.getChassisNumber()); // Check the cache memory if a car with given chassis number exists
+               getCache().get(chassisNumber);                              // Check the cache memory if a car with given chassis number exists
          
-         if(stolenCar != null) // If the car is in the cache memory
+         if(stolenCar != null)                                             // If the car is in the cache memory
          {
             final ProductList stolenProductsFromCache = new ProductList(); // Create empty final list of stolen products
-            PartList stolenParts = stolenCar.getPartList(); // Get all the parts from the stolen car
-            cacheMemory.getProductCache().getCache().forEach((x, y) -> { // For each entry in product cache
-               y.getPartList().getList().forEach((z) -> { // For each entry in part list of the product
-                  if(stolenParts.contains(z)) { // Find matching parts and products
-                     stolenProductsFromCache.addProduct(y); // Add stolen products into the list
+            PartList stolenParts = stolenCar.getPartList();                // Get all the parts from the stolen car
+            cacheMemory.getProductCache().getCache().forEach((x, y) -> {   // For each entry in product cache
+               y.getPartList().getList().forEach((z) -> {                  // For each entry in part list of the product
+                  if(stolenParts.contains(z)) {                            // Find matching parts and products
+                     stolenProductsFromCache.addProduct(y);                // Add stolen products into the list
                   }
                });
             });
-            if (stolenParts.count() != stolenProductsFromCache.countPartsInProducts())  // If a number of stolen parts from car doesn't match number of parts in stolen products
+            if (stolenParts.count() > stolenProductsFromCache.countPartsInProducts())  // If a number of stolen parts from car doesn't match number of parts in stolen products
             { 
-               ProductList stolenProductsFromDataServer = dataServer.executeGetStolenProducts(car); // Retrieve stolen parts list from the data server
-               stolenProductsFromCache.getList().forEach((x) -> {
-                  if(!cacheMemory.getProductCache().getCache().containsKey(x.getProductId())) // For each entry in product cache chech if the productId from data server is already there
-                  {
-                     cacheMemory.getProductCache().getCache().put(x.getProductId(), x); // If productId is not in product cache, add new product
-                  }
-               });
-               return stolenProductsFromDataServer;
+               return getProductsAndUpdateCache(chassisNumber);
             }
             return stolenProductsFromCache;
          }
-         return null;
+         return getProductsAndUpdateCache(chassisNumber);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
-	  @Override
-	   public PalletList validateGetStolenPallets(Car car) throws RemoteException
-	   {
-	     try {
-	         
-	         PartList stolenParts = cacheMemory.getCarCache().
-	               getCache().get(car.getChassisNumber()).getPartList();
-	         
-	         PalletList stolenPallets = new PalletList();
-	         
-	         this.cacheMemory.getPalletCache().getCache().forEach((x, y) -> {
-	            y.getPartList().getList().forEach((z) -> {
-	               if(stolenParts.contains(z)) {
-	                  stolenPallets.addPallet(y);
-	               }
-	            });
-	         });
-	         if (stolenPallets.count() == 0) {
-	            return null;
-	         }
-	         return stolenPallets;
-	      } catch (Exception e) {
-	         e.printStackTrace();
-	      }
-	      return null;
-	   }
 
 	@Override
 	public Car validateGetStolenCar(String chassisNumber) throws RemoteException {
@@ -493,5 +459,18 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		}
 
 		return null;
+	}
+	
+	private ProductList getProductsAndUpdateCache(String chassisNumber) throws RemoteException, SQLException
+	{
+	   ProductList stolenProductsFromDataServer = dataServer.executeGetStolenProducts(chassisNumber); // Retrieve stolen parts list from the data server
+	   stolenProductsFromDataServer.getList().forEach((x) -> {
+         if(!cacheMemory.getProductCache().getCache().containsKey(x.getProductId()))       // For each entry in product cache check if the productId from data server is already there
+         {
+            cacheMemory.getProductCache().getCache().put(x.getProductId(), x);             // If productId is not in product cache, add new product
+         }
+      });
+	   
+	   return stolenProductsFromDataServer;
 	}
 }

@@ -30,20 +30,6 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="traceStolenPallets">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="traceStolenPalletsResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
             <xs:element name="traceStolenCar">
                 <xs:complexType>
                     <xs:sequence>
@@ -80,16 +66,8 @@
     <wsdl:part name="parameters" element="ns:traceStolenProducts">
     </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="traceStolenPalletsResponse">
-    <wsdl:part name="parameters" element="ns:traceStolenPalletsResponse">
-    </wsdl:part>
-  </wsdl:message>
   <wsdl:message name="traceStolenProductsResponse">
     <wsdl:part name="parameters" element="ns:traceStolenProductsResponse">
-    </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="traceStolenPalletsRequest">
-    <wsdl:part name="parameters" element="ns:traceStolenPallets">
     </wsdl:part>
   </wsdl:message>
   <wsdl:portType name="ICarServicePortType">
@@ -109,12 +87,6 @@
       <wsdl:input message="ns:traceStolenCarRequest" wsaw:Action="urn:traceStolenCar">
     </wsdl:input>
       <wsdl:output message="ns:traceStolenCarResponse" wsaw:Action="urn:traceStolenCarResponse">
-    </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="traceStolenPallets">
-      <wsdl:input message="ns:traceStolenPalletsRequest" wsaw:Action="urn:traceStolenPallets">
-    </wsdl:input>
-      <wsdl:output message="ns:traceStolenPalletsResponse" wsaw:Action="urn:traceStolenPalletsResponse">
     </wsdl:output>
     </wsdl:operation>
   </wsdl:portType>
@@ -140,15 +112,6 @@
     </wsdl:operation>
     <wsdl:operation name="traceStolenCar">
       <http:operation location="traceStolenCar"/>
-      <wsdl:input>
-        <mime:content part="parameters" type="application/xml"/>
-      </wsdl:input>
-      <wsdl:output>
-        <mime:content part="parameters" type="application/xml"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="traceStolenPallets">
-      <http:operation location="traceStolenPallets"/>
       <wsdl:input>
         <mime:content part="parameters" type="application/xml"/>
       </wsdl:input>
@@ -186,15 +149,6 @@
         <soap12:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="traceStolenPallets">
-      <soap12:operation soapAction="urn:traceStolenPallets" style="document"/>
-      <wsdl:input>
-        <soap12:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
   </wsdl:binding>
   <wsdl:binding name="ICarServiceSoap11Binding" type="ns:ICarServicePortType">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
@@ -218,15 +172,6 @@
     </wsdl:operation>
     <wsdl:operation name="traceStolenCar">
       <soap:operation soapAction="urn:traceStolenCar" style="document"/>
-      <wsdl:input>
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="traceStolenPallets">
-      <soap:operation soapAction="urn:traceStolenPallets" style="document"/>
       <wsdl:input>
         <soap:body use="literal"/>
       </wsdl:input>

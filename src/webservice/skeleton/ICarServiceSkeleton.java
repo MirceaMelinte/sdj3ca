@@ -6,38 +6,25 @@
  */
 package webservice.skeleton;
 
-import webservice.TraceStolenPallets;
-import webservice.TraceStolenPalletsResponse;
-
-/**
- *  ICarServiceSkeleton java skeleton for the axisService
- */
 public class ICarServiceSkeleton implements ICarServiceSkeletonInterface {
+
+   private SkeletonSingleton skeleton = SkeletonSingleton.getInstance();
    
-    private SkeletonSingleton skeleton = SkeletonSingleton.getInstance();
-    
-    public webservice.TraceStolenProductsResponse traceStolenProducts(
-        webservice.TraceStolenProducts traceStolenProducts0) {
-        
-       return skeleton.traceStolenProducts(traceStolenProducts0);
-    }
-
-    public webservice.TraceStolenPartsResponse traceStolenParts(
-        webservice.TraceStolenParts traceStolenParts2) {
-        
-       return skeleton.traceStolenParts(traceStolenParts2);
-    }
-
-    public webservice.TraceStolenCarResponse traceStolenCar(
-        webservice.TraceStolenCar traceStolenCar4) {
-       
-        return skeleton.traceStolenCar(traceStolenCar4);
-    }
-
-   @Override
-   public TraceStolenPalletsResponse traceStolenPallets(
-         TraceStolenPallets traceStolenPallets)
-   {
-        return skeleton.traceStolenPallets(traceStolenPallets);
+   public webservice.TraceStolenProductsResponse traceStolenProducts(
+         webservice.TraceStolenProducts traceStolenProducts0) {
+         
+      return skeleton.traceStolenProducts(traceStolenProducts0);
    }
+
+   public webservice.TraceStolenPartsResponse traceStolenParts(
+         webservice.TraceStolenParts traceStolenParts2) {
+      
+      return skeleton.traceStolenParts(traceStolenParts2);
+   }  
+
+   public webservice.TraceStolenCarResponse traceStolenCar(
+         webservice.TraceStolenCar traceStolenCar4) {
+      
+      return skeleton.traceStolenCar(traceStolenCar4);
+   }  
 }

@@ -30,20 +30,17 @@ public class WebServiceClient
    {
       stub = new ICarServiceStub( URL );  
       System.out.println("Enter car chassis number: ");
-      Car c = new Car();
       chassisNumber = in.nextLine();
-      c.setChassisNumber(chassisNumber);
-      String carXml = serCar.createXMLString(c, Car.class);
-      start(stub, carXml);
+      start(stub);
    } 
    
-   public static void start(ICarServiceStub stub, String carXml) throws RemoteException, JAXBException {
+   public static void start(ICarServiceStub stub) throws RemoteException, JAXBException {
       int menuSelection;
       do {
          menuSelection = menu();
          switch (menuSelection) {
          case 1:
-            traceStolenParts.setArgs0(carXml);
+            traceStolenParts.setArgs0(chassisNumber);
             ICarServiceStub.TraceStolenPartsResponse res = stub.traceStolenParts(traceStolenParts);
             String partListXml = res.get_return();
             if(partListXml != null)
@@ -63,7 +60,7 @@ public class WebServiceClient
             }
             break;
          case 2:
-            traceStolenProducts.setArgs0(carXml);
+            traceStolenProducts.setArgs0(chassisNumber);
             ICarServiceStub.TraceStolenProductsResponse res2 = stub.traceStolenProducts(traceStolenProducts);
             String productListXml = res2.get_return();
             if(productListXml != null)

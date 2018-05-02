@@ -30,20 +30,6 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="traceStolenPallets">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="traceStolenPalletsResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
             <xs:element name="traceStolenCar">
                 <xs:complexType>
                     <xs:sequence>
@@ -78,12 +64,6 @@
     <wsdl:message name="traceStolenCarResponse">
         <wsdl:part name="parameters" element="ns:traceStolenCarResponse"/>
     </wsdl:message>
-    <wsdl:message name="traceStolenPalletsRequest">
-        <wsdl:part name="parameters" element="ns:traceStolenPallets"/>
-    </wsdl:message>
-    <wsdl:message name="traceStolenPalletsResponse">
-        <wsdl:part name="parameters" element="ns:traceStolenPalletsResponse"/>
-    </wsdl:message>
     <wsdl:portType name="ICarServicePortType">
         <wsdl:operation name="traceStolenProducts">
             <wsdl:input message="ns:traceStolenProductsRequest" wsaw:Action="urn:traceStolenProducts"/>
@@ -96,10 +76,6 @@
         <wsdl:operation name="traceStolenCar">
             <wsdl:input message="ns:traceStolenCarRequest" wsaw:Action="urn:traceStolenCar"/>
             <wsdl:output message="ns:traceStolenCarResponse" wsaw:Action="urn:traceStolenCarResponse"/>
-        </wsdl:operation>
-        <wsdl:operation name="traceStolenPallets">
-            <wsdl:input message="ns:traceStolenPalletsRequest" wsaw:Action="urn:traceStolenPallets"/>
-            <wsdl:output message="ns:traceStolenPalletsResponse" wsaw:Action="urn:traceStolenPalletsResponse"/>
         </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="ICarServiceSoap11Binding" type="ns:ICarServicePortType">
@@ -124,15 +100,6 @@
         </wsdl:operation>
         <wsdl:operation name="traceStolenCar">
             <soap:operation soapAction="urn:traceStolenCar" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="traceStolenPallets">
-            <soap:operation soapAction="urn:traceStolenPallets" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -170,15 +137,6 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="traceStolenPallets">
-            <soap12:operation soapAction="urn:traceStolenPallets" style="document"/>
-            <wsdl:input>
-                <soap12:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="ICarServiceHttpBinding" type="ns:ICarServicePortType">
         <http:binding verb="POST"/>
@@ -202,15 +160,6 @@
         </wsdl:operation>
         <wsdl:operation name="traceStolenCar">
             <http:operation location="traceStolenCar"/>
-            <wsdl:input>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="traceStolenPallets">
-            <http:operation location="traceStolenPallets"/>
             <wsdl:input>
                 <mime:content type="application/xml" part="parameters"/>
             </wsdl:input>

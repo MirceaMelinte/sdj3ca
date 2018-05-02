@@ -39,63 +39,48 @@ public class ICarServiceMessageReceiverInOut extends org.apache.axis2.receivers.
                     ((methodName = org.apache.axis2.util.JavaUtils.xmlNameToJavaIdentifier(
                             op.getName().getLocalPart())) != null)) {
                 if ("traceStolenProducts".equals(methodName)) {
-                    webservice.TraceStolenProductsResponse traceStolenProductsResponse25 =
+                    webservice.TraceStolenProductsResponse traceStolenProductsResponse19 =
                         null;
                     webservice.TraceStolenProducts wrappedParam = (webservice.TraceStolenProducts) fromOM(msgContext.getEnvelope()
                                                                                                                     .getBody()
                                                                                                                     .getFirstElement(),
                             webservice.TraceStolenProducts.class);
 
-                    traceStolenProductsResponse25 = skel.traceStolenProducts(wrappedParam);
+                    traceStolenProductsResponse19 = skel.traceStolenProducts(wrappedParam);
 
                     envelope = toEnvelope(getSOAPFactory(msgContext),
-                            traceStolenProductsResponse25, false,
+                            traceStolenProductsResponse19, false,
                             new javax.xml.namespace.QName("http://webservice",
                                 "traceStolenProductsResponse"));
                 } else
                  if ("traceStolenParts".equals(methodName)) {
-                    webservice.TraceStolenPartsResponse traceStolenPartsResponse27 =
+                    webservice.TraceStolenPartsResponse traceStolenPartsResponse21 =
                         null;
                     webservice.TraceStolenParts wrappedParam = (webservice.TraceStolenParts) fromOM(msgContext.getEnvelope()
                                                                                                               .getBody()
                                                                                                               .getFirstElement(),
                             webservice.TraceStolenParts.class);
 
-                    traceStolenPartsResponse27 = skel.traceStolenParts(wrappedParam);
+                    traceStolenPartsResponse21 = skel.traceStolenParts(wrappedParam);
 
                     envelope = toEnvelope(getSOAPFactory(msgContext),
-                            traceStolenPartsResponse27, false,
+                            traceStolenPartsResponse21, false,
                             new javax.xml.namespace.QName("http://webservice",
                                 "traceStolenPartsResponse"));
                 } else
                  if ("traceStolenCar".equals(methodName)) {
-                    webservice.TraceStolenCarResponse traceStolenCarResponse29 = null;
+                    webservice.TraceStolenCarResponse traceStolenCarResponse23 = null;
                     webservice.TraceStolenCar wrappedParam = (webservice.TraceStolenCar) fromOM(msgContext.getEnvelope()
                                                                                                           .getBody()
                                                                                                           .getFirstElement(),
                             webservice.TraceStolenCar.class);
 
-                    traceStolenCarResponse29 = skel.traceStolenCar(wrappedParam);
+                    traceStolenCarResponse23 = skel.traceStolenCar(wrappedParam);
 
                     envelope = toEnvelope(getSOAPFactory(msgContext),
-                            traceStolenCarResponse29, false,
+                            traceStolenCarResponse23, false,
                             new javax.xml.namespace.QName("http://webservice",
                                 "traceStolenCarResponse"));
-                } else
-                 if ("traceStolenPallets".equals(methodName)) {
-                    webservice.TraceStolenPalletsResponse traceStolenPalletsResponse31 =
-                        null;
-                    webservice.TraceStolenPallets wrappedParam = (webservice.TraceStolenPallets) fromOM(msgContext.getEnvelope()
-                                                                                                                  .getBody()
-                                                                                                                  .getFirstElement(),
-                            webservice.TraceStolenPallets.class);
-
-                    traceStolenPalletsResponse31 = skel.traceStolenPallets(wrappedParam);
-
-                    envelope = toEnvelope(getSOAPFactory(msgContext),
-                            traceStolenPalletsResponse31, false,
-                            new javax.xml.namespace.QName("http://webservice",
-                                "traceStolenPalletsResponse"));
                 } else {
                     throw new java.lang.RuntimeException("method not found");
                 }
@@ -174,28 +159,6 @@ public class ICarServiceMessageReceiverInOut extends org.apache.axis2.receivers.
         }
     }
 
-    private org.apache.axiom.om.OMElement toOM(
-        webservice.TraceStolenPallets param, boolean optimizeContent)
-        throws org.apache.axis2.AxisFault {
-        try {
-            return param.getOMElement(webservice.TraceStolenPallets.MY_QNAME,
-                org.apache.axiom.om.OMAbstractFactory.getOMFactory());
-        } catch (org.apache.axis2.databinding.ADBException e) {
-            throw org.apache.axis2.AxisFault.makeFault(e);
-        }
-    }
-
-    private org.apache.axiom.om.OMElement toOM(
-        webservice.TraceStolenPalletsResponse param, boolean optimizeContent)
-        throws org.apache.axis2.AxisFault {
-        try {
-            return param.getOMElement(webservice.TraceStolenPalletsResponse.MY_QNAME,
-                org.apache.axiom.om.OMAbstractFactory.getOMFactory());
-        } catch (org.apache.axis2.databinding.ADBException e) {
-            throw org.apache.axis2.AxisFault.makeFault(e);
-        }
-    }
-
     private org.apache.axiom.soap.SOAPEnvelope toEnvelope(
         org.apache.axiom.soap.SOAPFactory factory,
         webservice.TraceStolenProductsResponse param, boolean optimizeContent,
@@ -268,30 +231,6 @@ public class ICarServiceMessageReceiverInOut extends org.apache.axis2.receivers.
         return wrappedElement;
     }
 
-    private org.apache.axiom.soap.SOAPEnvelope toEnvelope(
-        org.apache.axiom.soap.SOAPFactory factory,
-        webservice.TraceStolenPalletsResponse param, boolean optimizeContent,
-        javax.xml.namespace.QName elementQName)
-        throws org.apache.axis2.AxisFault {
-        try {
-            org.apache.axiom.soap.SOAPEnvelope emptyEnvelope = factory.getDefaultEnvelope();
-
-            emptyEnvelope.getBody()
-                         .addChild(param.getOMElement(
-                    webservice.TraceStolenPalletsResponse.MY_QNAME, factory));
-
-            return emptyEnvelope;
-        } catch (org.apache.axis2.databinding.ADBException e) {
-            throw org.apache.axis2.AxisFault.makeFault(e);
-        }
-    }
-
-    private webservice.TraceStolenPalletsResponse wraptraceStolenPallets() {
-        webservice.TraceStolenPalletsResponse wrappedElement = new webservice.TraceStolenPalletsResponse();
-
-        return wrappedElement;
-    }
-
     /**
      *  get the default envelope
      */
@@ -309,14 +248,6 @@ public class ICarServiceMessageReceiverInOut extends org.apache.axis2.receivers.
 
             if (webservice.TraceStolenCarResponse.class.equals(type)) {
                 return webservice.TraceStolenCarResponse.Factory.parse(param.getXMLStreamReaderWithoutCaching());
-            }
-
-            if (webservice.TraceStolenPallets.class.equals(type)) {
-                return webservice.TraceStolenPallets.Factory.parse(param.getXMLStreamReaderWithoutCaching());
-            }
-
-            if (webservice.TraceStolenPalletsResponse.class.equals(type)) {
-                return webservice.TraceStolenPalletsResponse.Factory.parse(param.getXMLStreamReaderWithoutCaching());
             }
 
             if (webservice.TraceStolenParts.class.equals(type)) {
