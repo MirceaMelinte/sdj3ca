@@ -48,48 +48,49 @@ public class Cache implements Serializable {
             if(!carCache.contains(car.getChassisNumber())) {
                carCache.addCar(car);
             }  
-            
+            break;
          case "REGISTER_PART":
             car = (Car) t.getLoad();
             part = car.getPartList().getPart(0);
             carCache.getCache().get(car.getChassisNumber()).
                getPartList().addPart(part);
             partCache.getCache().put(part.getPartId(), part);
-            
+            break;
          case "REGISTER_PRODUCT":
             product = (Product) t.getLoad();
             if(!productCache.contains(product.getProductId())) {
                productCache.addProduct(product);
             }
-            
+            break;
          case "REGISTER_PALLET":
             pallet = (Pallet) t.getLoad();
             if(!palletCache.contains(pallet.getPalletId())) {
                palletCache.addPallet(pallet);
             }
-         
+            break;
          case "UPDATE_PALLET_PART":
             pallet = (Pallet) t.getLoad();
             part = pallet.getPartList().getPart(0);
             palletCache.getCache().get(pallet.getPalletId()).getPartList().addPart(part);
-            
+            break;
          case "UPDATE_PRODUCT_PART":
             product = (Product) t.getLoad();
             part = product.getPartList().getPart(0);
             palletCache.getCache().get(product.getProductId()).getPartList().addPart(part);
-            
+            break;
          case "UPDATE_PALLET_WEIGHT":
             pallet = (Pallet) t.getLoad();
             double newWeight = pallet.getWeight();
             palletCache.getCache().get(pallet.getPalletId()).setWeight(newWeight);
-            
+            break;
          case "UPDATE_FINISH_PALLET":
             pallet = (Pallet) t.getLoad();
             palletCache.getCache().get(pallet.getPalletId()).setState(Pallet.FINISHED);
-            
+            break;
          case "UPDATE_FINISH_CAR":
             car = (Car) t.getLoad();
             carCache.getCache().get(car.getChassisNumber()).setState(Car.FINISHED);
+            break;
       }
 	}
 }
