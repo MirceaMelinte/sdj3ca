@@ -29,7 +29,7 @@ public interface ILogicServer extends Remote {
 
 	// client 3
 	
-	String validateRegisterProduct(Product product, PartList partList) throws RemoteException;
+	String validateRegisterProduct(Product product) throws RemoteException;
 
 	
 	// client 4

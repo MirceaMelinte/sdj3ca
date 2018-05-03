@@ -23,7 +23,7 @@ public interface IDataServer extends Remote {
 	Car executeRegisterCar(Car car) throws RemoteException, SQLException;
 	Pallet executeRegisterPallet(Pallet pallet) throws RemoteException, SQLException;
 	Product executeRegisterProduct(Product product) throws RemoteException, SQLException;
-	Car executeRegisterNewPart(Part part, String chassisNumber) throws RemoteException, SQLException;
+	Part executeRegisterNewPart(Part part, String chassisNumber) throws RemoteException, SQLException;
 
 	// UPDATE
 	Part executeUpdatePartPallet(Part part, Pallet pallet) throws RemoteException, SQLException;
