@@ -11,21 +11,20 @@ import model.*;
 import model.cache.*;
 import remote.interfaces.IDataServer;
 import remote.interfaces.ILogicServer;
+import remote.interfaces.IObserver;
 import server.logic.view.LogicServerView;
 
-public class LogicServerController extends UnicastRemoteObject implements ILogicServer {
+public class LogicServerController extends UnicastRemoteObject implements ILogicServer, IObserver {
 
 	private static final long serialVersionUID = 1L;
 
 	private LogicServerView view;
+	private IDataServer dataServer;
+	private Cache cacheMemory;
 
 	public LogicServerController(LogicServerView view) throws RemoteException {
 		this.view = view;
 	}
-
-	private IDataServer dataServer;
-	
-	private Cache cacheMemory;
 
 	// Network Connection
 
@@ -39,6 +38,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			String URL = "rmi://" + ip + "/" + "dataServer";
 
 			this.dataServer = (IDataServer) Naming.lookup(URL);
+			dataServer.attatch(this);
 
 			view.show("Logic server is running... ");
 
@@ -80,9 +80,6 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			e.printStackTrace();
 		}
 
-		// Update Cache
-
-		this.cacheMemory.getCarCache().addCar(car);
 		return "[SUCCESS] The car was registered.";
 	}
 
@@ -106,19 +103,11 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	}
 
 	@Override
-	public String validateRegisterPart(Part part) throws RemoteException {
-		Car car = null;
-		
-		for (Car cachedCar : this.cacheMemory.getCarCache().getCache().values()) {
-			if (cachedCar.getPartList().contains(part)) {
-				car = cachedCar;
-			}
-		}
-		
-		if (car == null) {
-			this.dataServer.executeGetCarByPart(part.getPartId());
-		}
-		
+	public String validateRegisterPart(Part part, String chassisNumber) throws RemoteException {
+	   	
+	   Car car = new Car();
+
+
 		// Validate
 
 		if (part.getType() == null || part.getType().isEmpty())
@@ -127,32 +116,31 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		if (part.getWeight() <= 0)
 			return "[VALIDATION ERROR] Invalid part weight.";
 		
-		if (car == null)
-			return "[VALIDATION ERROR] Car could not be retrieved. ";
-		
-		if (car.getChassisNumber() == null || car.getChassisNumber().isEmpty())
+		if (chassisNumber == null || chassisNumber.isEmpty())
 			return "[VALIDATION ERROR] There was no car set for this part.";
 
-		if (!Validation.validate(car.getChassisNumber(), Validation.CHASSIS_NUMBER))
+		if (!Validation.validate(chassisNumber, Validation.CHASSIS_NUMBER))
 			return "[VALIDATION ERROR] Invalid car chassis number.";
 
-		if (!this.cacheMemory.getCarCache().contains(car.getChassisNumber()))
-			return "[VALIDATION ERROR] This car does not exist.";
-
-		if (this.cacheMemory.getCarCache().getCar(car.getChassisNumber()).getState().equals(Car.FINISHED))
+		if (car.getState().equals(Car.FINISHED))
 			return "[VALIDATION ERROR] This car is already finished.";
+		
 		
 		// Update Database
 
-		try {
-			part = dataServer.executeRegisterNewPart(part);
+	   try
+      {
+         car = dataServer.executeRegisterNewPart(part, chassisNumber);
+      }
+      catch (SQLException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+	    
+	    if (car == null)
+	       return "[VALIDATION ERROR] Car could not be retrieved. ";
 
-			if (part == null)
-				return "[FAIL]";
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
 
 		// Update Cache
 		
@@ -245,7 +233,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		// Update Database
 
 		try {
-			pallet = dataServer.executeSetPalletState(pallet, Pallet.FINISHED);
+			pallet = dataServer.executeUpdatePalletState(pallet, Pallet.FINISHED);
 
 			if (pallet == null)
 				return "[FAIL] Could not persist the setting of the pallet state. ";
@@ -316,7 +304,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		// Update Database
 
 		try {
-			car = dataServer.executeSetCarState(car, Car.FINISHED);
+			car = dataServer.executeUpdateCarState(car, Car.FINISHED);
 
 			if (car == null)
 				return "[FAIL] Failed persisting the new car state. ";
@@ -475,4 +463,11 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	   
 	   return stolenProductsFromDataServer;
 	}
+
+
+   @Override
+   public <T> void update(Transaction<T> t)
+   {
+      cacheMemory.updateCache(t);
+   }
 }

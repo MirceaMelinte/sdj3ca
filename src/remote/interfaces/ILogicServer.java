@@ -16,7 +16,7 @@ public interface ILogicServer extends Remote {
 	
 	CarList getAvailableCars() throws RemoteException;
 
-	String validateRegisterPart(Part part) throws RemoteException;
+	String validateRegisterPart(Part part, String chassisNumber) throws RemoteException;
 
 	String validatePutPart(int partId, int palletId) throws RemoteException;
 

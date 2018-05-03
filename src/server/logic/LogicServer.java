@@ -13,5 +13,4 @@ public class LogicServer  {
 
 		controller.begin();
 	}
-
 }

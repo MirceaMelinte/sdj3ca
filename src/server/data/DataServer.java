@@ -8,26 +8,38 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
+import model.Car;
+import model.CarList;
+import model.Pallet;
+import model.PalletList;
+import model.Part;
+import model.PartList;
+import model.Product;
+import model.ProductList;
+import model.Transaction;
 import remote.interfaces.IDataServer;
-import model.*;
+import remote.interfaces.IObserver;
 
 public class DataServer extends UnicastRemoteObject implements IDataServer {
 	private static final long serialVersionUID = 1L;
 	private static Connection connection;
+	private List<IObserver> observers = new ArrayList<>();
 
 	public DataServer() throws RemoteException {
-		super();
+		super();	
 	}
 
 	public void begin() {
 		try {
 			LocateRegistry.createRegistry(1099);
 			Naming.rebind("dataServer", this);
-
 			DataServer.connection = PersistenceConfig.establishConnection(connection);
-
 			System.out.println("Data server is running... ");
+			DataServer.addNonExistentEntities();
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -364,8 +376,10 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 			System.out.println("[SUCCESS] Successful execution of new car registration. Chassis number: "
 							+ car.getChassisNumber());
-			DataServer.connection.commit();
+			DataServer.connection.commit();		
 
+			notifyObservers(new Transaction<Car>(Transaction.REGISTER, car));
+			
 			return car;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
@@ -423,6 +437,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 			returnStatement.close();
 
+			notifyObservers(new Transaction<Pallet>(Transaction.REGISTER, pallet));
+			
 			return pallet;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
@@ -476,6 +492,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 			returnStatement.close();
 
+			notifyObservers(new Transaction<Product>(Transaction.REGISTER, product));
+			
 			return product;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
@@ -488,19 +506,23 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 
 	@Override
-	public Part executeRegisterNewPart(Part part) throws RemoteException, SQLException {
+	public Car executeRegisterNewPart(Part part, String chassisNumber) throws RemoteException, SQLException {
 		try {
-			DataServer.addNonExistentEntities();
-
+		   Car car = executeGetCarByChassisNumber(chassisNumber);  
+		   
 			PreparedStatement insertStatement = DataServer.connection
-					.prepareStatement("INSERT INTO part (type, weight) VALUES (?, ?)");
+					.prepareStatement("INSERT INTO part (type, weight, carId, palletId, productId) VALUES "
+					      + "(?, ?, (SELECT carId FROM Car WHERE chassisNumber = ?), -1, -1");
 
 			insertStatement.setString(1, part.getType());
 			insertStatement.setDouble(2, part.getWeight());
+			insertStatement.setString(3, chassisNumber);
 			insertStatement.execute();
 			insertStatement.close();
 
 			DataServer.connection.commit();
+			
+			car.getPartList().addPart(part);
 			
 			PreparedStatement returnStatement = DataServer.connection
 					.prepareStatement("SELECT * FROM (SELECT id FROM part ORDER BY id DESC) WHERE ROWNUM = 1");
@@ -517,7 +539,9 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			resultSet.close();
 			returnStatement.close();
 
-			return part;
+			notifyObservers(new Transaction<Part>(Transaction.REGISTER, part));
+			
+			return car;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
 			System.out.println("[FAIL] Failed execution of new part registration. Part number: "
@@ -531,8 +555,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	@Override
 	public Part executeUpdatePartPallet(Part part, Pallet pallet) throws RemoteException, SQLException {
 		try {
-			DataServer.addNonExistentEntities();
-
 			PreparedStatement updateStatement = DataServer.connection
 					.prepareStatement("UPDATE part SET palletId = ? WHERE id = ?");
 
@@ -561,8 +583,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	@Override
 	public Part executeUpdatePartProduct(Part part, Product product) throws RemoteException, SQLException {
 		try {
-			DataServer.addNonExistentEntities();
-
 			PreparedStatement updateStatement = DataServer.connection
 					.prepareStatement("UPDATE part SET productId = ? WHERE id = ?");
 
@@ -618,7 +638,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 
 	@Override
-	public Pallet executeSetPalletState(Pallet pallet, String state) throws RemoteException, SQLException {
+	public Pallet executeUpdatePalletState(Pallet pallet, String state) throws RemoteException, SQLException {
 		try {
 			PreparedStatement updateStatement = DataServer.connection
 					.prepareStatement("UPDATE pallet SET state = ? WHERE id = ?");
@@ -648,7 +668,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 
 	@Override
-	public Car executeSetCarState(Car car, String state) throws RemoteException, SQLException {
+	public Car executeUpdateCarState(Car car, String state) throws RemoteException, SQLException {
 		try {
 			PreparedStatement updateStatement = DataServer.connection
 					.prepareStatement("UPDATE car SET state = ? WHERE chassisNumber = ?");
@@ -675,38 +695,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 		}
 
 		return null;
-	}
-
-	private static void addNonExistentEntities() throws SQLException {
-		try {
-			PreparedStatement insertPalletStatement = DataServer.connection
-					.prepareStatement("INSERT INTO Pallet (id, partType, weight, maxWeight, state) "
-							+ "SELECT -1, 'no pallet', 0, 0, 'Finished' "
-							+ "FROM dual "
-							+ "WHERE NOT EXISTS "
-							+ "(SELECT id, partType, weight, maxWeight, state FROM pallet WHERE id = -1)");
-
-			insertPalletStatement.execute();
-			insertPalletStatement.close();
-
-			PreparedStatement insertProductStatement = DataServer.connection
-					.prepareStatement("INSERT INTO Product (id, type, name) "
-							+ "SELECT -1, 'no product', 'no product' "
-							+ "FROM dual "
-							+ "WHERE NOT EXISTS "
-							+ " (SELECT id, type, name FROM product WHERE id = -1)");
-
-			insertProductStatement.execute();
-			insertProductStatement.close();
-
-			DataServer.connection.commit();
-		} catch (Exception e) {
-			DataServer.connection.rollback();
-			System.out
-					.println("[FAIL] Failed execution of adding non existent entities. Exception: "
-							+ e.getMessage());
-			e.printStackTrace();
-		}
 	}
 
 	public static void main(String[] args) throws RemoteException {
@@ -871,8 +859,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
          carStatement.close();
          carResultSet.close();
          
-         System.out.println("[SUCCESS] Part List Retrieved");
-         
+         System.out.println("[SUCCESS] Car Details Retrieved");
+              
          return car;
       }
       catch (SQLException e) {
@@ -880,5 +868,65 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
          e.printStackTrace();
       }
       return null;
+   }
+
+   @Override
+   public void attatch(IObserver observer) throws RemoteException
+   {
+      observers.add(observer);
+   }
+
+   @Override
+   public void dettach(IObserver observer) throws RemoteException
+   {
+      observers.remove(observer);
+   }
+   
+   private <T> void notifyObservers(Transaction<T> t)
+   {
+      observers.forEach((x) -> {
+         try {
+            x.update(t);
+            System.out.println("[SUCESS] Observers have been notified about new " + 
+                  t.getLoad().getClass().getSimpleName() + " registration");
+         }
+         catch (Exception e) {
+            System.out.println("[FAIL] Observers have been not notified about new " + 
+                  t.getLoad().getClass().getSimpleName() + " registration");
+            e.printStackTrace();
+         }
+      });
+   }
+   
+   private static void addNonExistentEntities() throws SQLException {
+      try {
+         PreparedStatement insertPalletStatement = DataServer.connection
+               .prepareStatement("INSERT INTO Pallet (id, partType, weight, maxWeight, state) "
+                     + "SELECT -1, 'no pallet', 0, 0, 'Finished' "
+                     + "FROM dual "
+                     + "WHERE NOT EXISTS "
+                     + "(SELECT id, partType, weight, maxWeight, state FROM pallet WHERE id = -1)");
+
+         insertPalletStatement.execute();
+         insertPalletStatement.close();
+
+         PreparedStatement insertProductStatement = DataServer.connection
+               .prepareStatement("INSERT INTO Product (id, type, name) "
+                     + "SELECT -1, 'no product', 'no product' "
+                     + "FROM dual "
+                     + "WHERE NOT EXISTS "
+                     + " (SELECT id, type, name FROM product WHERE id = -1)");
+
+         insertProductStatement.execute();
+         insertProductStatement.close();
+
+         DataServer.connection.commit();
+      } catch (Exception e) {
+         DataServer.connection.rollback();
+         System.out
+               .println("[FAIL] Failed execution of adding non existent entities. Exception: "
+                     + e.getMessage());
+         e.printStackTrace();
+      }
    }
 }

@@ -7,7 +7,6 @@ import java.rmi.RemoteException;
 
 import model.Car;
 import model.CarList;
-import model.Pallet;
 import model.Part;
 import remote.interfaces.ILogicServer;
 import javafx.collections.FXCollections;
@@ -101,9 +100,9 @@ public class PartClientController {
 			String type = tfRegisterPart_type.getText();
 			double weight = Double.parseDouble(tfRegisterPart_weight.getText());
 
-			Part part = new Part(-1, type, weight, chassisNumber);
+			Part part = new Part(-1, type, weight);
 
-			String serverResponse = logicServer.validateRegisterPart(part);
+			String serverResponse = logicServer.validateRegisterPart(part, chassisNumber);
 
 			Alert alert = new Alert(AlertType.INFORMATION);
 			alert.setTitle("Server Response");
