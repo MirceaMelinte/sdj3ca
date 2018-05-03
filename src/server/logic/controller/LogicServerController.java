@@ -95,7 +95,9 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		
 		if (carList != null) {
 			carList.getList().forEach(x -> {
-				this.cacheMemory.getCarCache().addCar(x);
+				if (!this.cacheMemory.getCarCache().contains(x.getChassisNumber())) {
+					this.cacheMemory.getCarCache().addCar(x);
+				}				
 			});
 		}
 
