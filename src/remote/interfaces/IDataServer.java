@@ -17,17 +17,16 @@ public interface IDataServer extends Remote {
 	PartList executeGetPartsByProduct(int productId) throws RemoteException;
 	PartList executeGetStolenParts(String chassisNumber) throws RemoteException, SQLException;
 	ProductList executeGetStolenProducts(String chassisNumber) throws RemoteException, SQLException;
-	Car executeGetStolenCar(String chassisNumber) throws RemoteException, SQLException;
+//	Car executeGetStolenCar(String chassisNumber) throws RemoteException, SQLException;
 	
 	// REGISTER
 	Car executeRegisterCar(Car car) throws RemoteException, SQLException;
-	Pallet executeRegisterPallet(Pallet pallet) throws RemoteException, SQLException;
+	Pallet executeRegisterPallet(Pallet pallets) throws RemoteException, SQLException;
 	Product executeRegisterProduct(Product product) throws RemoteException, SQLException;
 	Part executeRegisterNewPart(Part part, String chassisNumber) throws RemoteException, SQLException;
 
 	// UPDATE
 	Part executeUpdatePartPallet(Part part, Pallet pallet) throws RemoteException, SQLException;
-	Part executeUpdatePartProduct(Part part, Product product) throws RemoteException, SQLException;
 	Pallet executeUpdatePalletWeight(Pallet pallet) throws RemoteException, SQLException;
 	Pallet executeUpdatePalletState(Pallet pallet, String state) throws RemoteException, SQLException;
 	Car executeUpdateCarState(Car car, String state) throws RemoteException, SQLException;

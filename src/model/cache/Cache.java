@@ -36,35 +36,60 @@ public class Cache implements Serializable {
 	public void setProductCache(ProductCache productCache) { this.productCache = productCache; }
 	
 	public <T> void updateCache(Transaction<T> t) {
-	   switch(t.getType()) {
-	      
-         case "REGISTER":
-            if(t.getLoad() instanceof Car) {
-               Car car = (Car) t.getLoad();
-               if(!carCache.contains(car.getChassisNumber())) {
-                  carCache.addCar(car);
-               }
-            }
-            else if (t.getLoad() instanceof Part) {
-               Part part = (Part) t.getLoad();
-               if(!partCache.contains(part.getPartId())) {
-                  partCache.addPart(part);
-               }
-            }
-            else if (t.getLoad() instanceof Pallet) {
-               Pallet pallet = (Pallet) t.getLoad();
-               if(!palletCache.contains(pallet.getPalletId())) {
-                  palletCache.addPallet(pallet);
-               }
-            }
-            else if (t.getLoad() instanceof Product) {
-               Product product = (Product) t.getLoad();
-               if(!productCache.contains(product.getProductId())) {
-                  productCache.addProduct(product);
-               }
-            }
-         case "UPDATE":
+   	Car car;
+   	Part part;
+   	Product product;
+   	Pallet pallet;
+   	
+   	switch(t.getType()) {
+   	   
+      	case "REGISTER_CAR":
+            car = (Car) t.getLoad();
+            if(!carCache.contains(car.getChassisNumber())) {
+               carCache.addCar(car);
+            }  
             
+         case "REGISTER_PART":
+            car = (Car) t.getLoad();
+            part = car.getPartList().getPart(0);
+            carCache.getCache().get(car.getChassisNumber()).
+               getPartList().addPart(part);
+            partCache.getCache().put(part.getPartId(), part);
+            
+         case "REGISTER_PRODUCT":
+            product = (Product) t.getLoad();
+            if(!productCache.contains(product.getProductId())) {
+               productCache.addProduct(product);
+            }
+            
+         case "REGISTER_PALLET":
+            pallet = (Pallet) t.getLoad();
+            if(!palletCache.contains(pallet.getPalletId())) {
+               palletCache.addPallet(pallet);
+            }
+         
+         case "UPDATE_PALLET_PART":
+            pallet = (Pallet) t.getLoad();
+            part = pallet.getPartList().getPart(0);
+            palletCache.getCache().get(pallet.getPalletId()).getPartList().addPart(part);
+            
+         case "UPDATE_PRODUCT_PART":
+            product = (Product) t.getLoad();
+            part = product.getPartList().getPart(0);
+            palletCache.getCache().get(product.getProductId()).getPartList().addPart(part);
+            
+         case "UPDATE_PALLET_WEIGHT":
+            pallet = (Pallet) t.getLoad();
+            double newWeight = pallet.getWeight();
+            palletCache.getCache().get(pallet.getPalletId()).setWeight(newWeight);
+            
+         case "UPDATE_FINISH_PALLET":
+            pallet = (Pallet) t.getLoad();
+            palletCache.getCache().get(pallet.getPalletId()).setState(Pallet.FINISHED);
+            
+         case "UPDATE_FINISH_CAR":
+            car = (Car) t.getLoad();
+            carCache.getCache().get(car.getChassisNumber()).setState(Car.FINISHED);
       }
 	}
 }

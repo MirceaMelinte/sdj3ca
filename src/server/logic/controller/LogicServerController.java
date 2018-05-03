@@ -399,7 +399,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			
 			if(car == null)
 			{
-			   car = dataServer.executeGetStolenCar(chassisNumber);
+			   car = dataServer.executeGetCarByChassisNumber(chassisNumber);
 			   if(car != null)
 			   {
 			      cacheMemory.getCarCache().getCache().put(car.getChassisNumber(), car);

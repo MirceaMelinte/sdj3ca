@@ -378,7 +378,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 							+ car.getChassisNumber());
 			DataServer.connection.commit();		
 
-			notifyObservers(new Transaction<Car>(Transaction.REGISTER, car));
+			notifyObservers(new Transaction<Car>(Transaction.REGISTER_CAR, car));
 			
 			return car;
 		} catch (Exception e) {
@@ -405,21 +405,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			insertStatement.setString(4, pallet.getState());
 			insertStatement.execute();
 			insertStatement.close();
-			
-			if (pallet.getPartList().count() > 0) {
-				pallet.getPartList().getList().forEach(part -> {
-					try {
-						PreparedStatement updateStatement = DataServer.connection
-								.prepareStatement("UPDATE part SET palletId = ? WHERE id = ?");
-						updateStatement.setInt(1, pallet.getPalletId());
-						updateStatement.setInt(2, part.getPartId());
-						updateStatement.executeUpdate();
-						updateStatement.close();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				});
-			}
 
 			DataServer.connection.commit();
 			
@@ -437,7 +422,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 			returnStatement.close();
 
-			notifyObservers(new Transaction<Pallet>(Transaction.REGISTER, pallet));
+			notifyObservers(new Transaction<Pallet>(Transaction.REGISTER_PALLET, pallet));
 			
 			return pallet;
 		} catch (Exception e) {
@@ -492,7 +477,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 			returnStatement.close();
 
-			notifyObservers(new Transaction<Product>(Transaction.REGISTER, product));
+			notifyObservers(new Transaction<Product>(Transaction.REGISTER_PRODUCT, product));
 			
 			return product;
 		} catch (Exception e) {
@@ -506,7 +491,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 
 	@Override
-	public Car executeRegisterNewPart(Part part, String chassisNumber) throws RemoteException, SQLException {
+	public Part executeRegisterNewPart(Part part, String chassisNumber) throws RemoteException, SQLException {
 		try {
 		   Car car = executeGetCarByChassisNumber(chassisNumber);  
 		   
@@ -539,9 +524,9 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			resultSet.close();
 			returnStatement.close();
 
-			notifyObservers(new Transaction<Part>(Transaction.REGISTER, part));
+			notifyObservers(new Transaction<Car>(Transaction.REGISTER_PART, car));
 			
-			return car;
+			return part;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
 			System.out.println("[FAIL] Failed execution of new part registration. Part number: "
@@ -569,39 +554,12 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			updateStatement.close();
 			DataServer.connection.commit();
 
+			notifyObservers(new Transaction<Part>(Transaction.UPDATE_PALLET_PART, part));
+			
 			return part;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
 			System.out.println("[FAIL] Failed execution of part pallet setting. Part number: "
-							+ part.getPartId());
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-
-	@Override
-	public Part executeUpdatePartProduct(Part part, Product product) throws RemoteException, SQLException {
-		try {
-			PreparedStatement updateStatement = DataServer.connection
-					.prepareStatement("UPDATE part SET productId = ? WHERE id = ?");
-
-			updateStatement.setInt(1, product.getProductId());
-			updateStatement.setInt(2, part.getPartId());
-			updateStatement.executeUpdate();
-			updateStatement.close();
-
-			System.out.println("[SUCCESS] Successful execution of part product setting. Part number: "
-							+ part.getPartId());
-
-			updateStatement.close();
-			DataServer.connection.commit();
-
-			return part;
-		} catch (Exception e) {
-			DataServer.connection.rollback();
-			System.out
-					.println("[FAIL] Failed execution of part product setting. Part number: "
 							+ part.getPartId());
 			e.printStackTrace();
 		}
@@ -626,6 +584,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			updateStatement.close();
 			DataServer.connection.commit();
 
+			notifyObservers(new Transaction<Pallet>(Transaction.UPDATE_PALLET_WEIGHT, pallet));
+			
 			return pallet;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
@@ -655,7 +615,9 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			DataServer.connection.commit();
 
 			pallet.setState(state);
-
+			
+			notifyObservers(new Transaction<Pallet>(Transaction.UPDATE_FINISH_PALLET, pallet));
+			
 			return pallet;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
@@ -686,6 +648,8 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 			car.setState(state);
 
+			notifyObservers(new Transaction<Car>(Transaction.UPDATE_FINISH_CAR, car));
+			
 			return car;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
@@ -695,12 +659,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 		}
 
 		return null;
-	}
-
-	public static void main(String[] args) throws RemoteException {
-		DataServer d = new DataServer();
-
-		d.begin();
 	}
 
    @Override
@@ -813,64 +771,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
    }
 
    @Override
-   public Car executeGetStolenCar(String chassisNumber) throws RemoteException,
-         SQLException
-   {
-      try 
-      {
-         PreparedStatement carStatement = 
-               DataServer.connection.prepareStatement("SELECT * FROM Car "
-                                             + "WHERE chassisNumber = ?");
-         
-         PreparedStatement partStatement = 
-               DataServer.connection.prepareStatement("SELECT * FROM Part "
-                     + "WHERE carId = (SELECT carId FROM Car WHERE chassisNumber = ?)");
-         
-         carStatement.setString(1, chassisNumber);
-         partStatement.setString(1, chassisNumber);
-         ResultSet carResultSet = carStatement.executeQuery();
-         ResultSet partResultSet = partStatement.executeQuery();
-         
-         Car car = new Car();
-         PartList partList = new PartList();
-
-         while (carResultSet.next()) {
-            car.setChassisNumber(carResultSet.getString("chassisNumber"));
-            car.setModel(carResultSet.getString("model"));
-            car.setManufacturer(carResultSet.getString("manufacturer"));
-            car.setYear(carResultSet.getInt("year"));
-            car.setWeight(carResultSet.getDouble("weight"));
-            car.setState(carResultSet.getString("state"));
-         }
-         
-         while(partResultSet.next())
-         {
-            Part part = new Part();
-            part.setPartId(partResultSet.getInt("id"));
-            part.setType(partResultSet.getString("type"));
-            part.setWeight(partResultSet.getDouble("weight"));
-            partList.addPart(part);
-         }
-         
-         car.setPartList(partList);
-
-         partStatement.close();
-         partResultSet.close();
-         carStatement.close();
-         carResultSet.close();
-         
-         System.out.println("[SUCCESS] Car Details Retrieved");
-              
-         return car;
-      }
-      catch (SQLException e) {
-         System.out.println("[FAIL] Part List Retrieval Failed");
-         e.printStackTrace();
-      }
-      return null;
-   }
-
-   @Override
    public void attatch(IObserver observer) throws RemoteException
    {
       observers.add(observer);
@@ -884,9 +784,9 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
    
    private <T> void notifyObservers(Transaction<T> t)
    {
-      observers.forEach((x) -> {
+      observers.forEach((observer) -> {
          try {
-            x.update(t);
+            observer.update(t);
             System.out.println("[SUCESS] Observers have been notified about new " + 
                   t.getLoad().getClass().getSimpleName() + " registration");
          }
@@ -928,5 +828,11 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
                      + e.getMessage());
          e.printStackTrace();
       }
+   }
+   
+   public static void main(String[] args) throws RemoteException {
+      DataServer d = new DataServer();
+
+      d.begin();
    }
 }
