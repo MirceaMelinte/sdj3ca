@@ -348,16 +348,8 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
          {
             return stolenCar.getPartList();
          }
-         else
-         {
-            PartList partList = dataServer.executeGetStolenParts(chassisNumber);
-            if(partList != null)
-            {
-               partList.getList().forEach((x) -> 
-               cacheMemory.getPartCache().getCache().put(x.getPartId(), x));
-            } 
-            return partList;
-         }
+         
+         return null;
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -382,13 +374,9 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
                   }
                });
             });
-            if (stolenParts.count() > stolenProductsFromCache.countPartsInProducts())  // If a number of stolen parts from car doesn't match number of parts in stolen products
-            { 
-               return getProductsAndUpdateCache(chassisNumber);
-            }
             return stolenProductsFromCache;
          }
-         return getProductsAndUpdateCache(chassisNumber);
+         return null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -400,15 +388,12 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		try {
 			Car car = cacheMemory.getCarCache().getCache().get(chassisNumber);
 			
-			if(car == null)
-			{
-			   car = dataServer.executeGetCarByChassisNumber(chassisNumber);
-			   if(car != null)
-			   {
-			      cacheMemory.getCarCache().getCache().put(car.getChassisNumber(), car);
-			   }
-			}
-			return car;
+			if(car != null)
+         {
+            cacheMemory.getCarCache().getCache().put(car.getChassisNumber(), car);
+            return car;
+         }
+			return null;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -416,20 +401,6 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		return null;
 	}
-	
-	private ProductList getProductsAndUpdateCache(String chassisNumber) throws RemoteException, SQLException
-	{
-	   ProductList stolenProductsFromDataServer = dataServer.executeGetStolenProducts(chassisNumber); // Retrieve stolen parts list from the data server
-	   stolenProductsFromDataServer.getList().forEach((x) -> {
-         if(!cacheMemory.getProductCache().getCache().containsKey(x.getProductId()))       // For each entry in product cache check if the productId from data server is already there
-         {
-            cacheMemory.getProductCache().getCache().put(x.getProductId(), x);             // If productId is not in product cache, add new product
-         }
-      });
-	   
-	   return stolenProductsFromDataServer;
-	}
-
 
    @Override
    public <T> void update(Transaction<T> t)

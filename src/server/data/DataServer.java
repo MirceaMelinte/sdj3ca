@@ -736,7 +736,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
    {
       try
       {
-         System.out.println("executeGetStolenProducts() method called from data server");
       PreparedStatement partStatement = 
             DataServer.connection.prepareStatement("SELECT * FROM Part "
                   + "WHERE carId = (SELECT carId FROM Car WHERE chassisNumber = ?)");
