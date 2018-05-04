@@ -497,7 +497,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 
 	
-	// TODO does this method change the state of the car if it is AVAILABLE it should change to IN_PROGRESS
 	
 	// Part that is returned holds information about newly created part ID that is then sent to the client
 	@Override
@@ -532,17 +531,20 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			resultSet.close();
 			returnStatement.close();
 			
+			Car car = new Car();
+			car.setChassisNumber(chassisNumber);
+			car.getPartList().addPart(part);
+			car.setState(Car.IN_PROGRESS);	
+			
+			executeUpdateCarState(car, Car.IN_PROGRESS);
+
 			/*
 			 * Car needs to have 
 			 * - chassisNumber defined
 			 * - only one part in Part List
+			 * - state defined
 			 */
 			
-			// i am creating a new Car because so it has empty part list partList
-			
-			Car car = new Car();  
-			car.setChassisNumber(chassisNumber);
-			car.getPartList().addPart(part);
 			notifyObservers(new Transaction<Car>(Transaction.REGISTER_PART, car));
 			
 			return part;
@@ -617,6 +619,15 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 
 	@Override
+	public	Pallet executeUpdateFinishPallet(Pallet pallet) throws RemoteException, SQLException {
+		pallet = executeUpdatePalletState(pallet, Pallet.FINISHED);
+		
+		notifyObservers(new Transaction<Pallet>(Transaction.UPDATE_FINISH_PALLET, pallet));
+
+		return pallet;
+	}
+	
+	@Override
 	public Pallet executeUpdatePalletState(Pallet pallet, String state) throws RemoteException, SQLException {
 		try {
 			PreparedStatement updateStatement = DataServer.connection
@@ -633,13 +644,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			updateStatement.close();
 			DataServer.connection.commit();
 
-			
-			// this transaction deos not need to know pallets state, it is always setting it to finished
-			// pallet.setState(state);
-						
-			if (state == Pallet.FINISHED)
-				notifyObservers(new Transaction<Pallet>(Transaction.UPDATE_FINISH_PALLET, pallet));
-			
 			return pallet;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
@@ -651,6 +655,16 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 		return null;
 	}
 
+	@Override
+	public Car executeUpdateFinishCar(Car car) throws RemoteException, SQLException {
+		car =  executeUpdateCarState(car, Car.FINISHED);
+		
+		notifyObservers(new Transaction<Car>(Transaction.UPDATE_FINISH_CAR, car));
+		
+		return car;
+		
+	}
+	
 	@Override
 	public Car executeUpdateCarState(Car car, String state) throws RemoteException, SQLException {
 		try {
@@ -667,14 +681,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 			updateStatement.close();
 			DataServer.connection.commit();
-
-			
-			
-			// this transaction deos not need to know car state, it is always setting it to finished
-			// car.setState(state);
-			
-			if (state == Car.FINISHED)
-				notifyObservers(new Transaction<Car>(Transaction.UPDATE_FINISH_CAR, car));
 			
 			return car;
 		} catch (Exception e) {

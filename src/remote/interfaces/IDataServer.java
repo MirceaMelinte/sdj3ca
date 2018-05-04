@@ -18,6 +18,8 @@ public interface IDataServer extends Remote {
 	PartList executeGetStolenParts(String chassisNumber) throws RemoteException, SQLException;
 	ProductList executeGetStolenProducts(String chassisNumber) throws RemoteException, SQLException;
 //	Car executeGetStolenCar(String chassisNumber) throws RemoteException, SQLException;
+	Pallet executeUpdatePalletState(Pallet pallet, String state) throws RemoteException, SQLException;
+	Car executeUpdateCarState(Car car, String state) throws RemoteException, SQLException;
 	
 	// REGISTER
 	Car executeRegisterCar(Car car) throws RemoteException, SQLException;
@@ -27,9 +29,9 @@ public interface IDataServer extends Remote {
 
 	// UPDATE
 	Part executeUpdatePartPallet(Part part, Pallet pallet) throws RemoteException, SQLException;
-	Pallet executeUpdatePalletState(Pallet pallet, String state) throws RemoteException, SQLException;
-	Car executeUpdateCarState(Car car, String state) throws RemoteException, SQLException;
-	
+	Pallet executeUpdateFinishPallet(Pallet pallet) throws RemoteException, SQLException;
+	Car executeUpdateFinishCar(Car car) throws RemoteException, SQLException;
+
 	// DELETE
 	// Maybe few methods for deleting items from database and making sure all caches are updated
 	

@@ -65,13 +65,12 @@ public class Cache implements Serializable {
             
             Product fullNewProduct = new Product(product.getProductId(), product.getType(), product.getName());
             
-            if(!productCache.contains(fullNewProduct.getProductId())) 
+            if(!productCache.contains(fullNewProduct.getProductId())) { 
             	productCache.addProduct(fullNewProduct);
             
-            
-            for (Part part2 : product.getPartList().getList()) 
-            	fullNewProduct.getPartList().addPart(partCache.getPart(part2.getPartId()));
-			
+            	for (Part part2 : product.getPartList().getList()) 
+            		fullNewProduct.getPartList().addPart(partCache.getPart(part2.getPartId()));
+            }
             break;
          case "REGISTER_PALLET":
             pallet = (Pallet) t.getLoad();
