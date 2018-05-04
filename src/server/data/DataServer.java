@@ -477,6 +477,12 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 			returnStatement.close();
 
+			
+			/*
+			 * Product needs to have 
+			 * - productid, type, name
+			 * - part list with part that contain only ids of parts
+			 */
 			notifyObservers(new Transaction<Product>(Transaction.REGISTER_PRODUCT, product));
 			
 			return product;
@@ -490,10 +496,13 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 		return null;
 	}
 
+	
+	// TODO does this method change the state of the car if it is AVAILABLE it should change to IN_PROGRESS
+	
+	// Part that is returned holds information about newly created part ID that is then sent to the client
 	@Override
 	public Part executeRegisterNewPart(Part part, String chassisNumber) throws RemoteException, SQLException {
 		try {
-		   Car car = executeGetCarByChassisNumber(chassisNumber);  
 		   
 			PreparedStatement insertStatement = DataServer.connection
 					.prepareStatement("INSERT INTO part (type, weight, carId, palletId, productId) VALUES "
@@ -507,7 +516,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 			DataServer.connection.commit();
 			
-			car.getPartList().addPart(part);
 			
 			PreparedStatement returnStatement = DataServer.connection
 					.prepareStatement("SELECT * FROM (SELECT id FROM part ORDER BY id DESC) WHERE ROWNUM = 1");
@@ -523,7 +531,18 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			
 			resultSet.close();
 			returnStatement.close();
-
+			
+			/*
+			 * Car needs to have 
+			 * - chassisNumber defined
+			 * - only one part in Part List
+			 */
+			
+			// i am creating a new Car because so it has empty part list partList
+			
+			Car car = new Car();  
+			car.setChassisNumber(chassisNumber);
+			car.getPartList().addPart(part);
 			notifyObservers(new Transaction<Car>(Transaction.REGISTER_PART, car));
 			
 			return part;
@@ -568,7 +587,23 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			updateStatement.close();
 			DataServer.connection.commit();
 
-			notifyObservers(new Transaction<Part>(Transaction.UPDATE_PALLET_PART, part));
+			/*
+			 * this should have a Pallet in transaction
+			 * pallet needs to have 
+			 * - pallteID defined
+			 * - one new part in Part List
+			 * - updated part weight
+			 * - part type defined ( so in case it was undefined and first part was put it can be changed also)
+			 */
+			
+			// i am creating a new pallet because pallet from parameter could have partList with many parts already
+			
+			Pallet palletNotify = new Pallet();
+			palletNotify.setPalletId(pallet.getPalletId());
+			palletNotify.setWeight(pallet.getWeight() + part.getWeight());
+			palletNotify.setPartType(part.getType());
+			palletNotify.getPartList().addPart(part);
+			notifyObservers(new Transaction<Pallet>(Transaction.UPDATE_PALLET_PART, palletNotify));
 			
 			return part;
 		} catch (Exception e) {
@@ -598,9 +633,12 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			updateStatement.close();
 			DataServer.connection.commit();
 
-			pallet.setState(state);
 			
-			notifyObservers(new Transaction<Pallet>(Transaction.UPDATE_FINISH_PALLET, pallet));
+			// this transaction deos not need to know pallets state, it is always setting it to finished
+			// pallet.setState(state);
+						
+			if (state == Pallet.FINISHED)
+				notifyObservers(new Transaction<Pallet>(Transaction.UPDATE_FINISH_PALLET, pallet));
 			
 			return pallet;
 		} catch (Exception e) {
@@ -630,9 +668,13 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			updateStatement.close();
 			DataServer.connection.commit();
 
-			car.setState(state);
-
-			notifyObservers(new Transaction<Car>(Transaction.UPDATE_FINISH_CAR, car));
+			
+			
+			// this transaction deos not need to know car state, it is always setting it to finished
+			// car.setState(state);
+			
+			if (state == Car.FINISHED)
+				notifyObservers(new Transaction<Car>(Transaction.UPDATE_FINISH_CAR, car));
 			
 			return car;
 		} catch (Exception e) {

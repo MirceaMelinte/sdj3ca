@@ -54,13 +54,24 @@ public class Cache implements Serializable {
             part = car.getPartList().getPart(0);
             carCache.getCache().get(car.getChassisNumber()).
                getPartList().addPart(part);
+            
+            // if the car is AVAILABLE change to IN_PROGRESS
+            if (carCache.getCache().get(car.getChassisNumber()).getState().equals(Car.AVAILABLE))
+            	carCache.getCache().get(car.getChassisNumber()).setState(Car.IN_PROGRESS);
             partCache.getCache().put(part.getPartId(), part);
             break;
          case "REGISTER_PRODUCT":
             product = (Product) t.getLoad();
-            if(!productCache.contains(product.getProductId())) {
-               productCache.addProduct(product);
-            }
+            
+            Product fullNewProduct = new Product(product.getProductId(), product.getType(), product.getName());
+            
+            if(!productCache.contains(fullNewProduct.getProductId())) 
+            	productCache.addProduct(fullNewProduct);
+            
+            
+            for (Part part2 : product.getPartList().getList()) 
+            	fullNewProduct.getPartList().addPart(partCache.getPart(part2.getPartId()));
+			
             break;
          case "REGISTER_PALLET":
             pallet = (Pallet) t.getLoad();
@@ -72,6 +83,9 @@ public class Cache implements Serializable {
             pallet = (Pallet) t.getLoad();
             part = pallet.getPartList().getPart(0);
             palletCache.getCache().get(pallet.getPalletId()).getPartList().addPart(part);
+            palletCache.getCache().get(pallet.getPalletId()).setWeight(pallet.getWeight());
+            if (palletCache.getCache().get(pallet.getPalletId()).getPartType() == "-1") 
+            	palletCache.getCache().get(pallet.getPalletId()).setPartType(pallet.getPartType());
             break;
          case "UPDATE_PRODUCT_PART":
             product = (Product) t.getLoad();

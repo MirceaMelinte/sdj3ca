@@ -72,7 +72,8 @@ public class ProductClientController {
 		product.setName(tfProductName.getText());
 		product.setType(tfProductType.getText());
 		
-		String serverResponse = logicServer.validateRegisterProduct(product, partList);
+		product.setPartList(partList);
+		String serverResponse = logicServer.validateRegisterProduct(product);
 
 		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle("Server Response");

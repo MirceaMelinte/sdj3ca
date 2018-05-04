@@ -184,6 +184,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 				return "[FAIL] Failed database update part pallet. ";
 
 			
+			/*
 			pallet.setWeight(pallet.getWeight() + part.getWeight());
 			
 			// TODO maybe this should have been done by executeUpdatePartPallet already
@@ -195,6 +196,8 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			
 			if (pallet.getPartType().equals("-1"));
 				// TODO need updatePalletType method in database interface
+				 
+			*/
 
 		} catch (SQLException e) {
 			e.printStackTrace();
