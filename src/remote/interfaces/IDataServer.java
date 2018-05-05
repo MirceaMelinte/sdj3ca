@@ -8,6 +8,14 @@ import model.*;
 
 public interface IDataServer extends Remote {
    
+   // Initial cache synchronization
+   CarList executeGetAllCars();
+   PartList executeGetAllParts();
+   PalletList executeGetAllPallets();
+   ProductList executeGetAllProducts();
+   
+   
+   
 	Car executeGetCarByChassisNumber(String chassisNumber) throws RemoteException;
 	PalletList executeGetAvailablePallets(Part part) throws RemoteException;
 	CarList executeGetAvailableCars() throws RemoteException;

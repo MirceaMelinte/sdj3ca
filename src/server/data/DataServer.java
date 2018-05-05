@@ -866,4 +866,203 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
       d.begin();
    }
+
+   @Override
+   public CarList executeGetAllCars()
+   {
+      try
+      {
+      PreparedStatement carStatement = 
+            DataServer.connection.prepareStatement("SELECT c.chassisNumber AS \"chassisNumber\", c.model AS \"carModel\", c.manufacturer AS \"carManufacturer\", c.year AS \"carYear\", "
+                  + "c.weight as \"carWeight\", c.state AS \"carState\" "
+              + "FROM Car");
+      
+      ResultSet resultSet = carStatement.executeQuery();
+      
+      CarList carList = new CarList();
+      
+      while(resultSet.next())
+      {
+         Car car = new Car();
+         car.setChassisNumber(resultSet.getString("chassisNumber"));
+         car.setModel(resultSet.getString("carModel"));
+         car.setManufacturer(resultSet.getString("carManufacturer"));
+         car.setYear(resultSet.getInt("carYear"));
+         car.setWeight(resultSet.getDouble("carWeight"));
+         car.setState(resultSet.getString("carState"));
+         carList.addCar(car);
+      }
+         System.out.println("[SUCCESS] Car List Retrieved");
+         return carList;
+      }
+      catch (Exception e) {
+         System.out
+               .println("[FAIL] Failed get car list. Exception: "
+                     + e.getMessage());
+         e.printStackTrace();
+      }
+      return null;
+   }
+
+   @Override
+   public PartList executeGetAllParts()
+   {
+      try {
+         PreparedStatement selectStatement = DataServer.connection.prepareStatement(
+               "SELECT p.id AS \"partId\", p.type AS \"partType\", p.weight AS \"partWeight\" "
+                + "FROM part");        
+         ResultSet resultSet = selectStatement.executeQuery();
+         PartList partList = new PartList();
+         
+         while (resultSet.next()) {
+            Part part = new Part();
+            part.setPartId(resultSet.getInt("partId"));
+            part.setType(resultSet.getString("partType"));
+            part.setWeight(resultSet.getDouble("partWeight"));
+            partList.addPart(part);
+         }
+
+         selectStatement.close();
+         resultSet.close();
+         System.out.println("[SUCCESS] Successful retrieval of part list from the database. ");
+
+         return partList;
+      } catch (Exception e) {
+         System.out.println("[FAIL] Failed execution of part list retrieval. ");
+         e.printStackTrace();
+      }
+
+      return null;
+   }
+
+   @Override
+   public PalletList executeGetAllPallets()
+   {
+      try
+      {
+      PreparedStatement partStatement = 
+            DataServer.connection.prepareStatement("SELECT * FROM Part");
+      
+      PreparedStatement palletStatement = 
+            DataServer.connection.prepareStatement("SELECT * FROM Pallet");
+       
+      ResultSet partResultSet = partStatement.executeQuery();
+      ResultSet palletResultSet = palletStatement.executeQuery();
+      
+      PalletList palletList = new PalletList();
+      
+      while(palletResultSet.next())
+      {
+         Pallet pallet = new Pallet();
+         pallet.setPalletId(palletResultSet.getInt("id"));
+         pallet.setPartType(palletResultSet.getString("partType"));
+         pallet.setWeight(palletResultSet.getDouble("weight"));
+         pallet.setMaxWeight(palletResultSet.getDouble("maxWeight"));
+         pallet.setState(palletResultSet.getString("state"));
+         palletList.addPallet(pallet);
+      }
+      
+      while(partResultSet.next())
+      {
+         Part part = new Part();
+         part.setPartId(partResultSet.getInt("id"));
+         part.setType(partResultSet.getString("type"));
+         part.setWeight(partResultSet.getDouble("weight"));
+         palletList.getList().forEach((x) -> {
+            try
+            {
+               if(x.getPalletId() == partResultSet.getInt("productId"))
+               {
+                  x.getPartList().addPart(part);
+               }
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+            }
+         });
+      }
+       
+
+      partStatement.close();
+      partResultSet.close();
+      palletStatement.close();
+      palletResultSet.close();
+      
+      System.out.println("[SUCCESS] Pallet List Retrieved");
+      
+      return palletList;
+      
+   }
+   catch (SQLException e) {
+      System.out.println("[FAIL] Pallet List Retrieval Failed");
+      e.printStackTrace();
+   }
+   return null;
+   }
+
+   @Override
+   public ProductList executeGetAllProducts()
+   {
+      try
+      {
+      PreparedStatement partStatement = 
+            DataServer.connection.prepareStatement("SELECT * FROM Part");
+      
+      PreparedStatement productStatement = 
+            DataServer.connection.prepareStatement("SELECT * FROM Product");
+       
+      ResultSet partResultSet = partStatement.executeQuery();
+      ResultSet productResultSet = productStatement.executeQuery();
+      
+      ProductList productList = new ProductList();
+      
+      while(productResultSet.next())
+      {
+         Product product = new Product();
+         product.setProductId(productResultSet.getInt("id"));
+         product.setName(productResultSet.getString("name"));
+         product.setType(productResultSet.getString("type"));
+         productList.addProduct(product);
+      }
+      
+      while(partResultSet.next())
+      {
+         Part part = new Part();
+         part.setPartId(partResultSet.getInt("id"));
+         part.setType(partResultSet.getString("type"));
+         part.setWeight(partResultSet.getDouble("weight"));
+         productList.getList().forEach((x) -> {
+            try
+            {
+               if(x.getProductId() == partResultSet.getInt("productId"))
+               {
+                  x.getPartList().addPart(part);
+               }
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+            }
+         });
+      }
+       
+      System.out.println(productList.toString());
+
+      partStatement.close();
+      partResultSet.close();
+      productStatement.close();
+      productResultSet.close();
+      
+      System.out.println("[SUCCESS] Product List Retrieved");
+      
+      return productList;
+      
+   }
+   catch (SQLException e) {
+      System.out.println("[FAIL] Product List Retrieval Failed");
+      e.printStackTrace();
+   }
+   return null;
+   }
 }
