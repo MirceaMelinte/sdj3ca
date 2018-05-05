@@ -505,7 +505,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 		   
 			PreparedStatement insertStatement = DataServer.connection
 					.prepareStatement("INSERT INTO part (type, weight, carId, palletId, productId) VALUES "
-					      + "(?, ?, (SELECT carId FROM Car WHERE chassisNumber = ?), -1, -1");
+					      + "(?, ?, (SELECT id FROM Car WHERE chassisNumber = ?), -1, -1)");
 
 			insertStatement.setString(1, part.getType());
 			insertStatement.setDouble(2, part.getWeight());
