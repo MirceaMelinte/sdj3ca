@@ -43,12 +43,86 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			view.show("Logic server is running... ");
 
 			this.cacheMemory = new Cache();
+			
+			loadCache();
+			
 			System.out.println("Caches initialized. ");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+
+	// TODO why these new methods in data server dont throw exceptions like other do?
+	private void loadCache() {
+
+		// Getting lists from data server
+		
+		PartList partList = dataServer.executeGetAllParts();
+		
+		if (partList == null) {
+			view.show("A problem has occured when updating PART list.");
+			return;
+		}
+		
+		CarList carList = dataServer.executeGetAllCars();
+		
+		if (carList == null) {
+			view.show("A problem has occured when updating CAR list.");
+			return;
+		}
+		
+		PalletList palletList = dataServer.executeGetAllPallets();
+		
+		if (palletList == null) {
+			view.show("A problem has occured when updating PALLET list.");
+			return;
+		}
+		
+		ProductList productList = dataServer.executeGetAllProducts();
+		
+		if (productList == null) {
+			view.show("A problem has occured when updating PRODUCT list.");
+			return;
+		}
+
+		// Populating Cache
+		
+		for (Part part: partList.getList()) 
+			cacheMemory.getPartCache().addPart(part);
+		
+		for (Car car: carList.getList()) {
+			Car newCar = new Car(car.getChassisNumber(), car.getManufacturer(), car.getModel(), car.getYear(), car.getWeight(), car.getState());
+			
+			cacheMemory.getCarCache().addCar(newCar);
+			
+			for (Part part : car.getPartList().getList()) 
+				newCar.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
+		}
+		
+		for (Pallet pallet: palletList.getList()) {
+			Pallet newPallet = new Pallet(pallet.getPalletId(), pallet.getMaxWeight(), pallet.getState());
+			newPallet.setPartType(pallet.getPartType());
+			newPallet.setWeight(pallet.getWeight());
+			
+			cacheMemory.getPalletCache().addPallet(newPallet);
+			
+			for (Part part : pallet.getPartList().getList()) 
+				newPallet.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
+		}
+		
+		for (Product product: productList.getList()) {
+			Product newProduct= new Product(product.getProductId(),product.getType(), product.getName());
+			
+			cacheMemory.getProductCache().addProduct(newProduct);
+			
+			for (Part part : product.getPartList().getList()) 
+				newProduct.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
+		}
+		
+		view.show("Cache loaded.");
+		
+	}
 
 	// Network Methods
 
