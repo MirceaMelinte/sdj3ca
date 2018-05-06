@@ -446,6 +446,17 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			insertStatement.execute();
 			insertStatement.close();
 			
+			PreparedStatement returnStatement = DataServer.connection
+               .prepareStatement("SELECT * FROM (SELECT id FROM product ORDER BY id DESC) WHERE ROWNUM = 1");
+
+         ResultSet resultSet = returnStatement.executeQuery();
+
+         while (resultSet.next()) {
+            product.setProductId(resultSet.getInt("id"));
+         }
+			
+			System.out.println(product.toString());
+			
 			if (product.getPartList().count() > 0) {
 				product.getPartList().getList().forEach(part -> {
 					try {
@@ -462,15 +473,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			}
 
 			DataServer.connection.commit();
-			
-			PreparedStatement returnStatement = DataServer.connection
-					.prepareStatement("SELECT * FROM (SELECT id FROM product ORDER BY id DESC) WHERE ROWNUM = 1");
-
-			ResultSet resultSet = returnStatement.executeQuery();
-
-			while (resultSet.next()) {
-				product.setProductId(resultSet.getInt("id"));
-			}
 
 			System.out.println("[SUCCESS] Successful execution of new product registration. Product number: "
 							+ product.getProductId());

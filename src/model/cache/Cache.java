@@ -51,7 +51,7 @@ public class Cache implements Serializable {
             break;
          case "REGISTER_PART":
             car = (Car) t.getLoad();
-            part = car.getPartList().getPart(0);
+            part = car.getPartList().getList().get(0);
             carCache.getCache().get(car.getChassisNumber()).
                getPartList().addPart(part);
             
@@ -80,7 +80,7 @@ public class Cache implements Serializable {
             break;
          case "UPDATE_PALLET_PART":
             pallet = (Pallet) t.getLoad();
-            part = pallet.getPartList().getPart(0);
+            part = pallet.getPartList().getList().get(0);
             palletCache.getCache().get(pallet.getPalletId()).getPartList().addPart(part);
             palletCache.getCache().get(pallet.getPalletId()).setWeight(pallet.getWeight());
             if (palletCache.getCache().get(pallet.getPalletId()).getPartType() == "-1") 
@@ -88,7 +88,7 @@ public class Cache implements Serializable {
             break;
          case "UPDATE_PRODUCT_PART":
             product = (Product) t.getLoad();
-            part = product.getPartList().getPart(0);
+            part = product.getPartList().getList().get(0);
             palletCache.getCache().get(product.getProductId()).getPartList().addPart(part);
             break;
          case "UPDATE_PALLET_WEIGHT":
