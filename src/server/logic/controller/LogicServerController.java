@@ -54,7 +54,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 
 	// TODO why these new methods in data server dont throw exceptions like other do?
-	private void loadCache() {
+	private void loadCache() throws RemoteException, SQLException {
 
 		// Getting lists from data server
 		
@@ -86,19 +86,24 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			return;
 		}
 
-		// Populating Cache
+		// Populating Cache	
 		
-		for (Part part: partList.getList()) 
-			cacheMemory.getPartCache().addPart(part);
+		partList.getList().forEach((part) -> {
+		   cacheMemory.getPartCache().addPart(part);
+		});
 		
-		for (Car car: carList.getList()) {
-			Car newCar = new Car(car.getChassisNumber(), car.getManufacturer(), car.getModel(), car.getYear(), car.getWeight(), car.getState());
-			
-			cacheMemory.getCarCache().addCar(newCar);
-			
-			for (Part part : car.getPartList().getList()) 
-				newCar.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
-		}
+	    System.out.println(cacheMemory.getPartCache().toString());
+		
+		carList.getList().forEach((car) -> {
+		   Car newCar = new Car(car.getChassisNumber(), car.getManufacturer(), 
+               car.getModel(), car.getYear(), car.getWeight(), car.getState());        
+         
+         cacheMemory.getCarCache().addCar(newCar);
+         
+         car.getPartList().getList().forEach((part) -> {
+            newCar.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
+         });
+		});
 		
 		for (Pallet pallet: palletList.getList()) {
 			Pallet newPallet = new Pallet(pallet.getPalletId(), pallet.getMaxWeight(), pallet.getState());
@@ -462,12 +467,12 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		try {
 			Car car = cacheMemory.getCarCache().getCache().get(chassisNumber);
 			
-			if(car != null)
-         {
-            cacheMemory.getCarCache().getCache().put(car.getChassisNumber(), car);
+//			if(car != null)
+//         {
+//            cacheMemory.getCarCache().getCache().put(car.getChassisNumber(), car);
             return car;
-         }
-			return null;
+//         }
+//			return null;
 
 		} catch (Exception e) {
 			e.printStackTrace();

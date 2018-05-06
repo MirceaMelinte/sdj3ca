@@ -9,21 +9,23 @@ import model.*;
 public interface IDataServer extends Remote {
    
    // Initial cache synchronization
-   CarList executeGetAllCars();
-   PartList executeGetAllParts();
-   PalletList executeGetAllPallets();
-   ProductList executeGetAllProducts();
+   CarList executeGetAllCars() throws RemoteException, SQLException;
+   PartList executeGetAllParts() throws RemoteException, SQLException;
+   PalletList executeGetAllPallets() throws RemoteException, SQLException;
+   ProductList executeGetAllProducts() throws RemoteException, SQLException;
    
    
    
-	Car executeGetCarByChassisNumber(String chassisNumber) throws RemoteException;
-	PalletList executeGetAvailablePallets(Part part) throws RemoteException;
-	CarList executeGetAvailableCars() throws RemoteException;
-	Pallet executeGetPalletById(int palletId) throws RemoteException;
-	Part executeGetPartById(int partId) throws RemoteException;
-	Car executeGetCarByPart(int partId) throws RemoteException;
-	PartList executeGetPartsByProduct(int productId) throws RemoteException;
-	PartList executeGetStolenParts(String chassisNumber) throws RemoteException, SQLException;
+	Car executeGetCarByChassisNumber(String chassisNumber) throws RemoteException, SQLException;
+	PalletList executeGetAvailablePallets(Part part) throws RemoteException, SQLException;
+	CarList executeGetAvailableCars() throws RemoteException, SQLException;
+	Pallet executeGetPalletById(int palletId) throws RemoteException, SQLException;
+	Part executeGetPartById(int partId) throws RemoteException, SQLException;
+	Car executeGetCarByPart(int partId) throws RemoteException, SQLException;
+	
+	PartList executeGetPartsByProduct(int productId) throws RemoteException, SQLException;
+	PartList executeGetPartsByPallet(int palletId) throws RemoteException, SQLException;
+	PartList executeGetPartsByCar(String chassisNumber) throws RemoteException, SQLException;
 	ProductList executeGetStolenProducts(String chassisNumber) throws RemoteException, SQLException;
 //	Car executeGetStolenCar(String chassisNumber) throws RemoteException, SQLException;
 	Pallet executeUpdatePalletState(Pallet pallet, String state) throws RemoteException, SQLException;

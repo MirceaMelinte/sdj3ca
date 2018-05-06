@@ -694,7 +694,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 	}
 
    @Override
-   public PartList executeGetStolenParts(String chassisNumber) throws RemoteException,
+   public PartList executeGetPartsByCar(String chassisNumber) throws RemoteException,
          SQLException
    {
       try 
@@ -868,17 +868,16 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
    }
 
    @Override
-   public CarList executeGetAllCars()
+   public CarList executeGetAllCars() throws RemoteException, SQLException
    {
       try
       {
       PreparedStatement carStatement = 
             DataServer.connection.prepareStatement("SELECT c.chassisNumber AS \"chassisNumber\", c.model AS \"carModel\", c.manufacturer AS \"carManufacturer\", c.year AS \"carYear\", "
                   + "c.weight as \"carWeight\", c.state AS \"carState\" "
-              + "FROM Car");
-      
+              + "FROM Car c");     
+            
       ResultSet resultSet = carStatement.executeQuery();
-      
       CarList carList = new CarList();
       
       while(resultSet.next())
@@ -890,7 +889,9 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
          car.setYear(resultSet.getInt("carYear"));
          car.setWeight(resultSet.getDouble("carWeight"));
          car.setState(resultSet.getString("carState"));
-         carList.addCar(car);
+         PartList partList = executeGetPartsByCar(car.getChassisNumber());
+         car.setPartList(partList);
+         carList.addCar(car);          
       }
          System.out.println("[SUCCESS] Car List Retrieved");
          return carList;
@@ -905,12 +906,12 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
    }
 
    @Override
-   public PartList executeGetAllParts()
+   public PartList executeGetAllParts() throws RemoteException, SQLException
    {
       try {
          PreparedStatement selectStatement = DataServer.connection.prepareStatement(
                "SELECT p.id AS \"partId\", p.type AS \"partType\", p.weight AS \"partWeight\" "
-                + "FROM part");        
+                + "FROM part p");        
          ResultSet resultSet = selectStatement.executeQuery();
          PartList partList = new PartList();
          
@@ -936,17 +937,13 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
    }
 
    @Override
-   public PalletList executeGetAllPallets()
+   public PalletList executeGetAllPallets() throws RemoteException, SQLException
    {
       try
-      {
-      PreparedStatement partStatement = 
-            DataServer.connection.prepareStatement("SELECT * FROM Part");
-      
+      {   
       PreparedStatement palletStatement = 
             DataServer.connection.prepareStatement("SELECT * FROM Pallet");
        
-      ResultSet partResultSet = partStatement.executeQuery();
       ResultSet palletResultSet = palletStatement.executeQuery();
       
       PalletList palletList = new PalletList();
@@ -959,33 +956,11 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
          pallet.setWeight(palletResultSet.getDouble("weight"));
          pallet.setMaxWeight(palletResultSet.getDouble("maxWeight"));
          pallet.setState(palletResultSet.getString("state"));
+         PartList partList = executeGetPartsByPallet(pallet.getPalletId());
+         pallet.setPartList(partList);
          palletList.addPallet(pallet);
       }
-      
-      while(partResultSet.next())
-      {
-         Part part = new Part();
-         part.setPartId(partResultSet.getInt("id"));
-         part.setType(partResultSet.getString("type"));
-         part.setWeight(partResultSet.getDouble("weight"));
-         palletList.getList().forEach((x) -> {
-            try
-            {
-               if(x.getPalletId() == partResultSet.getInt("productId"))
-               {
-                  x.getPartList().addPart(part);
-               }
-            }
-            catch (Exception e)
-            {
-               e.printStackTrace();
-            }
-         });
-      }
-       
 
-      partStatement.close();
-      partResultSet.close();
       palletStatement.close();
       palletResultSet.close();
       
@@ -1002,17 +977,13 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
    }
 
    @Override
-   public ProductList executeGetAllProducts()
+   public ProductList executeGetAllProducts() throws RemoteException, SQLException
    {
       try
-      {
-      PreparedStatement partStatement = 
-            DataServer.connection.prepareStatement("SELECT * FROM Part");
-      
+      {    
       PreparedStatement productStatement = 
             DataServer.connection.prepareStatement("SELECT * FROM Product");
        
-      ResultSet partResultSet = partStatement.executeQuery();
       ResultSet productResultSet = productStatement.executeQuery();
       
       ProductList productList = new ProductList();
@@ -1023,34 +994,14 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
          product.setProductId(productResultSet.getInt("id"));
          product.setName(productResultSet.getString("name"));
          product.setType(productResultSet.getString("type"));
+         PartList partList = executeGetPartsByProduct(product.getProductId());
+         product.setPartList(partList);
          productList.addProduct(product);
       }
       
-      while(partResultSet.next())
-      {
-         Part part = new Part();
-         part.setPartId(partResultSet.getInt("id"));
-         part.setType(partResultSet.getString("type"));
-         part.setWeight(partResultSet.getDouble("weight"));
-         productList.getList().forEach((x) -> {
-            try
-            {
-               if(x.getProductId() == partResultSet.getInt("productId"))
-               {
-                  x.getPartList().addPart(part);
-               }
-            }
-            catch (Exception e)
-            {
-               e.printStackTrace();
-            }
-         });
-      }
        
       System.out.println(productList.toString());
 
-      partStatement.close();
-      partResultSet.close();
       productStatement.close();
       productResultSet.close();
       
@@ -1064,5 +1015,40 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
       e.printStackTrace();
    }
    return null;
+   }
+
+   @Override
+   public PartList executeGetPartsByPallet(int palletId)
+         throws RemoteException, SQLException
+   {
+      try {
+         PreparedStatement selectStatement = DataServer.connection.prepareStatement(
+               "SELECT p.id AS \"partId\", p.type AS \"partType\", p.weight AS \"partWeight\""
+                + "FROM part p WHERE p.palletId = ?");
+         selectStatement.setInt(1, palletId);
+         
+         ResultSet resultSet = selectStatement.executeQuery();
+         PartList parts = new PartList();
+
+         while (resultSet.next()) {
+            Part part = new Part();
+            part.setPartId(resultSet.getInt("partId"));
+            part.setType(resultSet.getString("partType"));
+            part.setWeight(resultSet.getDouble("partWeight"));
+            
+            parts.addPart(part);
+         }
+
+         selectStatement.close();
+         resultSet.close();
+         System.out.println("[SUCCESS] Successful retrieval of " + parts.count() + " parts from the database. ");
+
+         return parts;
+      } catch (Exception e) {
+         System.out.println("[FAIL] Failed execution of parts retrieval. ");
+         e.printStackTrace();
+      }
+
+      return null;
    }
 }
