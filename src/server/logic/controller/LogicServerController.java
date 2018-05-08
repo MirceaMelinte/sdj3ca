@@ -130,14 +130,12 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		}
 
 		for (Product product : productList.getList()) {
-			Product newProduct = new Product(product.getProductId(),
-					product.getType(), product.getName());
+			Product newProduct = new Product(product.getProductId(), product.getType(), product.getName());
 
 			cacheMemory.getProductCache().addProduct(newProduct);
 
 			for (Part part : product.getPartList().getList())
-				newProduct.getPartList().addPart(
-						cacheMemory.getPartCache().getPart(part.getPartId()));
+				newProduct.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
 		}
 
 		view.show("Cache loaded.");
@@ -153,8 +151,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		// Validation
 
-		if (!Validation.validate(car.getChassisNumber(),
-				Validation.CHASSIS_NUMBER))
+		if (!Validation.validate(car.getChassisNumber(), Validation.CHASSIS_NUMBER))
 			return "[VALIDATION ERROR] Invalid car chassis number. ";
 
 		if (!Validation.validate(car.getYear(), Validation.YEAR))
@@ -194,8 +191,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	}
 
 	@Override
-	public String validateRegisterPart(Part part, String chassisNumber)
-			throws RemoteException {
+	public String validateRegisterPart(Part part, String chassisNumber) throws RemoteException {
 
 		// Validate
 
@@ -235,8 +231,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	}
 
 	@Override
-	public String validatePutPart(int partId, int palletId)
-			throws RemoteException {
+	public String validatePutPart(int partId, int palletId) throws RemoteException {
 
 		// Validation
 
@@ -318,8 +313,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		// Update Database
 
 		try {
-			pallet = dataServer.executeUpdatePalletState(pallet,
-					Pallet.FINISHED);
+			pallet = dataServer.executeUpdatePalletState(pallet, Pallet.FINISHED);
 
 			if (pallet == null)
 				return "[FAIL] Could not persist the setting of the pallet state. ";
@@ -346,16 +340,14 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		for (Pallet pallet : cacheMemory.getPalletCache().getCache().values())
 			if (pallet.getPartType().equals(part.getType())
-					&& (pallet.getWeight() + part.getWeight()) <= pallet
-							.getMaxWeight())
+					&& (pallet.getWeight() + part.getWeight()) <= pallet.getMaxWeight())
 				return pallet;
 
 		return null;
 	}
 
 	@Override
-	public String validateFinishDismantling(String chassisNumber)
-			throws RemoteException {
+	public String validateFinishDismantling(String chassisNumber) throws RemoteException {
 
 		// Validation
 
@@ -392,8 +384,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	 * partList has only a list of parts that contain only theit Id
 	 */
 	@Override
-	public String validateRegisterProduct(Product product)
-			throws RemoteException {
+	public String validateRegisterProduct(Product product) throws RemoteException {
 
 		// Validate
 
@@ -437,8 +428,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	// FOURTH CLIENT
 
 	@Override
-	public PartList validateGetStolenParts(String chassisNumber)
-			throws RemoteException {
+	public PartList validateGetStolenParts(String chassisNumber) throws RemoteException {
 		try {
 			Car stolenCar = cacheMemory.getCarCache().getCache()
 					.get(chassisNumber);
@@ -456,8 +446,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	}
 
 	@Override
-	public ProductList validateGetStolenProducts(String chassisNumber)
-			throws RemoteException {
+	public ProductList validateGetStolenProducts(String chassisNumber) throws RemoteException {
 		try {
 			Car stolenCar = cacheMemory.getCarCache().getCache()
 					.get(chassisNumber); // Check the cache memory if a car with
@@ -512,8 +501,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	}
 
 	@Override
-	public Car validateGetStolenCar(String chassisNumber)
-			throws RemoteException {
+	public Car validateGetStolenCar(String chassisNumber) throws RemoteException {
 		try {
 			Car car = cacheMemory.getCarCache().getCache().get(chassisNumber);
 
