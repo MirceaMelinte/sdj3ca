@@ -10,11 +10,10 @@ package webservice;
 /**
  *  TraceStolenProductsResponse bean class
  */
-@SuppressWarnings({"unchecked",
-    "unused"
-})
 public class TraceStolenProductsResponse implements org.apache.axis2.databinding.ADBBean {
-    public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
+	private static final long serialVersionUID = 1L;
+
+	public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
             "traceStolenProductsResponse", "ns1");
 
     /**
@@ -171,7 +170,8 @@ public class TraceStolenProductsResponse implements org.apache.axis2.databinding
     /**
      * Util method to write an attribute without the ns prefix
      */
-    private void writeAttribute(java.lang.String namespace,
+    @SuppressWarnings("unused")
+	private void writeAttribute(java.lang.String namespace,
         java.lang.String attName, java.lang.String attValue,
         javax.xml.stream.XMLStreamWriter xmlWriter)
         throws javax.xml.stream.XMLStreamException {
@@ -186,7 +186,8 @@ public class TraceStolenProductsResponse implements org.apache.axis2.databinding
     /**
      * Util method to write an attribute without the ns prefix
      */
-    private void writeQNameAttribute(java.lang.String namespace,
+    @SuppressWarnings("unused")
+	private void writeQNameAttribute(java.lang.String namespace,
         java.lang.String attName, javax.xml.namespace.QName qname,
         javax.xml.stream.XMLStreamWriter xmlWriter)
         throws javax.xml.stream.XMLStreamException {
@@ -217,7 +218,8 @@ public class TraceStolenProductsResponse implements org.apache.axis2.databinding
     /**
      *  method to handle Qnames
      */
-    private void writeQName(javax.xml.namespace.QName qname,
+    @SuppressWarnings("unused")
+	private void writeQName(javax.xml.namespace.QName qname,
         javax.xml.stream.XMLStreamWriter xmlWriter)
         throws javax.xml.stream.XMLStreamException {
         java.lang.String namespaceURI = qname.getNamespaceURI();
@@ -246,7 +248,8 @@ public class TraceStolenProductsResponse implements org.apache.axis2.databinding
         }
     }
 
-    private void writeQNames(javax.xml.namespace.QName[] qnames,
+    @SuppressWarnings("unused")
+	private void writeQNames(javax.xml.namespace.QName[] qnames,
         javax.xml.stream.XMLStreamWriter xmlWriter)
         throws javax.xml.stream.XMLStreamException {
         if (qnames != null) {
@@ -324,16 +327,18 @@ public class TraceStolenProductsResponse implements org.apache.axis2.databinding
      *  Factory class that keeps the parse method
      */
     public static class Factory {
-        private static org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(Factory.class);
+        @SuppressWarnings("unused")
+		private static org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(Factory.class);
 
         /**
          * static method to create the object
-         * Precondition:  If this object is an element, the current or next start element starts this object and any intervening reader events are ignorable
+         * Precondition:  If this object is an element, the current or next start element starts this object and any intervening reader events are ignored
          *                If this object is not an element, it is a complex type and the reader is at the event just after the outer start element
          * Postcondition: If this object is an element, the reader is positioned at its end element
          *                If this object is a complex type, the reader is positioned at the end element of its outer element
          */
-        public static TraceStolenProductsResponse parse(
+        @SuppressWarnings({ "unused", "rawtypes" })
+		public static TraceStolenProductsResponse parse(
             javax.xml.stream.XMLStreamReader reader) throws java.lang.Exception {
             TraceStolenProductsResponse object = new TraceStolenProductsResponse();
 

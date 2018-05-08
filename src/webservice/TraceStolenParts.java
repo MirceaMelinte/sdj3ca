@@ -10,11 +10,13 @@ package webservice;
 /**
  *  TraceStolenParts bean class
  */
-@SuppressWarnings({"unchecked",
+@SuppressWarnings({
     "unused"
 })
 public class TraceStolenParts implements org.apache.axis2.databinding.ADBBean {
-    public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
+	private static final long serialVersionUID = 1L;
+
+	public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
             "traceStolenParts", "ns1");
 
     /**
@@ -333,7 +335,8 @@ public class TraceStolenParts implements org.apache.axis2.databinding.ADBBean {
          * Postcondition: If this object is an element, the reader is positioned at its end element
          *                If this object is a complex type, the reader is positioned at the end element of its outer element
          */
-        public static TraceStolenParts parse(
+        @SuppressWarnings("rawtypes")
+		public static TraceStolenParts parse(
             javax.xml.stream.XMLStreamReader reader) throws java.lang.Exception {
             TraceStolenParts object = new TraceStolenParts();
 

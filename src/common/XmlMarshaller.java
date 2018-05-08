@@ -10,7 +10,7 @@ import javax.xml.bind.Unmarshaller;
 
 //Generic helper class for XML/Object and Object/XML marshalling
 //Methods are generic so they can be reused on any type of objects
-//in the system as long as a XmlMarshaller object is of a corresponging
+//in the system as long as a XmlMarshaller object is of a corresponding
 //class of the object to be serialized
 
 public class XmlMarshaller<T>

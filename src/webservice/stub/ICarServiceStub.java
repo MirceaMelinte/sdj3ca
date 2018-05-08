@@ -10,12 +10,13 @@ package webservice.stub;
 /*
  *  ICarServiceStub java implementation
  */
+@SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public class ICarServiceStub extends org.apache.axis2.client.Stub {
     private static int counter = 0;
     protected org.apache.axis2.description.AxisOperation[] _operations;
 
     //hashmaps to keep the fault mapping
-    private java.util.HashMap faultExceptionNameMap = new java.util.HashMap();
+	private java.util.HashMap faultExceptionNameMap = new java.util.HashMap();
     private java.util.HashMap faultExceptionClassNameMap = new java.util.HashMap();
     private java.util.HashMap faultMessageMap = new java.util.HashMap();
     private javax.xml.namespace.QName[] opNameArray = null;
@@ -193,7 +194,7 @@ public class ICarServiceStub extends org.apache.axis2.client.Stub {
                         java.lang.String exceptionClassName = (java.lang.String) faultExceptionClassNameMap.get(new org.apache.axis2.client.FaultMapKey(
                                     faultElt.getQName(), "traceStolenProducts"));
                         java.lang.Class exceptionClass = java.lang.Class.forName(exceptionClassName);
-                        java.lang.reflect.Constructor constructor = exceptionClass.getConstructor(java.lang.String.class);
+						java.lang.reflect.Constructor constructor = exceptionClass.getConstructor(java.lang.String.class);
                         java.lang.Exception ex = (java.lang.Exception) constructor.newInstance(f.getMessage());
 
                         //message class
@@ -647,7 +648,9 @@ public class ICarServiceStub extends org.apache.axis2.client.Stub {
 
     //http://localhost:8080/axis2/services/ICarService
     public static class TraceStolenParts implements org.apache.axis2.databinding.ADBBean {
-        public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
+		private static final long serialVersionUID = 1L;
+
+		public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
                 "traceStolenParts", "ns1");
 
         /**
@@ -1075,7 +1078,9 @@ public class ICarServiceStub extends org.apache.axis2.client.Stub {
     }
 
     public static class TraceStolenProducts implements org.apache.axis2.databinding.ADBBean {
-        public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
+		private static final long serialVersionUID = 1L;
+
+		public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
                 "traceStolenProducts", "ns1");
 
         /**
@@ -1494,12 +1499,11 @@ public class ICarServiceStub extends org.apache.axis2.client.Stub {
     }
 
     public static class TraceStolenProductsResponse implements org.apache.axis2.databinding.ADBBean {
-        public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
+		private static final long serialVersionUID = 1L;
+
+		public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
                 "traceStolenProductsResponse", "ns1");
 
-        /**
-         * field for _return
-         */
         protected java.lang.String local_return;
 
         /*  This tracker boolean wil be used to detect whether the user called the set method
@@ -1914,7 +1918,9 @@ public class ICarServiceStub extends org.apache.axis2.client.Stub {
     }
 
     public static class TraceStolenCarResponse implements org.apache.axis2.databinding.ADBBean {
-        public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
+		private static final long serialVersionUID = 1L;
+
+		public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
                 "traceStolenCarResponse", "ns1");
 
         /**
@@ -2333,7 +2339,9 @@ public class ICarServiceStub extends org.apache.axis2.client.Stub {
     }
 
     public static class TraceStolenCar implements org.apache.axis2.databinding.ADBBean {
-        public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
+		private static final long serialVersionUID = 1L;
+
+		public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
                 "traceStolenCar", "ns1");
 
         /**
@@ -2752,7 +2760,9 @@ public class ICarServiceStub extends org.apache.axis2.client.Stub {
     }
 
     public static class TraceStolenPartsResponse implements org.apache.axis2.databinding.ADBBean {
-        public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
+		private static final long serialVersionUID = 1L;
+
+		public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
                 "traceStolenPartsResponse", "ns1");
 
         /**

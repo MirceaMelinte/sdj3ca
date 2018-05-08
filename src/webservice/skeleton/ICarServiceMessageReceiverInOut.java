@@ -10,6 +10,7 @@ package webservice.skeleton;
 /**
  *  ICarServiceMessageReceiverInOut message receiver
  */
+@SuppressWarnings({"rawtypes", "unused"})
 public class ICarServiceMessageReceiverInOut extends org.apache.axis2.receivers.AbstractInOutMessageReceiver {
     public void invokeBusinessLogic(
         org.apache.axis2.context.MessageContext msgContext,

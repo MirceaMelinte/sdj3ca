@@ -10,11 +10,13 @@ package webservice;
 /**
  *  TraceStolenCarResponse bean class
  */
-@SuppressWarnings({"unchecked",
+@SuppressWarnings({
     "unused"
 })
 public class TraceStolenCarResponse implements org.apache.axis2.databinding.ADBBean {
-    public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
+	private static final long serialVersionUID = 1L;
+
+	public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName("http://webservice",
             "traceStolenCarResponse", "ns1");
 
     /**
@@ -333,7 +335,8 @@ public class TraceStolenCarResponse implements org.apache.axis2.databinding.ADBB
          * Postcondition: If this object is an element, the reader is positioned at its end element
          *                If this object is a complex type, the reader is positioned at the end element of its outer element
          */
-        public static TraceStolenCarResponse parse(
+        @SuppressWarnings("rawtypes")
+		public static TraceStolenCarResponse parse(
             javax.xml.stream.XMLStreamReader reader) throws java.lang.Exception {
             TraceStolenCarResponse object = new TraceStolenCarResponse();
 
