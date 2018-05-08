@@ -43,103 +43,90 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			view.show("Logic server is running... ");
 
 			this.cacheMemory = new Cache();
-
+			
 			loadCache();
-
+			
 			System.out.println("Caches initialized. ");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	// TODO why these new methods in data server dont throw exceptions like
-	// other do?
+
+	// TODO why these new methods in data server dont throw exceptions like other do?
 	private void loadCache() throws RemoteException, SQLException {
 
 		// Getting lists from data server
-
+		
 		PartList partList = dataServer.executeGetAllParts();
-
+		
 		if (partList == null) {
 			view.show("A problem has occured when updating PART list.");
 			return;
 		}
-
+		
 		CarList carList = dataServer.executeGetAllCars();
-
+		
 		if (carList == null) {
 			view.show("A problem has occured when updating CAR list.");
 			return;
 		}
-
+		
 		PalletList palletList = dataServer.executeGetAllPallets();
-
+		
 		if (palletList == null) {
 			view.show("A problem has occured when updating PALLET list.");
 			return;
 		}
-
+		
 		ProductList productList = dataServer.executeGetAllProducts();
-
+		
 		if (productList == null) {
 			view.show("A problem has occured when updating PRODUCT list.");
 			return;
 		}
 
-		// Populating Cache
-
+		// Populating Cache	
+		
 		partList.getList().forEach((part) -> {
-			cacheMemory.getPartCache().addPart(part);
+		   cacheMemory.getPartCache().addPart(part);
 		});
-
-		System.out.println(cacheMemory.getPartCache().toString());
-
-		carList.getList()
-				.forEach(
-						(car) -> {
-							Car newCar = new Car(car.getChassisNumber(), car
-									.getManufacturer(), car.getModel(), car
-									.getYear(), car.getWeight(), car.getState());
-
-							cacheMemory.getCarCache().addCar(newCar);
-
-							car.getPartList()
-									.getList()
-									.forEach(
-											(part) -> {
-												newCar.getPartList()
-														.addPart(
-																cacheMemory
-																		.getPartCache()
-																		.getPart(
-																				part.getPartId()));
-											});
-						});
-
-		for (Pallet pallet : palletList.getList()) {
-			Pallet newPallet = new Pallet(pallet.getPalletId(),
-					pallet.getMaxWeight(), pallet.getState());
+		
+	    System.out.println(cacheMemory.getPartCache().toString());
+		
+		carList.getList().forEach((car) -> {
+		   Car newCar = new Car(car.getChassisNumber(), car.getManufacturer(), 
+               car.getModel(), car.getYear(), car.getWeight(), car.getState());        
+         
+         cacheMemory.getCarCache().addCar(newCar);
+         
+         car.getPartList().getList().forEach((part) -> {
+            newCar.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
+         });
+		});
+		
+		for (Pallet pallet: palletList.getList()) {
+			Pallet newPallet = new Pallet(pallet.getPalletId(), pallet.getMaxWeight(), pallet.getState());
 			newPallet.setPartType(pallet.getPartType());
 			newPallet.setWeight(pallet.getWeight());
-
+			
 			cacheMemory.getPalletCache().addPallet(newPallet);
-
-			for (Part part : pallet.getPartList().getList())
-				newPallet.getPartList().addPart(
-						cacheMemory.getPartCache().getPart(part.getPartId()));
+			
+			for (Part part : pallet.getPartList().getList()) 
+				newPallet.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
 		}
-
-		for (Product product : productList.getList()) {
-			Product newProduct = new Product(product.getProductId(), product.getType(), product.getName());
-
+		
+		for (Product product: productList.getList()) {
+			Product newProduct= new Product(product.getProductId(),product.getType(), product.getName());
+			
 			cacheMemory.getProductCache().addProduct(newProduct);
-
-			for (Part part : product.getPartList().getList())
+			
+			for (Part part : product.getPartList().getList()) 
 				newProduct.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
 		}
-
+		
 		view.show("Cache loaded.");
-
+		
 	}
 
 	// Network Methods
@@ -179,12 +166,13 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 	@Override
 	public CarList getAvailableCars() throws RemoteException {
-
+		
 		CarList carList = new CarList();
-
-		for (Car car : cacheMemory.getCarCache().getCache().values())
+		
+		for (Car car : cacheMemory.getCarCache().getCache().values()) 
 			if (!car.getState().equals(Car.FINISHED))
 				carList.addCar(car);
+		
 
 		return carList;
 
@@ -192,6 +180,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 	@Override
 	public String validateRegisterPart(Part part, String chassisNumber) throws RemoteException {
+
 
 		// Validate
 
@@ -209,16 +198,16 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		if (!cacheMemory.getCarCache().contains(chassisNumber))
 			return "[VALIDATION ERROR] Car not found.";
-
-		if (cacheMemory.getCarCache().getCar(chassisNumber).getState()
-				.equals(Car.FINISHED))
+		
+		if (cacheMemory.getCarCache().getCar(chassisNumber).getState().equals(Car.FINISHED))
 			return "[VALIDATION ERROR] This car is already finished.";
 
+		
 		// Update Database
 
 		try {
 			part = dataServer.executeRegisterNewPart(part, chassisNumber);
-
+		
 			if (part == null)
 				return "[FAIL] Part could not be registered. ";
 
@@ -243,17 +232,17 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		if (!cacheMemory.getPartCache().contains(partId))
 			return "[VALIDATION ERROR] Part not found.";
-
+		
 		if (!cacheMemory.getPalletCache().contains(palletId))
 			return "[VALIDATION ERROR] Pallet not found.";
-
+		
+		
 		Part part = this.cacheMemory.getPartCache().getPart(partId);
-
+		
 		Pallet pallet = this.cacheMemory.getPalletCache().getPallet(palletId);
 
-		double availableWeightCapacity = pallet.getMaxWeight()
-				- pallet.getWeight();
-
+		double availableWeightCapacity = pallet.getMaxWeight() - pallet.getWeight();
+		
 		if (availableWeightCapacity < part.getWeight())
 			return "[FAIL] Not enough space on the pallet";
 
@@ -264,6 +253,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			if (!pallet.getPartType().equals(part.getType()))
 				return "[FAIL] Type missmatch";
 
+		
 		// Update Database
 
 		try {
@@ -272,19 +262,21 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			if (part == null)
 				return "[FAIL] Failed database update part pallet. ";
 
+			
 			/*
-			 * pallet.setWeight(pallet.getWeight() + part.getWeight());
-			 * 
-			 * // TODO maybe this should have been done by
-			 * executeUpdatePartPallet already pallet =
-			 * dataServer.executeUpdatePalletWeight(pallet);
-			 * 
-			 * if (pallet == null) return
-			 * "[FAIL] Failed database update pallet weight. ";
-			 * 
-			 * if (pallet.getPartType().equals("-1")); // TODO need
-			 * updatePalletType method in database interface
-			 */
+			pallet.setWeight(pallet.getWeight() + part.getWeight());
+			
+			// TODO maybe this should have been done by executeUpdatePartPallet already
+			pallet = dataServer.executeUpdatePalletWeight(pallet); 
+			
+			if (pallet == null)
+				return "[FAIL] Failed database update pallet weight. ";
+
+			
+			if (pallet.getPartType().equals("-1"));
+				// TODO need updatePalletType method in database interface
+				 
+			*/
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -337,18 +329,18 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		if (!cacheMemory.getPartCache().contains(part.getPartId()))
 			return null;
-
+	
 		for (Pallet pallet : cacheMemory.getPalletCache().getCache().values())
 			if (pallet.getPartType().equals(part.getType())
-					&& (pallet.getWeight() + part.getWeight()) <= pallet.getMaxWeight())
+					&& (pallet.getWeight() + part.getWeight()) <= pallet.getMaxWeight()) 
 				return pallet;
-
+			
 		return null;
 	}
 
 	@Override
 	public String validateFinishDismantling(String chassisNumber) throws RemoteException {
-
+		
 		// Validation
 
 		if (!Validation.validate(chassisNumber, Validation.CHASSIS_NUMBER))
@@ -388,8 +380,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		// Validate
 
-		if (product == null) // TODO should validation like this be in other
-								// methods too?
+		if (product == null) // TODO should validation like this be in other methods too?
 			return "[VALIDATION ERROR] Null objects.";
 
 		if (product.getName() == null || product.getName().isEmpty())
@@ -404,15 +395,14 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			if (!cacheMemory.getPartCache().contains(part.getPartId()))
 				return "[VALIDATION ERROR] Part does not exist.";
 		}
-
-		// TODO validation - is the part on a pallet that is finished? it needs
-		// to be
+		
+		// TODO validation - is the part on a pallet that is finished? it needs to be
 
 		// Update Database
 
 		try {
 			product = dataServer.executeRegisterProduct(product);
-
+			
 			if (product == null)
 				return "[FAIL] Failed persisting the product.";
 
@@ -420,8 +410,8 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			e.printStackTrace();
 		}
 
-		return "[SUCCESS] The product was registered. ID: "
-				+ product.getProductId();
+
+		return "[SUCCESS] The product was registered. ID: " + product.getProductId();
 
 	}
 
@@ -429,71 +419,43 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 	@Override
 	public PartList validateGetStolenParts(String chassisNumber) throws RemoteException {
-		try {
-			Car stolenCar = cacheMemory.getCarCache().getCache()
-					.get(chassisNumber);
+	   try {        
+         Car stolenCar = cacheMemory.getCarCache().
+               getCache().get(chassisNumber);
+         
+         if(stolenCar != null)
+         {
+            return stolenCar.getPartList();
+         }
+         
+         return null;
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
 
-			if (stolenCar != null) {
-				return stolenCar.getPartList();
-			}
-
-			return null;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return null;
+      return null;
 	}
 
 	@Override
 	public ProductList validateGetStolenProducts(String chassisNumber) throws RemoteException {
 		try {
-			Car stolenCar = cacheMemory.getCarCache().getCache()
-					.get(chassisNumber); // Check the cache memory if a car with
-											// given chassis number exists
-
-			if (stolenCar != null) // If the car is in the cache memory
-			{
-				final ProductList stolenProductsFromCache = new ProductList(); // Create
-																				// empty
-																				// final
-																				// list
-																				// of
-																				// stolen
-																				// products
-				PartList stolenParts = stolenCar.getPartList(); // Get all the
-																// parts from
-																// the stolen
-																// car
-				cacheMemory
-						.getProductCache()
-						.getCache()
-						.forEach((x, y) -> { // For each entry in product cache
-									y.getPartList()
-											.getList()
-											.forEach((z) -> { // For each entry
-																// in part list
-																// of the
-																// product
-														if (stolenParts
-																.contains(z)) { // Find
-																				// matching
-																				// parts
-																				// and
-																				// products
-															stolenProductsFromCache
-																	.addProduct(y); // Add
-																					// stolen
-																					// products
-																					// into
-																					// the
-																					// list
-														}
-													});
-								});
-				return stolenProductsFromCache;
-			}
-			return null;
+		   Car stolenCar = cacheMemory.getCarCache().
+               getCache().get(chassisNumber);                              // Check the cache memory if a car with given chassis number exists
+         
+         if(stolenCar != null)                                             // If the car is in the cache memory
+         {
+            final ProductList stolenProductsFromCache = new ProductList(); // Create empty final list of stolen products
+            PartList stolenParts = stolenCar.getPartList();                // Get all the parts from the stolen car
+            cacheMemory.getProductCache().getCache().forEach((x, y) -> {   // For each entry in product cache
+               y.getPartList().getList().forEach((z) -> {                  // For each entry in part list of the product
+                  if(stolenParts.contains(z)) {                            // Find matching parts and products
+                     stolenProductsFromCache.addProduct(y);                // Add stolen products into the list
+                  }
+               });
+            });
+            return stolenProductsFromCache;
+         }
+         return null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -504,14 +466,13 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	public Car validateGetStolenCar(String chassisNumber) throws RemoteException {
 		try {
 			Car car = cacheMemory.getCarCache().getCache().get(chassisNumber);
-
-			// if(car != null)
-			// {
-			// cacheMemory.getCarCache().getCache().put(car.getChassisNumber(),
-			// car);
-			return car;
-			// }
-			// return null;
+			
+//			if(car != null)
+//         {
+//            cacheMemory.getCarCache().getCache().put(car.getChassisNumber(), car);
+            return car;
+//         }
+//			return null;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -520,8 +481,9 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		return null;
 	}
 
-	@Override
-	public <T> void update(Transaction<T> t) {
-		cacheMemory.updateCache(t);
-	}
+   @Override
+   public <T> void update(Transaction<T> t)
+   {
+      cacheMemory.updateCache(t);
+   }
 }
