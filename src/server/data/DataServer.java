@@ -703,7 +703,7 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
       {
          PreparedStatement statement = 
                DataServer.connection.prepareStatement("SELECT * FROM Part "
-                                             + "WHERE carId = (SELECT carId FROM Car WHERE chassisNumber = ?)");
+                                             + "WHERE carId = (SELECT id FROM Car WHERE chassisNumber = ?)");
          
          statement.setString(1, chassisNumber);
          ResultSet resultSet = statement.executeQuery();

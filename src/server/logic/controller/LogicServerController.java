@@ -44,7 +44,20 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 			this.cacheMemory = new Cache();
 			
-			loadCache();
+			new Thread(new Runnable() {
+			   public void run() {
+      			try
+               {
+      			   loadCache();
+               }
+                  catch (RemoteException | SQLException e) {
+                  System.out.println("Failed to load cache memory");
+                  e.printStackTrace();
+               }
+			}
+			}).start();
+			
+			
 			
 			System.out.println("Caches initialized. ");
 		} catch (Exception e) {
@@ -91,8 +104,6 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		partList.getList().forEach((part) -> {
 		   cacheMemory.getPartCache().addPart(part);
 		});
-		
-	    System.out.println(cacheMemory.getPartCache().toString());
 		
 		carList.getList().forEach((car) -> {
 		   Car newCar = new Car(car.getChassisNumber(), car.getManufacturer(), 
