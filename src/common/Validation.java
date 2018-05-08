@@ -5,7 +5,7 @@ public class Validation {
 	// 4 figure number 1900-2099 
 	public static final String YEAR = "(19|20)[0-9]{2}"; 
 	
-	// Upper case, lower case letters, numbers, length 17
+	// Upper case, lower case letters, numbers, length 8
 	public static final String CHASSIS_NUMBER = "[A-Za-z0-9]{8}"; 
 	
 	public static final String PALLET_ID = "[1-9][0-9]{3}";
