@@ -128,6 +128,3 @@ BEGIN
   INTO :new.id
   FROM dual;
 END;
-
-commit;
--- 

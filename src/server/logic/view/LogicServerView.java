@@ -14,6 +14,5 @@ public class LogicServerView {
 		System.out.print("Please enter " + what + ": ");
 		String input = in.nextLine();
 		return input;
-	}
-	
+	}	
 }

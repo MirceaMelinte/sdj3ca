@@ -71,7 +71,7 @@ public class ProductClientController {
 		Product product = new Product();
 		product.setName(tfProductName.getText());
 		product.setType(tfProductType.getText());
-		
+
 		product.setPartList(partList);
 		String serverResponse = logicServer.validateRegisterProduct(product);
 
@@ -98,4 +98,3 @@ public class ProductClientController {
 		lvListOfParts.setItems(items);
 	}
 }
-

@@ -6,20 +6,17 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
+public class ProductClient extends Application {
 
-public class ProductClient extends Application
-{
+	public static void main(String[] args) {
+		Application.launch(args);
+	}
 
-   public static void main(String[] args)
-   {
-      Application.launch(args);
-   }
-
-   @Override
-   public void start(Stage primaryStage) throws Exception
-   {
-      Pane mainPane = (Pane) FXMLLoader.load(ProductClient.class.getResource("view/ProductClientGUI.fxml"));
-      primaryStage.setScene(new Scene(mainPane));
-      primaryStage.show();
-   }
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		Pane mainPane = (Pane) FXMLLoader.load(ProductClient.class
+				.getResource("view/ProductClientGUI.fxml"));
+		primaryStage.setScene(new Scene(mainPane));
+		primaryStage.show();
+	}
 }

@@ -19,7 +19,7 @@ public class CarClientController {
 	private ILogicServer logicServer;
 
 	public CarClientController() throws RemoteException, MalformedURLException, NotBoundException {
-		 logicServer = (ILogicServer) Naming.lookup("rmi://localhost/logicServer");
+		logicServer = (ILogicServer) Naming.lookup("rmi://localhost/logicServer");
 	}
 
 	@FXML
@@ -39,7 +39,7 @@ public class CarClientController {
 			int year = Integer.parseInt(tfYear.getText());
 			double weight = Double.parseDouble(tfWeight.getText());
 			String state = Car.AVAILABLE;
-			
+
 			car = new Car(chassisNumber, manufacturer, model, year, weight, state);
 
 			String serverResponse = logicServer.validateRegisterCar(car);
@@ -49,7 +49,7 @@ public class CarClientController {
 			alert.setHeaderText(null);
 			alert.setContentText(serverResponse);
 			alert.showAndWait();
-			
+
 		} catch (NumberFormatException e) {
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("Error");
@@ -57,9 +57,5 @@ public class CarClientController {
 			alert.setContentText("Invalid Input");
 			alert.showAndWait();
 		}
-			
-
-
 	}
-
 }
