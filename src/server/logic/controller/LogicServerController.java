@@ -354,8 +354,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
          Car stolenCar = cacheMemory.getCarCache().
                getCache().get(chassisNumber);
          
-         if(stolenCar != null)
-         {
+         if(stolenCar != null) {
             return stolenCar.getPartList();
          }
          
@@ -370,21 +369,21 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	@Override
 	public ProductList validateProductsByCar(String chassisNumber) throws RemoteException {
 		try {
-		   Car stolenCar = cacheMemory.getCarCache().
-               getCache().get(chassisNumber);                              // Check the cache memory if a car with given chassis number exists
+		   Car car = cacheMemory.getCarCache().
+               getCache().get(chassisNumber);                                            // Check the cache memory if a car with given chassis number exists
          
-         if(stolenCar != null)                                             // If the car is in the cache memory
+         if(car != null)                                                                 // If the car is in the cache memory
          {
-            final ProductList stolenProductsFromCache = new ProductList(); // Create empty final list of stolen products
-            PartList stolenParts = stolenCar.getPartList();                // Get all the parts from the stolen car
-            cacheMemory.getProductCache().getCache().forEach((x, y) -> {   // For each entry in product cache
-               y.getPartList().getList().forEach((z) -> {                  // For each entry in part list of the product
-                  if(stolenParts.contains(z)) {                            // Find matching parts and products
-                     stolenProductsFromCache.addProduct(y);                // Add stolen products into the list
+            final ProductList productsFromCache = new ProductList();                     // Create empty final list of stolen products
+            PartList parts = car.getPartList();                                          // Get all the parts from the stolen car
+            cacheMemory.getProductCache().getCache().forEach((productId, product) -> {   // For each entry in product cache
+               product.getPartList().getList().forEach((part) -> {                       // For each entry in part list of the product
+                  if(parts.contains(part)) {                                             // Find matching parts and products
+                     productsFromCache.addProduct(product);                              // Add stolen products into the list
                   }
                });
             });
-            return stolenProductsFromCache;
+            return productsFromCache;
          }
          return null;
 		} catch (Exception e) {
@@ -398,13 +397,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		try {
 			Car car = cacheMemory.getCarCache().getCache().get(chassisNumber);
 			
-//			if(car != null)
-//         {
-//            cacheMemory.getCarCache().getCache().put(car.getChassisNumber(), car);
-            return car;
-//         }
-//			return null;
-
+         return car;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -488,6 +481,5 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		}
 		
 		view.show("Cache loaded.");
-		
 	}
 }
