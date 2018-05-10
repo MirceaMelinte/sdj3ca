@@ -1,5 +1,7 @@
 SELECT * FROM Part;
 SELECT * FROM Car;
+SELECT * FROM Pallet;
+SELECT * FROM Product;
 
 DELETE FROM Part;
 DELETE FROM Pallet;
@@ -7,16 +9,16 @@ DELETE FROM Car;
 DELETE FROM Product;
 
 INSERT INTO Car (manufacturer, model, year, weight, chassisNumber, state)
-    VALUES ('BMW', 'X5', 2016, 2500, '1JCCM85E5BT001312', 'Finished');
+    VALUES ('BMW', 'X5', 2016, 2500, '1JCCM85E', 'Finished');
     
 INSERT INTO Car (manufacturer, model, year, weight, chassisNumber, state)
-    VALUES ('AUDI', 'R8', 2018, 1900, '1JDDM85EABT002212', 'Finished');
+    VALUES ('AUDI', 'R8', 2018, 1900, '1JDDM85A', 'Finished');
     
 INSERT INTO Car (manufacturer, model, year, weight, chassisNumber, state)
-    VALUES ('BMW', 'M3', 2015, 2300, '1JKTK85E3AT001312', 'Finished');
+    VALUES ('BMW', 'M3', 2015, 2300, '1JKTK85E', 'Finished');
     
 INSERT INTO Car (manufacturer, model, year, weight, chassisNumber, state)
-    VALUES ('AUDI', 'TT', 2013, 2150, '1JKLM85E5BT231312', 'Finished');
+    VALUES ('AUDI', 'TT', 2013, 2150, '1JKLM86E', 'Finished');
     
     
 INSERT INTO Part (type, weight, carId, palletId, productId)
