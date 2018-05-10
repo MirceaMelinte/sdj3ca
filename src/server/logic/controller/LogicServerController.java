@@ -185,6 +185,18 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			if (!pallet.getPartType().equals(part.getType()))
 				return "[FAIL] Type missmatch";
 		
+	    // Check if part is already on this pallet 
+	    for (Part palletsPart : pallet.getPartList().getList()) 
+			if (palletsPart.getPartId() == part.getPartId())
+				return "[FAIL] Pallet already contains this part.";
+	    
+	    // Do not allow if part is already on some pallet
+	    for (Pallet palletFromCahce : cacheMemory.getPalletCache().getCache().values()) 
+			for (Part partFromProduct : palletFromCahce.getPartList().getList()) 
+				if (partFromProduct.getPartId() == part.getPartId()) 
+					return "[FAIL] Part is already a on some pallet.";
+	    
+	    
 	    if (pallet.getPartType().equals("no type"))
 	         pallet.setPartType(part.getType());
 
@@ -329,6 +341,12 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 				return "[VALIDATION ERROR] Invalid part Id.";
 			if (!cacheMemory.getPartCache().contains(part.getPartId()))
 				return "[VALIDATION ERROR] Part does not exist.";
+			
+			for (Product productFromCahce : cacheMemory.getProductCache().getCache().values()) 
+				for (Part partFromProduct : productFromCahce.getPartList().getList()) 
+					if (part.getPartId() == partFromProduct.getPartId()) 
+						return "[VALIDATION ERROR] Part is already a part of some product."; 
+			
 		}
 		
 		// TODO validation - is the part on a pallet that is finished? it needs to be
