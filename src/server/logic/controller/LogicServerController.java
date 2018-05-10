@@ -181,9 +181,9 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		if (!pallet.getState().equals(Pallet.AVAILABLE))
 			return "[FAIL] Pallet is not available";
 
-		if (!pallet.getPartType().equals("no type"))
-			if (!pallet.getPartType().equals(part.getType()))
-				return "[FAIL] Type missmatch";
+//		if (!pallet.getPartType().equals("no type"))
+//			if (!pallet.getPartType().equals(part.getType()))
+//				return "[FAIL] Type missmatch";
 		
 	    // Check if part is already on this pallet 
 	    for (Part palletsPart : pallet.getPartList().getList()) 

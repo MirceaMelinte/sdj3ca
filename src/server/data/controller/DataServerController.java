@@ -22,7 +22,6 @@ import model.ProductList;
 import model.Transaction;
 import remote.interfaces.IDataServer;
 import remote.interfaces.IObserver;
-import server.data.PersistenceConfig;
 
 public class DataServerController extends UnicastRemoteObject implements IDataServer {
 	private static final long serialVersionUID = 1L;
@@ -559,7 +558,7 @@ public class DataServerController extends UnicastRemoteObject implements IDataSe
 			PreparedStatement updateTypeStatement = DataServerController.connection
                .prepareStatement("UPDATE pallet SET partType = ? WHERE id = ? AND partType = 'no type'");
 
-			updateTypeStatement.setString(1, pallet.getPartType());
+			updateTypeStatement.setString(1, part.getType());
 			updateTypeStatement.setInt(2, pallet.getPalletId());
 			updateTypeStatement.executeUpdate();
 			updateTypeStatement.close();
