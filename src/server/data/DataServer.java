@@ -600,6 +600,9 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			updateStatement.close();
 			DataServer.connection.commit();
 
+			if (state.equals(Pallet.FINISHED))
+				notifyObservers(new Transaction<Pallet>(Transaction.UPDATE_FINISH_PALLET, pallet));
+
 			return pallet;
 		} catch (Exception e) {
 			DataServer.connection.rollback();
@@ -627,6 +630,9 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 
 			updateStatement.close();
 			DataServer.connection.commit();
+			
+			if (state.equals(Car.FINISHED))
+				notifyObservers(new Transaction<Car>(Transaction.UPDATE_FINISH_CAR, car));
 			
 			return car;
 		} catch (Exception e) {
