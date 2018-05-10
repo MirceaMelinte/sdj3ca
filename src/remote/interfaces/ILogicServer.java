@@ -33,11 +33,11 @@ public interface ILogicServer extends Remote {
 
 	// client 4
 
-	PartList validateGetStolenParts(String chassisNumber)
+	PartList validateGetPartsByCar(String chassisNumber)
 			throws RemoteException;
 
-	ProductList validateGetStolenProducts(String chassisNumber)
+	ProductList validateProductsByCar(String chassisNumber)
 			throws RemoteException;
 
-	Car validateGetStolenCar(String chassisNumber) throws RemoteException;
+	Car validateGetCar(String chassisNumber) throws RemoteException;
 }

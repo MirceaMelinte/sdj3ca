@@ -33,7 +33,6 @@ public interface IDataServer extends Remote {
 
 	ProductList executeGetProductsByCar(String chassisNumber) throws RemoteException, SQLException;
 
-	// Car executeGetStolenCar(String chassisNumber) throws RemoteException, SQLException;
 
 	// INSERT
 	
@@ -51,6 +50,7 @@ public interface IDataServer extends Remote {
 
 	Car executeUpdateCarState(Car car, String state) throws RemoteException, SQLException;
 
+	
 	// Observable methods
 	
 	void attach(IObserver observer) throws RemoteException;
