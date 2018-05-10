@@ -70,6 +70,9 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	public String validateRegisterCar(Car car) throws RemoteException {
 
 		// Validation
+		
+		if (car == null)
+			return "[VALIDATION ERROR] Null reference passed.";
 
 		if (!Validation.validate(car.getChassisNumber(), Validation.CHASSIS_NUMBER))
 			return "[VALIDATION ERROR] Invalid car chassis number. ";
@@ -114,9 +117,11 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	@Override
 	public String validateRegisterPart(Part part, String chassisNumber) throws RemoteException {
 
-
 		// Validate
 
+		if (part == null)
+			return "[VALIDATION ERROR] Null reference passed.";
+		
 		if (part.getType() == null || part.getType().isEmpty())
 			return "[VALIDATION ERROR] Invalid part type.";
 
@@ -249,6 +254,9 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 	@Override
 	public Pallet findAvailablePallet(Part part) throws RemoteException {
+		if (part == null)
+			return null;
+		
 		if (!Validation.validate(part.getPartId(), Validation.PART_ID))
 			return null;
 
@@ -305,8 +313,8 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 		// Validate
 
-		if (product == null) // TODO should validation like this be in other methods too?
-			return "[VALIDATION ERROR] Null objects.";
+		if (product == null)
+			return "[VALIDATION ERROR] Null reference passed.";
 
 		if (product.getName() == null || product.getName().isEmpty())
 			return "[VALIDATION ERROR] Product name is not set.";
@@ -325,9 +333,13 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 					if (part.getPartId() == partFromProduct.getPartId()) 
 						return "[VALIDATION ERROR] Part is already a part of some product."; 
 			
+			for (Pallet pallet : this.cacheMemory.getPalletCache().getCache().values()) {
+				if (pallet.getPartList().contains(part) && pallet.getState().equals(Pallet.FINISHED)) {
+					return "[VALIDATION ERROR] Part #" + part.getPartId() + " is currently on pallet #" + pallet.getPalletId()
+							+ " that is not yet finished. ";
+				}
+			}
 		}
-		
-		// TODO validation - is the part on a pallet that is finished? it needs to be
 
 		// Update Database
 
