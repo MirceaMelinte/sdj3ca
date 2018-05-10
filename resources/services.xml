@@ -21,9 +21,5 @@
             <actionMapping>urn:traceStolenCar</actionMapping>
             <outputActionMapping>urn:traceStolenCarResponse</outputActionMapping>
         </operation>
-        <operation name="traceStolenPallets" mep="http://www.w3.org/ns/wsdl/in-out" namespace="http://webservice">
-            <actionMapping>urn:traceStolenPallets</actionMapping>
-            <outputActionMapping>urn:traceStolenPalletsResponse</outputActionMapping>
-        </operation>
     </service>
 </serviceGroup>
