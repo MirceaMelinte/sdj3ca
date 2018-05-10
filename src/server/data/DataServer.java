@@ -550,21 +550,22 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 			PreparedStatement updateWeightStatement = DataServer.connection
                .prepareStatement("UPDATE pallet SET weight = ? WHERE id = ?");
 
-			updateWeightStatement.setDouble(1, pallet.getWeight());
+			updateWeightStatement.setDouble(1, pallet.getWeight() + part.getWeight());
 			updateWeightStatement.setInt(2, pallet.getPalletId());
 			updateWeightStatement.executeUpdate();
 			updateWeightStatement.close();
+			
+			PreparedStatement updateTypeStatement = DataServer.connection
+               .prepareStatement("UPDATE pallet SET partType = ? WHERE id = ? AND partType = 'no type'");
 
-         System.out.println("[SUCCESS] Successful execution of pallet weight setting. Pallet number: "
-                     + pallet.getPalletId());
-
-         updateStatement.close();
-         DataServer.connection.commit();
+			updateTypeStatement.setString(1, pallet.getPartType());
+			updateTypeStatement.setInt(2, pallet.getPalletId());
+			updateTypeStatement.executeUpdate();
+			updateTypeStatement.close();
 
 			System.out.println("[SUCCESS] Successful execution of part pallet setting. Part number: "
 							+ part.getPartId());
-
-			updateStatement.close();
+			
 			DataServer.connection.commit();
 
 			/*

@@ -93,7 +93,7 @@ CREATE TABLE Part
 -- ##################################
 
 INSERT INTO Pallet (id, partType, weight, maxWeight, state)
-    VALUES (-1, 'no pallet', 0, 0, 'Finished');
+    VALUES (-1, 'no type', 0, 0, 'Finished');
     
 INSERT INTO Product (id, type, name)
     VALUES (-1, 'no product', 'no product');

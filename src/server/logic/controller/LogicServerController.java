@@ -172,7 +172,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		Part part = this.cacheMemory.getPartCache().getPart(partId);
 		
 		Pallet pallet = this.cacheMemory.getPalletCache().getPallet(palletId);
-
+		
 		double availableWeightCapacity = pallet.getMaxWeight() - pallet.getWeight();
 		
 		if (availableWeightCapacity < part.getWeight())
@@ -181,11 +181,14 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		if (!pallet.getState().equals(Pallet.AVAILABLE))
 			return "[FAIL] Pallet is not available";
 
-		if (!pallet.getPartType().equals("-1"))
+		if (!pallet.getPartType().equals("no type"))
 			if (!pallet.getPartType().equals(part.getType()))
 				return "[FAIL] Type missmatch";
-
 		
+	    if (pallet.getPartType().equals("no type"))
+	         pallet.setPartType(part.getType());
+
+	    
 		// Update Database
 
 		try {
