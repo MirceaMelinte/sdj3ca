@@ -25,10 +25,11 @@ import remote.interfaces.IObserver;
 
 public class DataServer extends UnicastRemoteObject implements IDataServer {
 	private static final long serialVersionUID = 1L;
+	private static volatile DataServer instance = null;
 	private static Connection connection;
 	private List<IObserver> observers = new ArrayList<>();
 
-	public DataServer() throws RemoteException {
+	private DataServer() throws RemoteException {
 		super();	
 	}
 
@@ -43,6 +44,18 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static DataServer getInstance() throws RemoteException {
+		if (DataServer.instance == null) {
+			synchronized (DataServer.class) {
+				if (DataServer.instance == null) {
+					DataServer.instance = new DataServer();
+				}
+			}
+		}
+		
+		return DataServer.instance;
 	}
 	
 	// GET
@@ -704,8 +717,6 @@ public class DataServer extends UnicastRemoteObject implements IDataServer {
    }
    
    public static void main(String[] args) throws RemoteException {
-      DataServer d = new DataServer();
-
-      d.begin();
+	   DataServer.getInstance().begin();
    }
 }
