@@ -1,1 +1,2 @@
 ant jar.server
+pause
