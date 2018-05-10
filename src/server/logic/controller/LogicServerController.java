@@ -494,4 +494,4 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		
 		view.show("Cache loaded.");
 	}
-}//
+}
