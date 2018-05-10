@@ -20,7 +20,7 @@ import common.XmlMarshaller;
 
 public class SkeletonSingleton implements ICarServiceSkeletonInterface
 {
-   public static SkeletonSingleton skeleton = null;
+   private static volatile SkeletonSingleton skeleton = null;
    private ILogicServer logicServer;
    
    private SkeletonSingleton(){
