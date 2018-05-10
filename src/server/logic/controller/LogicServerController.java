@@ -204,22 +204,6 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			if (part == null)
 				return "[FAIL] Failed database update part pallet. ";
 
-			
-			/*
-			pallet.setWeight(pallet.getWeight() + part.getWeight());
-			
-			// TODO maybe this should have been done by executeUpdatePartPallet already
-			pallet = dataServer.executeUpdatePalletWeight(pallet); 
-			
-			if (pallet == null)
-				return "[FAIL] Failed database update pallet weight. ";
-
-			
-			if (pallet.getPartType().equals("-1"));
-				// TODO need updatePalletType method in database interface
-				 
-			*/
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -261,8 +245,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	}
 
 	// TODO not yet used in client
-	// TODO should take part id as a parameter
-	// maybe should return just pallet ID
+	// TODO maybe should take part id as a parameter and should return just pallet ID
 
 	@Override
 	public Pallet findAvailablePallet(Part part) throws RemoteException {
