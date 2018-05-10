@@ -349,7 +349,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	// FOURTH CLIENT
 
 	@Override
-	public PartList validateGetStolenParts(String chassisNumber) throws RemoteException {
+	public PartList validateGetPartsByCar(String chassisNumber) throws RemoteException {
 	   try {        
          Car stolenCar = cacheMemory.getCarCache().
                getCache().get(chassisNumber);
@@ -368,7 +368,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	}
 
 	@Override
-	public ProductList validateGetStolenProducts(String chassisNumber) throws RemoteException {
+	public ProductList validateProductsByCar(String chassisNumber) throws RemoteException {
 		try {
 		   Car stolenCar = cacheMemory.getCarCache().
                getCache().get(chassisNumber);                              // Check the cache memory if a car with given chassis number exists
@@ -394,7 +394,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	}
 
 	@Override
-	public Car validateGetStolenCar(String chassisNumber) throws RemoteException {
+	public Car validateGetCar(String chassisNumber) throws RemoteException {
 		try {
 			Car car = cacheMemory.getCarCache().getCache().get(chassisNumber);
 			

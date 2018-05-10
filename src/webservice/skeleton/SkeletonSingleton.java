@@ -57,7 +57,7 @@ public class SkeletonSingleton implements ICarServiceSkeletonInterface
       
       try
       {     
-         PartList partList = logicServer.validateGetStolenParts(chassisNumber); // Call RMI method and return PartList object
+         PartList partList = logicServer.validateGetPartsByCar(chassisNumber); // Call RMI method and return PartList object
          
          if(partList != null)
          {
@@ -89,7 +89,7 @@ public class SkeletonSingleton implements ICarServiceSkeletonInterface
       
       try
       {  
-         ProductList productList = logicServer.validateGetStolenProducts(chassisNumber); 
+         ProductList productList = logicServer.validateProductsByCar(chassisNumber); 
          if(productList != null)
          {
             String xmlProductList = serPalletList.createXMLString(productList, ProductList.class); 
@@ -119,7 +119,7 @@ public class SkeletonSingleton implements ICarServiceSkeletonInterface
       
       try
       {     
-         Car car = logicServer.validateGetStolenCar(chassisNumber); 
+         Car car = logicServer.validateGetCar(chassisNumber); 
          if(car != null)
          {
             String xmlCar = serCar.createXMLString(car, Car.class); 
