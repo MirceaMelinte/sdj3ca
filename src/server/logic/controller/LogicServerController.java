@@ -38,7 +38,7 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			String URL = "rmi://" + ip + "/" + "dataServer";
 
 			this.dataServer = (IDataServer) Naming.lookup(URL);
-			dataServer.attatch(this);
+			dataServer.attach(this);
 
 			view.show("Logic server is running... ");
 
@@ -51,93 +51,15 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
       			   loadCache();
                }
                   catch (RemoteException | SQLException e) {
-                  System.out.println("Failed to load cache memory");
+                  view.show("Failed to load cache memory");
                   e.printStackTrace();
                }
 			}
 			}).start();
 			
-			
-			
-			System.out.println("Caches initialized. ");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-
-	// TODO why these new methods in data server dont throw exceptions like other do?
-	private void loadCache() throws RemoteException, SQLException {
-
-		// Getting lists from data server
-		
-		PartList partList = dataServer.executeGetAllParts();
-		
-		if (partList == null) {
-			view.show("A problem has occured when updating PART list.");
-			return;
-		}
-		
-		CarList carList = dataServer.executeGetAllCars();
-		
-		if (carList == null) {
-			view.show("A problem has occured when updating CAR list.");
-			return;
-		}
-		
-		PalletList palletList = dataServer.executeGetAllPallets();
-		
-		if (palletList == null) {
-			view.show("A problem has occured when updating PALLET list.");
-			return;
-		}
-		
-		ProductList productList = dataServer.executeGetAllProducts();
-		
-		if (productList == null) {
-			view.show("A problem has occured when updating PRODUCT list.");
-			return;
-		}
-
-		// Populating Cache	
-		
-		partList.getList().forEach((part) -> {
-		   cacheMemory.getPartCache().addPart(part);
-		});
-		
-		carList.getList().forEach((car) -> {
-		   Car newCar = new Car(car.getChassisNumber(), car.getManufacturer(), 
-               car.getModel(), car.getYear(), car.getWeight(), car.getState());        
-         
-         cacheMemory.getCarCache().addCar(newCar);
-         
-         car.getPartList().getList().forEach((part) -> {
-            newCar.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
-         });
-		});
-		
-		for (Pallet pallet: palletList.getList()) {
-			Pallet newPallet = new Pallet(pallet.getPalletId(), pallet.getMaxWeight(), pallet.getState());
-			newPallet.setPartType(pallet.getPartType());
-			newPallet.setWeight(pallet.getWeight());
-			
-			cacheMemory.getPalletCache().addPallet(newPallet);
-			
-			for (Part part : pallet.getPartList().getList()) 
-				newPallet.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
-		}
-		
-		for (Product product: productList.getList()) {
-			Product newProduct= new Product(product.getProductId(),product.getType(), product.getName());
-			
-			cacheMemory.getProductCache().addProduct(newProduct);
-			
-			for (Part part : product.getPartList().getList()) 
-				newProduct.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
-		}
-		
-		view.show("Cache loaded.");
-		
 	}
 
 	// Network Methods
@@ -223,7 +145,6 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 				return "[FAIL] Part could not be registered. ";
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -497,4 +418,77 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
    {
       cacheMemory.updateCache(t);
    }
+   
+   private void loadCache() throws RemoteException, SQLException {
+
+		// Getting lists from data server
+		
+		PartList partList = dataServer.executeGetAllParts();
+		
+		if (partList == null) {
+			view.show("A problem has occured when updating PART list.");
+			return;
+		}
+		
+		CarList carList = dataServer.executeGetAllCars();
+		
+		if (carList == null) {
+			view.show("A problem has occured when updating CAR list.");
+			return;
+		}
+		
+		PalletList palletList = dataServer.executeGetAllPallets();
+		
+		if (palletList == null) {
+			view.show("A problem has occured when updating PALLET list.");
+			return;
+		}
+		
+		ProductList productList = dataServer.executeGetAllProducts();
+		
+		if (productList == null) {
+			view.show("A problem has occured when updating PRODUCT list.");
+			return;
+		}
+
+		// Populating Cache	
+		
+		partList.getList().forEach((part) -> {
+		   cacheMemory.getPartCache().addPart(part);
+		});
+		
+		carList.getList().forEach((car) -> {
+		   Car newCar = new Car(car.getChassisNumber(), car.getManufacturer(), 
+              car.getModel(), car.getYear(), car.getWeight(), car.getState());        
+        
+        cacheMemory.getCarCache().addCar(newCar);
+        
+        car.getPartList().getList().forEach((part) -> {
+           newCar.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
+        });
+		});
+		
+		for (Pallet pallet: palletList.getList()) {
+			Pallet newPallet = new Pallet(pallet.getPalletId(), pallet.getMaxWeight(), pallet.getState());
+			newPallet.setPartType(pallet.getPartType());
+			newPallet.setWeight(pallet.getWeight());
+			
+			cacheMemory.getPalletCache().addPallet(newPallet);
+			
+			for (Part part : pallet.getPartList().getList()) 
+				newPallet.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
+		}
+		
+		for (Product product: productList.getList()) {
+			Product newProduct= new Product(product.getProductId(),product.getType(), product.getName());
+			
+			cacheMemory.getProductCache().addProduct(newProduct);
+			
+			for (Part part : product.getPartList().getList()) 
+				newProduct.getPartList().addPart(cacheMemory.getPartCache().getPart(part.getPartId()));
+		}
+		
+		view.show("Cache loaded.");
+		
+	}
 }
