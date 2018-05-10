@@ -31,7 +31,7 @@ public interface IDataServer extends Remote {
 
 	PartList executeGetPartsByCar(String chassisNumber) throws RemoteException, SQLException;
 
-	ProductList executeGetStolenProducts(String chassisNumber) throws RemoteException, SQLException;
+	ProductList executeGetProductsByCar(String chassisNumber) throws RemoteException, SQLException;
 
 	// Car executeGetStolenCar(String chassisNumber) throws RemoteException, SQLException;
 

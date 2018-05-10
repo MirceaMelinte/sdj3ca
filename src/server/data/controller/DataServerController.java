@@ -302,7 +302,7 @@ public class DataServerController extends UnicastRemoteObject implements IDataSe
 	   }
 
 	   @Override
-	   public ProductList executeGetStolenProducts(String chassisNumber) throws RemoteException,
+	   public ProductList executeGetProductsByCar(String chassisNumber) throws RemoteException,
 	         SQLException
 	   {
 	      try
