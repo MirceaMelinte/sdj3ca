@@ -7,6 +7,5 @@ public class DataServer   {
 	
 	public static void main(String[] args) throws RemoteException {
 		   DataServerController.getInstance().begin();
-
 	}
 }

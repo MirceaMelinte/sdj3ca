@@ -1,4 +1,4 @@
-package server.data.controller;
+package server.data.persistence;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,7 +11,7 @@ public abstract class PersistenceConfig {
 	private final static String userName = "sdj3";
 	private final static String password = "sdj3";
 	
-	protected static Connection establishConnection(Connection connection) {
+	public static Connection establishConnection(Connection connection) {
 		try {
 			DriverManager.registerDriver(new OracleDriver());
 

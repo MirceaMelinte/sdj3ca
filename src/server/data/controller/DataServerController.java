@@ -22,6 +22,7 @@ import model.ProductList;
 import model.Transaction;
 import remote.interfaces.IDataServer;
 import remote.interfaces.IObserver;
+import server.data.persistence.PersistenceConfig;
 
 public class DataServerController extends UnicastRemoteObject implements IDataServer {
 	private static final long serialVersionUID = 1L;
@@ -48,11 +49,7 @@ public class DataServerController extends UnicastRemoteObject implements IDataSe
 	
 	public static DataServerController getInstance() throws RemoteException {
 		if (DataServerController.instance == null) {
-			synchronized (DataServerController.class) {
-				if (DataServerController.instance == null) {
-					DataServerController.instance = new DataServerController();
-				}
-			}
+			DataServerController.instance = new DataServerController();
 		}
 		
 		return DataServerController.instance;
