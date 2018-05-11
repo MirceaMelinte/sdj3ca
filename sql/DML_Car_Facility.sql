@@ -3,6 +3,10 @@ SELECT * FROM Car;
 SELECT * FROM Pallet;
 SELECT * FROM Product;
 
+SELECT COUNT(*) FROM Pallet WHERE State = 'Available';
+DELETE FROM Pallet WHERE State = 'Available';
+COMMIT;
+
 DELETE FROM Part;
 DELETE FROM Pallet;
 DELETE FROM Car;

@@ -531,6 +531,55 @@ public class DataServerController extends UnicastRemoteObject implements IDataSe
 		return null;
 	}
 	
+	@Override
+	public int executeRegisterNewPallets(PalletList pallets) throws RemoteException, SQLException {
+		try {
+			int insertedPallets = 0;
+			
+			for (Pallet pallet : pallets.getList()) {
+				PreparedStatement insertStatement = DataServerController.connection
+						.prepareStatement("INSERT INTO pallet (partType, weight, maxWeight, state) "
+						      + "VALUES (?, ?, ?, ?)");
+
+				insertStatement.setString(1, pallet.getPartType());
+				insertStatement.setDouble(2, pallet.getWeight());
+				insertStatement.setDouble(3, pallet.getMaxWeight());
+				insertStatement.setString(4, pallet.getState());
+				insertStatement.execute();
+				insertStatement.close();
+				DataServerController.connection.commit();
+				
+				PreparedStatement returnStatement = DataServerController.connection
+						.prepareStatement("SELECT * FROM (SELECT id FROM pallet ORDER BY id DESC) WHERE ROWNUM = 1");
+
+				ResultSet resultSet = returnStatement.executeQuery();
+
+				while (resultSet.next()) {
+					pallet.setPalletId(resultSet.getInt("id"));
+				}
+				
+				resultSet.close();
+				returnStatement.close();
+				
+				notifyObservers(new Transaction<Pallet>(Transaction.REGISTER_PALLET, pallet));
+				
+				++insertedPallets;
+			}
+
+			if (insertedPallets != pallets.count()) {
+				System.out.println("[WARNING] The number of inserted pallets does not match the passed pallets list. ");
+			}
+
+			return insertedPallets;
+		} catch (Exception e) {
+			DataServerController.connection.rollback();
+			System.out.println("[FAIL] Failed execution of new pallets registration. ");
+			e.printStackTrace();
+		}
+
+		return 0;
+	}
+	
 	// UPDATE
 
 	@Override

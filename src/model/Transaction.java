@@ -11,7 +11,7 @@ public class Transaction<T> implements Serializable
    public final static String REGISTER_CAR = "REGISTER_CAR";
    public final static String REGISTER_PART = "REGISTER_PART";
    public final static String REGISTER_PRODUCT = "REGISTER_PRODUCT";
-   public final static String REGISTER_PALLET = "REGISTER_PALLET"; // Should happen only once
+   public final static String REGISTER_PALLET = "REGISTER_PALLET";
    public final static String UPDATE_PALLET_PART = "UPDATE_PALLET_PART";
    public final static String UPDATE_PALLET_WEIGHT = "UPDATE_PALLET_WEIGHT";
    public final static String UPDATE_FINISH_PALLET = "UPDATE_FINISH_PALLET";

@@ -22,7 +22,7 @@
       <TextField fx:id="tfPutPart_partId" layoutX="490.0" layoutY="90.0" />
       <Button fx:id="btnRegisterPart" layoutX="260.0" layoutY="250.0" mnemonicParsing="false" onAction="#onRegisterPart" text="Submit" />
       <Button fx:id="btnPutPart" layoutX="490.0" layoutY="190.0" mnemonicParsing="false" onAction="#onPutPart" text="Submit" />
-      <Button fx:id="btnFinishPallet" layoutX="260.0" layoutY="430.0" mnemonicParsing="false" onAction="#onFinishPallet" text="Sumbit" />
+      <Button fx:id="btnFinishPallet" layoutX="260.0" layoutY="430.0" mnemonicParsing="false" onAction="#onFinishPallet" text="Submit" />
       <Button fx:id="btnFinishCar" layoutX="490.0" layoutY="430.0" mnemonicParsing="false" onAction="#onFinishCar" text="Submit" />
       <Label layoutX="490.0" layoutY="70.0" text="Part Id" />
       <Label layoutX="490.0" layoutY="130.0" text="Pallet Id" />

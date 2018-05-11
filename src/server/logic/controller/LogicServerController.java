@@ -214,7 +214,6 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 		}
 
 		return "[SUCCESS] Part was put on pallet";
-
 	}
 
 	@Override
@@ -240,6 +239,8 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 			if (pallet == null)
 				return "[FAIL] Could not persist the setting of the pallet state. ";
+			
+			this.addNewPallets();
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -422,6 +423,39 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
    public <T> void update(Transaction<T> t)
    {
       cacheMemory.updateCache(t);
+   }
+   
+   private void addNewPallets() {
+		int availablePallets = 0;
+		
+		for (Pallet pallet : this.cacheMemory.getPalletCache().getCache().values()) {
+			if (pallet.getState().equals(Pallet.AVAILABLE)) {
+				++availablePallets;
+			}
+		}
+		
+		if (availablePallets < 20) {
+			try {
+				PalletList pallets = new PalletList();
+				
+				for (int i = 0; i < 500; i++) {
+					Pallet pallet = new Pallet();
+					pallet.setWeight(0);
+					pallet.setPartType("no type");
+					pallet.setMaxWeight(2100);
+					pallet.setState(Pallet.AVAILABLE);
+					pallets.addPallet(pallet);
+				}
+				
+				int addedPalletsCount = this.dataServer.executeRegisterNewPallets(pallets);
+				
+				if (addedPalletsCount != 0) {
+					this.view.show("[SUCCESS] A total of " + addedPalletsCount + " pallets was added. ");
+				}
+			} catch (RemoteException | SQLException e) {
+				e.printStackTrace();
+			}
+		}
    }
    
    private void loadCache() throws RemoteException, SQLException {

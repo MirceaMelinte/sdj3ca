@@ -41,6 +41,8 @@ public interface IDataServer extends Remote {
 	Product executeRegisterProduct(Product product) throws RemoteException, SQLException;
 
 	Part executeRegisterNewPart(Part part, String chassisNumber) throws RemoteException, SQLException;
+	
+	int executeRegisterNewPallets(PalletList pallets) throws RemoteException, SQLException;
 
 	// UPDATE
 	
