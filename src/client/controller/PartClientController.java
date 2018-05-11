@@ -121,8 +121,10 @@ public class PartClientController {
 			// get suggested pallet id for the registered part
 			Pallet suggestedPallet = logicServer.findAvailablePallet(partId);
 			System.out.println(suggestedPallet);
-			if (suggestedPallet == null)
+			if (suggestedPallet == null) {
+				tfPutPart_palletId.textProperty().set("");
 				return;
+			}
 			tfPutPart_palletId.textProperty().set(Integer.toString(suggestedPallet.getPalletId()));
 			
 
