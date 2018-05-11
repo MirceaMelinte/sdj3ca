@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 import oracle.jdbc.OracleDriver;
 
-public abstract class PersistenceConfig {
+public final class PersistenceConfig {
 	private final static String connectString = "jdbc:oracle:thin:@localhost:1521:orcl";
 	private final static String userName = "sdj3";
 	private final static String password = "sdj3";
