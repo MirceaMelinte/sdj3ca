@@ -27,7 +27,18 @@ public class PartClientController {
 	private Car selected;
 
 	public PartClientController() throws RemoteException, MalformedURLException, NotBoundException {
-		logicServer = (ILogicServer) Naming.lookup("rmi://localhost/logicServer");
+		try {
+			logicServer = (ILogicServer) Naming.lookup("rmi://localhost/logicServer");
+		}
+		catch (Exception e) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Connection issue");
+			alert.setHeaderText(null);
+			alert.setContentText("Fatal error: Could not connect to the server.\n\nPlease restart the application. ");
+			alert.showAndWait();
+			
+			System.exit(1);
+		}
 	}
 
 	@FXML
