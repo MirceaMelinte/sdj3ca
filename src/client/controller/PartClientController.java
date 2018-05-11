@@ -87,12 +87,15 @@ public class PartClientController {
 
 	@FXML
 	void onSelectCar(ActionEvent event) throws RemoteException {
-		selected = cl.getList().get(lvAvailableCars.getSelectionModel().getSelectedIndex());
-		String selectedChassisNumber = selected.getChassisNumber();
+		if (cl != null) {
+			if (lvAvailableCars.getSelectionModel().getSelectedIndex() >= 0) {
+				selected = cl.getList().get(lvAvailableCars.getSelectionModel().getSelectedIndex());
+				String selectedChassisNumber = selected.getChassisNumber();
 
-		tfRegisterPart_chassisNumber.textProperty().set(selectedChassisNumber);
-		tfFinishCar_chassisNumber.textProperty().set(selectedChassisNumber);
-
+				tfRegisterPart_chassisNumber.textProperty().set(selectedChassisNumber);
+				tfFinishCar_chassisNumber.textProperty().set(selectedChassisNumber);
+			}
+		}
 	}
 
 	@FXML
