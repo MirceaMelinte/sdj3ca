@@ -25,7 +25,7 @@ public interface ILogicServer extends Remote {
 	String validateFinishDismantling(String chassisNumber)
 			throws RemoteException;
 
-	Pallet findAvailablePallet(Part part) throws RemoteException;
+	Pallet findAvailablePallet(int partId) throws RemoteException;
 
 	// client 3
 

@@ -5,8 +5,10 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
+import common.Validation;
 import model.Car;
 import model.CarList;
+import model.Pallet;
 import model.Part;
 import remote.interfaces.ILogicServer;
 import javafx.collections.FXCollections;
@@ -110,6 +112,20 @@ public class PartClientController {
 			alert.setContentText(serverResponse);
 			alert.showAndWait();
 
+			// get part id from response
+			int partId = Integer.parseInt(serverResponse.substring(39));
+			if (!Validation.validate(partId, Validation.PART_ID))
+				return;
+			tfPutPart_partId.textProperty().set(Integer.toString(partId));
+			
+			// get suggested pallet id for the registered part
+			Pallet suggestedPallet = logicServer.findAvailablePallet(partId);
+			System.out.println(suggestedPallet);
+			if (suggestedPallet == null)
+				return;
+			tfPutPart_palletId.textProperty().set(Integer.toString(suggestedPallet.getPalletId()));
+			
+
 		} catch (NumberFormatException e) {
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("Error");
@@ -118,7 +134,6 @@ public class PartClientController {
 			alert.showAndWait();
 		}
 
-		// TODO fill tfPutPart_partId with ID
 	}
 
 	@FXML

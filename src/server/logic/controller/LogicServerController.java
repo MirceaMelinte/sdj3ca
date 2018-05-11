@@ -253,16 +253,16 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 	// TODO maybe should take part id as a parameter and should return just pallet ID
 
 	@Override
-	public Pallet findAvailablePallet(Part part) throws RemoteException {
-		if (part == null)
-			return null;
+	public Pallet findAvailablePallet(int partId) throws RemoteException {
 		
-		if (!Validation.validate(part.getPartId(), Validation.PART_ID))
+		if (!Validation.validate(partId, Validation.PART_ID))
 			return null;
 
-		if (!cacheMemory.getPartCache().contains(part.getPartId()))
+		if (!cacheMemory.getPartCache().contains(partId))
 			return null;
-	
+		
+		Part part = this.cacheMemory.getPartCache().getPart(partId);
+ 
 		for (Pallet pallet : cacheMemory.getPalletCache().getCache().values())
 			if (pallet.getPartType().equals(part.getType())
 					&& (pallet.getWeight() + part.getWeight()) <= pallet.getMaxWeight()) 
