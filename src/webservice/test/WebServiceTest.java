@@ -1,4 +1,4 @@
-package client;
+package webservice.test;
 
 import java.rmi.RemoteException;
 import java.util.Scanner;
@@ -11,7 +11,7 @@ import model.ProductList;
 import webservice.stub.ICarServiceStub;
 import common.XmlMarshaller;
 
-public class WebServiceClient
+public class WebServiceTest
 {
    private static Scanner in = new Scanner(System.in);
    private static String URL = "http://localhost:8080/axis2/services/ICarService";

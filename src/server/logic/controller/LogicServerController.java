@@ -250,9 +250,6 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 
 	}
 
-	// TODO not yet used in client
-	// TODO maybe should take part id as a parameter and should return just pallet ID
-
 	@Override
 	public Pallet findAvailablePallet(int partId) throws RemoteException {
 		

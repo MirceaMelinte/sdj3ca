@@ -68,7 +68,6 @@ public class Car implements Serializable {
 		s.append(", Year: " + year);
 		s.append(", Weight: " + weight);
 		s.append(", State: " + state);
-		s.append("\n[" + parts.toString() + "]");
 
 		return s.toString();
 	}
