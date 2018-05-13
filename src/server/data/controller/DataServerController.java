@@ -165,7 +165,7 @@ public class DataServerController extends UnicastRemoteObject implements IDataSe
 	@Override
 	public ProductList executeGetAllProducts() throws RemoteException, SQLException {
 		try {
-			PreparedStatement productStatement = DataServerController.connection.prepareStatement("SELECT id, name, type FROM Product");
+			PreparedStatement productStatement = DataServerController.connection.prepareStatement("SELECT id, name, type FROM Product WHERE id != -1");
 
 			ResultSet productResultSet = productStatement.executeQuery();
 

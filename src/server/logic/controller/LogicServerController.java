@@ -267,6 +267,10 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 					&& pallet.getState().equals(Pallet.AVAILABLE))
 				return pallet;
 			
+		for (Pallet pallet : cacheMemory.getPalletCache().getCache().values())
+         if (pallet.getPartType().equals("no type") && pallet.getPalletId() != -1)
+            return pallet;
+		
 		return null;
 	}
 
@@ -329,8 +333,11 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			
 			for (Product productFromCahce : cacheMemory.getProductCache().getCache().values()) 
 				for (Part partFromProduct : productFromCahce.getPartList().getList()) 
-					if (part.getPartId() == partFromProduct.getPartId()) 
+					if (part.getPartId() == partFromProduct.getPartId()){
+					   System.out.println(productFromCahce.getProductId());
+					   System.out.println(partFromProduct.getPartId());
 						return "[VALIDATION ERROR] Part is already a part of some product."; 
+					}
 			
 			for (Pallet pallet : this.cacheMemory.getPalletCache().getCache().values()) {
 				if (pallet.getPartList().contains(part) && pallet.getState().equals(Pallet.FINISHED)) {

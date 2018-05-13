@@ -83,7 +83,7 @@ public class Cache implements Serializable {
             part = pallet.getPartList().getList().get(0);
             palletCache.getCache().get(pallet.getPalletId()).getPartList().addPart(part);
             palletCache.getCache().get(pallet.getPalletId()).setWeight(pallet.getWeight());
-            if (palletCache.getCache().get(pallet.getPalletId()).getPartType() == "-1") 
+            if (palletCache.getCache().get(pallet.getPalletId()).getPartType().equals("no type")) 
             	palletCache.getCache().get(pallet.getPalletId()).setPartType(pallet.getPartType());
             break;
          case "UPDATE_PRODUCT_PART":
