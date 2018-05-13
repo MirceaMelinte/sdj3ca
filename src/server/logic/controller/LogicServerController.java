@@ -331,11 +331,9 @@ public class LogicServerController extends UnicastRemoteObject implements ILogic
 			if (!cacheMemory.getPartCache().contains(part.getPartId()))
 				return "[VALIDATION ERROR] Part does not exist.";
 			
-			for (Product productFromCahce : cacheMemory.getProductCache().getCache().values()) 
-				for (Part partFromProduct : productFromCahce.getPartList().getList()) 
+			for (Product productFromCache : cacheMemory.getProductCache().getCache().values()) 
+				for (Part partFromProduct : productFromCache.getPartList().getList()) 
 					if (part.getPartId() == partFromProduct.getPartId()){
-					   System.out.println(productFromCahce.getProductId());
-					   System.out.println(partFromProduct.getPartId());
 						return "[VALIDATION ERROR] Part is already a part of some product."; 
 					}
 			
